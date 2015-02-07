@@ -182,7 +182,6 @@ definitions:
       $ref: "#/definitions/Character"
   Room:
     required:
-      - id
       - name
     properties:
       id:
@@ -194,6 +193,9 @@ definitions:
         type: array
         items:
           properties:
+            method:
+              type: string
+              description: This should effectively be hardcoded to GET
             href:
               type: string
               format: uri
@@ -207,7 +209,6 @@ definitions:
                 - west
   Dungeon:
     required:
-      - id
       - name
     properties:
       id:
