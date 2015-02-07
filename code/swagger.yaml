@@ -1,0 +1,235 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: A RESTful Adventure
+host: localhost
+basePath: /v1
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /characters:
+    get:
+      summary: List all Characters
+      operationId: list_characters
+      responses:
+        200:
+          description: An array of Characters
+          schema:
+            $ref: "#/definitions/Characters"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Create a Character
+      operationId: create_character
+      parameters:
+        - name: name
+          in: body
+          required: true
+          schema:
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 256
+      responses:
+        201:
+          description: Null response
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /characters/{character_id}:
+    get:
+      summary: Get a specific Character
+      operationId: get_character
+      parameters:
+        - name: character_id
+          in: path
+          description: The id of the Character to retrieve
+          type: string
+      responses:
+        200:
+          description: Expected response to a valid request
+          schema:
+            $ref: "#/definitions/Character"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      summary: Delete a Character
+      operationId: delete_character
+      parameters:
+        - name: character_id
+          in: path
+          description: The id of the Character to delete
+          type: string
+      responses:
+        201:
+          description: Null response
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    patch:
+      summary: Update a Character
+      operationId: update_character
+      parameters:
+        - name: character_id
+          in: path
+          description: The id of the Character to update
+          type: string
+        - name: name
+          in: body
+          required: true
+          schema:
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 256
+      responses:
+        201:
+          description: Null response
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /dungeons:
+    get:
+      summary: List all Dungeons
+      operationId: list_dungeons
+      responses:
+        200:
+          description: An array of Dungeons
+          schema:
+            $ref: "#/definitions/Dungeons"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /dungeon/{dungeon_id}:
+    get:
+      summary: Get a specific Dungeon
+      operationId: get_dungeon
+      parameters:
+        - name: dungeon_id
+          in: path
+          description: The id of the Dungeon to retrieve
+          type: string
+      responses:
+        200:
+          description: Expected response to a valid request
+          schema:
+            $ref: "#/definitions/Dungeon"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /dungeon/{dungeon_id}/rooms/{room_id}:
+    get:
+      summary: Get a specific Room in a specific Dungeon
+      operationId: get_room
+      parameters:
+        - name: dungeon_id
+          in: path
+          description: The id of the Dungeon
+          type: string
+        - name: room_id
+          in: path
+          description: The id of the Room
+          type: string
+      responses:
+        200:
+          description: Expected response to a valid request
+          schema:
+            $ref: "#/definitions/Room"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Character:
+    required:
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      location_or_link:
+        properties:
+          method:
+            type: string
+            description: This should effectively be hardcoded to GET
+          href:
+            type: string
+            format: uri
+            description: Link to a specific Room in a specific Dungeon "/dungeon/{dungeon_id}/rooms/{room_id}"
+          rel:
+            type: string
+            description: This rel should effectively be hardcoded to "room"
+  Characters:
+    type: array
+    items:
+      $ref: "#/definitions/Character"
+  Room:
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      links:
+        type: array
+        items:
+          properties:
+            href:
+              type: string
+              format: uri
+              description: Link to a specific Room in a specific Dungeon "/dungeon/{dungeon_id}/rooms/{room_id}"
+            rel:
+              type: string
+              enum:
+                - north
+                - south
+                - east
+                - west
+  Dungeon:
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      rooms:
+        type: array
+        items:
+          $ref: "#/definitions/Room"
+  Dungeons:
+    type: array
+    items:
+      $ref: "#/definitions/Dungeon"
+  Error:
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
