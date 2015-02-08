@@ -83,7 +83,7 @@ paths:
       parameters:
         - name: character_id
           in: path
-          description: The id of the Character to update
+          description: The id of the Character to update. For example you can rename a Character or move them to a new room.
           type: string
         - name: name
           in: body
@@ -94,6 +94,12 @@ paths:
                 type: string
                 minLength: 1
                 maxLength: 256
+              dungeon_id:
+                type: integer
+                format: int64
+              room_id:
+                type: integer
+                format: int64
       responses:
         201:
           description: Null response
@@ -114,7 +120,7 @@ paths:
           description: unexpected error
           schema:
             $ref: "#/definitions/Error"
-  /dungeon/{dungeon_id}:
+  /dungeons/{dungeon_id}:
     get:
       summary: Get a specific Dungeon
       operationId: get_dungeon
@@ -132,7 +138,7 @@ paths:
           description: unexpected error
           schema:
             $ref: "#/definitions/Error"
-  /dungeon/{dungeon_id}/rooms/{room_id}:
+  /dungeons/{dungeon_id}/rooms/{room_id}:
     get:
       summary: Get a specific Room in a specific Dungeon
       operationId: get_room
@@ -164,18 +170,12 @@ definitions:
         format: int64
       name:
         type: string
-      location_or_link:
-        properties:
-          method:
-            type: string
-            description: This should effectively be hardcoded to GET
-          href:
-            type: string
-            format: uri
-            description: Link to a specific Room in a specific Dungeon "/dungeon/{dungeon_id}/rooms/{room_id}"
-          rel:
-            type: string
-            description: This rel should effectively be hardcoded to "room"
+      dungeon_id:
+        type: integer
+        format: int64
+      room_id:
+        type: integer
+        format: int64
   Characters:
     type: array
     items:
@@ -187,20 +187,18 @@ definitions:
       id:
         type: integer
         format: int64
+      dungeon_id:
+        type: integer
+        format: int64
       name:
         type: string
-      links:
+      doors:
         type: array
         items:
           properties:
-            method:
-              type: string
-              description: This should effectively be hardcoded to GET
-            href:
-              type: string
-              format: uri
-              description: Link to a specific Room in a specific Dungeon "/dungeon/{dungeon_id}/rooms/{room_id}"
-            rel:
+            room:
+              $ref: "#/definitions/Room"
+            direction:
               type: string
               enum:
                 - north
@@ -212,6 +210,12 @@ definitions:
       - name
     properties:
       id:
+        type: integer
+        format: int64
+      entrance_room_id:
+        type: integer
+        format: int64
+      exit_room_id:
         type: integer
         format: int64
       name:
