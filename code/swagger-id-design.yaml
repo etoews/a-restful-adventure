@@ -19,16 +19,27 @@ paths:
         200:
           description: An array of Characters
           schema:
-            $ref: "#/definitions/Characters"
-        default:
-          description: unexpected error
-          schema:
-            $ref: "#/definitions/Error"
+            properties:
+              characters:
+                type: array
+                $ref: "#/definitions/Characters"
+          examples:
+            application/json: |-
+              {
+                "characters": [
+                  {
+                    "id": 1234,
+                    "name": "Knox Thunderbane",
+                    "dungeon_id": 2345,
+                    "room_id": 3456
+                  }
+                ]
+              }
     post:
       summary: Create a Character
       operationId: create_character
       parameters:
-        - name: name
+        - name: body
           in: body
           required: true
           schema:
@@ -37,13 +48,30 @@ paths:
                 type: string
                 minLength: 1
                 maxLength: 256
+      x-examples:
+        application/json: { "name": "Knox Thunderbane" }
       responses:
         201:
-          description: Null response
-        default:
-          description: unexpected error
+          description: Character created
+          headers:
+            Location:
+              type: string
+              format: url
+              description: A link to the Character
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Character"
+          examples:
+            application/json: |-
+              {
+                "id": 1234,
+                "name": "Knox Thunderbane",
+                "dungeon_id": 2345,
+                "room_id": 3456
+              }
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
   /characters/{character_id}:
     get:
       summary: Get a specific Character
@@ -51,62 +79,76 @@ paths:
       parameters:
         - name: character_id
           in: path
-          description: The id of the Character to retrieve
+          required: true
           type: string
+          description: The id of the Character to retrieve
       responses:
         200:
-          description: Expected response to a valid request
+          description: A Character
           schema:
             $ref: "#/definitions/Character"
         default:
-          description: unexpected error
+          description: Unexpected Errors
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
+          examples:
+            application/json: |-
+              {
+                "id": 1234,
+                "name": "Knox Thunderbane",
+                "dungeon_id": 2345,
+                "room_id": 3456
+              }
     delete:
       summary: Delete a Character
       operationId: delete_character
       parameters:
         - name: character_id
           in: path
-          description: The id of the Character to delete
+          required: true
           type: string
+          description: The id of the Character to delete
       responses:
-        201:
-          description: Null response
+        204:
+          description: Character deleted
         default:
-          description: unexpected error
+          description: Unexpected errors
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
     patch:
       summary: Update a Character
       operationId: update_character
+      # TODO: Should this use JSON Patch? http://williamdurand.fr/2014/02/14/please-do-not-patch-like-an-idiot/
       parameters:
         - name: character_id
           in: path
-          description: The id of the Character to update. For example you can rename a Character or move them to a new room.
+          required: true
           type: string
-        - name: name
+        - name: body
           in: body
           required: true
+          description: Rename a Character or move them to a new room.
           schema:
-            properties:
-              name:
-                type: string
-                minLength: 1
-                maxLength: 256
-              dungeon_id:
-                type: integer
-                format: int64
-              room_id:
-                type: integer
-                format: int64
+            $ref: "#/definitions/Character"
+      x-examples:
+        application/json: { dungeon_id: "2345", room_id: "4567" }
       responses:
-        201:
-          description: Null response
-        default:
-          description: unexpected error
+        200:
+          description: Character updated
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Character"
+          examples:
+            application/json: |-
+              {
+                "id": 1234,
+                "name": "Knox Thunderbane",
+                "dungeon_id": 2345,
+                "room_id": 4567
+              }
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
   /dungeons:
     get:
       summary: List all Dungeons
@@ -115,11 +157,48 @@ paths:
         200:
           description: An array of Dungeons
           schema:
-            $ref: "#/definitions/Dungeons"
-        default:
-          description: unexpected error
-          schema:
-            $ref: "#/definitions/Error"
+            properties:
+              dungeons:
+                type: array
+                $ref: "#/definitions/Dungeons"
+          examples:
+            application/json: |-
+              {
+                "dungeons": [
+                  {
+                    "id": 1234,
+                    "name": "Dungeon of Doom",
+                    "entrance_room_id": 1000,
+                    "exit_room_id": 1001,
+                    "rooms": [
+                      {
+                        "id": 9876,
+                        "name": "Entrance",
+                        "dungeon_id": 1234,
+                        "doors": [
+                          {
+                            "room_id": 1001,
+                            "dungeon_id": 1234,
+                            "direction": "east"
+                          }
+                        ]
+                      },
+                      {
+                        "id": 8765,
+                        "name": "Exit",
+                        "dungeon_id": 1234,
+                        "doors": [
+                          {
+                            "room_id": 1000,
+                            "dungeon_id": 1234,
+                            "direction": "west"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
   /dungeons/{dungeon_id}:
     get:
       summary: Get a specific Dungeon
@@ -127,17 +206,52 @@ paths:
       parameters:
         - name: dungeon_id
           in: path
+          required: true
           description: The id of the Dungeon to retrieve
           type: string
       responses:
         200:
-          description: Expected response to a valid request
+          description: A Dungeon
           schema:
             $ref: "#/definitions/Dungeon"
+          examples:
+            application/json: |-
+              {
+                "id": 1234,
+                "name": "Dungeon of Doom",
+                "entrance_room_id": 1000,
+                "exit_room_id": 1001,
+                "rooms": [
+                  {
+                    "id": 9876,
+                    "name": "Entrance",
+                    "dungeon_id": 1234,
+                    "doors": [
+                      {
+                        "room_id": 1001,
+                        "dungeon_id": 1234,
+                        "direction": "east"
+                      }
+                    ]
+                  },
+                  {
+                    "id": 8765,
+                    "name": "Exit",
+                    "dungeon_id": 1234,
+                    "doors": [
+                      {
+                        "room_id": 1000,
+                        "dungeon_id": 1234,
+                        "direction": "west"
+                      }
+                    ]
+                  }
+                ]
+              }
         default:
-          description: unexpected error
+          description: Unexpected errors
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
   /dungeons/{dungeon_id}/rooms/{room_id}:
     get:
       summary: Get a specific Room in a specific Dungeon
@@ -146,20 +260,36 @@ paths:
         - name: dungeon_id
           in: path
           description: The id of the Dungeon
+          required: true
           type: string
         - name: room_id
           in: path
           description: The id of the Room
+          required: true
           type: string
       responses:
         200:
           description: Expected response to a valid request
           schema:
             $ref: "#/definitions/Room"
+          examples:
+            application/json: |-
+              {
+                "id": 9876,
+                "name": "Entrance",
+                "dungeon_id": 1234,
+                "doors": [
+                  {
+                    "room_id": 1001,
+                    "dungeon_id": 1234,
+                    "direction": "east"
+                  }
+                ]
+              }
         default:
-          description: unexpected error
+          description: Unexpected errors
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
 definitions:
   Character:
     required:
@@ -168,8 +298,11 @@ definitions:
       id:
         type: integer
         format: int64
+        readOnly: true
       name:
         type: string
+        minLength: 1
+        maxLength: 256
       dungeon_id:
         type: integer
         format: int64
@@ -187,6 +320,7 @@ definitions:
       id:
         type: integer
         format: int64
+        readOnly: true
       dungeon_id:
         type: integer
         format: int64
@@ -195,9 +329,14 @@ definitions:
       doors:
         type: array
         items:
+          type: object
           properties:
-            room:
-              $ref: "#/definitions/Room"
+            room_id:
+              type: integer
+              format: int64
+            dungeon_id:
+              type: integer
+              format: int64
             direction:
               type: string
               enum:
@@ -212,6 +351,7 @@ definitions:
       id:
         type: integer
         format: int64
+        readOnly: true
       entrance_room_id:
         type: integer
         format: int64
@@ -230,11 +370,28 @@ definitions:
       $ref: "#/definitions/Dungeon"
   Error:
     required:
-      - code
-      - message
+      - title
+    readOnly: true
     properties:
+      transaction_id:
+        type: integer
+        format: int64
+        description: A transaction id for the request/response cycle.
       code:
         type: integer
         format: int32
-      message:
+        description: The application error code. Not to be confused with the HTTP status code in the response.
+      title:
         type: string
+        description: A short, human readable title of the error.
+      description:
+        type: string
+        description: A long, human readable description of the error.
+      href:
+        type: string
+        format: url
+        description: A link to a document contain more information
+  Errors:
+    type: array
+    items:
+      $ref: "#/definitions/Error"
