@@ -60,6 +60,7 @@ paths:
               description: A link to the Character
           schema:
             $ref: "#/definitions/Character"
+          # TODO: Do we want a top-level "character" key like we have with "characters"? e.g. { "character": {"id": 1234, ...}}
           examples:
             application/json: |-
               {
