@@ -28,10 +28,10 @@ paths:
               {
                 "characters": [
                   {
-                    "id": 1234,
+                    "id": "1234",
                     "name": "Knox Thunderbane",
-                    "dungeon_id": 2345,
-                    "room_id": 3456
+                    "dungeon_id": "2345",
+                    "room_id": "3456"
                   }
                 ]
               }
@@ -64,10 +64,10 @@ paths:
           examples:
             application/json: |-
               {
-                "id": 1234,
+                "id": "1234",
                 "name": "Knox Thunderbane",
-                "dungeon_id": 2345,
-                "room_id": 3456
+                "dungeon_id": "2345",
+                "room_id": "3456"
               }
         default:
           description: Unexpected errors
@@ -95,10 +95,10 @@ paths:
           examples:
             application/json: |-
               {
-                "id": 1234,
+                "id": "1234",
                 "name": "Knox Thunderbane",
-                "dungeon_id": 2345,
-                "room_id": 3456
+                "dungeon_id": "2345",
+                "room_id": "3456"
               }
     delete:
       summary: Delete a Character
@@ -132,7 +132,7 @@ paths:
           schema:
             $ref: "#/definitions/Character"
       x-examples:
-        application/json: { dungeon_id: "2345", room_id: "4567" }
+        application/json: { "dungeon_id": "2345", "room_id": "4567" }
       responses:
         200:
           description: Character updated
@@ -141,10 +141,10 @@ paths:
           examples:
             application/json: |-
               {
-                "id": 1234,
+                "id": "1234",
                 "name": "Knox Thunderbane",
-                "dungeon_id": 2345,
-                "room_id": 4567
+                "dungeon_id": "2345",
+                "room_id": "4567"
               }
         default:
           description: Unexpected errors
@@ -167,31 +167,31 @@ paths:
               {
                 "dungeons": [
                   {
-                    "id": 1234,
+                    "id": "1234",
                     "name": "Dungeon of Doom",
-                    "entrance_room_id": 1000,
-                    "exit_room_id": 1001,
+                    "entrance_room_id": "1000",
+                    "exit_room_id": "1001",
                     "rooms": [
                       {
-                        "id": 9876,
+                        "id": "9876",
                         "name": "Entrance",
-                        "dungeon_id": 1234,
+                        "dungeon_id": "1234",
                         "doors": [
                           {
-                            "room_id": 1001,
-                            "dungeon_id": 1234,
+                            "room_id": "1001",
+                            "dungeon_id": "1234",
                             "direction": "east"
                           }
                         ]
                       },
                       {
-                        "id": 8765,
+                        "id": "8765",
                         "name": "Exit",
-                        "dungeon_id": 1234,
+                        "dungeon_id": "1234",
                         "doors": [
                           {
-                            "room_id": 1000,
-                            "dungeon_id": 1234,
+                            "room_id": "1000",
+                            "dungeon_id": "1234",
                             "direction": "west"
                           }
                         ]
@@ -218,31 +218,31 @@ paths:
           examples:
             application/json: |-
               {
-                "id": 1234,
+                "id": "1234",
                 "name": "Dungeon of Doom",
-                "entrance_room_id": 1000,
-                "exit_room_id": 1001,
+                "entrance_room_id": "1000",
+                "exit_room_id": "1001",
                 "rooms": [
                   {
-                    "id": 9876,
+                    "id": "9876",
                     "name": "Entrance",
-                    "dungeon_id": 1234,
+                    "dungeon_id": "1234",
                     "doors": [
                       {
-                        "room_id": 1001,
-                        "dungeon_id": 1234,
+                        "room_id": "1001",
+                        "dungeon_id": "1234",
                         "direction": "east"
                       }
                     ]
                   },
                   {
-                    "id": 8765,
+                    "id": "8765",
                     "name": "Exit",
-                    "dungeon_id": 1234,
+                    "dungeon_id": "1234",
                     "doors": [
                       {
-                        "room_id": 1000,
-                        "dungeon_id": 1234,
+                        "room_id": "1000",
+                        "dungeon_id": "1234",
                         "direction": "west"
                       }
                     ]
@@ -276,13 +276,13 @@ paths:
           examples:
             application/json: |-
               {
-                "id": 9876,
+                "id": "9876",
                 "name": "Entrance",
-                "dungeon_id": 1234,
+                "dungeon_id": "1234",
                 "doors": [
                   {
-                    "room_id": 1001,
-                    "dungeon_id": 1234,
+                    "room_id": "1001",
+                    "dungeon_id": "1234",
                     "direction": "east"
                   }
                 ]
@@ -297,19 +297,16 @@ definitions:
       - name
     properties:
       id:
-        type: integer
-        format: int64
+        type: string
         readOnly: true
       name:
         type: string
         minLength: 1
         maxLength: 256
       dungeon_id:
-        type: integer
-        format: int64
+        type: string
       room_id:
-        type: integer
-        format: int64
+        type: string
   Characters:
     type: array
     items:
@@ -319,12 +316,10 @@ definitions:
       - name
     properties:
       id:
-        type: integer
-        format: int64
+        type: string
         readOnly: true
       dungeon_id:
-        type: integer
-        format: int64
+        type: string
       name:
         type: string
       doors:
@@ -333,11 +328,9 @@ definitions:
           type: object
           properties:
             room_id:
-              type: integer
-              format: int64
+              type: string
             dungeon_id:
-              type: integer
-              format: int64
+              type: string
             direction:
               type: string
               enum:
@@ -350,15 +343,12 @@ definitions:
       - name
     properties:
       id:
-        type: integer
-        format: int64
+        type: string
         readOnly: true
       entrance_room_id:
-        type: integer
-        format: int64
+        type: string
       exit_room_id:
-        type: integer
-        format: int64
+        type: string
       name:
         type: string
       rooms:
