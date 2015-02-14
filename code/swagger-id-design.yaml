@@ -66,8 +66,6 @@ paths:
               {
                 "id": "1234",
                 "name": "Knox Thunderbane",
-                "dungeon_id": "2345",
-                "room_id": "3456"
               }
         default:
           description: Unexpected errors
@@ -169,34 +167,12 @@ paths:
                   {
                     "id": "1234",
                     "name": "Dungeon of Doom",
-                    "entrance_room_id": "1000",
-                    "exit_room_id": "1001",
-                    "rooms": [
-                      {
-                        "id": "9876",
-                        "name": "Entrance",
-                        "dungeon_id": "1234",
-                        "doors": [
-                          {
-                            "room_id": "1001",
-                            "dungeon_id": "1234",
-                            "direction": "east"
-                          }
-                        ]
-                      },
-                      {
-                        "id": "8765",
-                        "name": "Exit",
-                        "dungeon_id": "1234",
-                        "doors": [
-                          {
-                            "room_id": "1000",
-                            "dungeon_id": "1234",
-                            "direction": "west"
-                          }
-                        ]
-                      }
-                    ]
+                    "entrance_room_id": "1000"
+                  },
+                  {
+                    "id": "9876",
+                    "name": "Dungeon of Hope",
+                    "entrance_room_id": "2000"
                   }
                 ]
               }
@@ -220,34 +196,7 @@ paths:
               {
                 "id": "1234",
                 "name": "Dungeon of Doom",
-                "entrance_room_id": "1000",
-                "exit_room_id": "1001",
-                "rooms": [
-                  {
-                    "id": "9876",
-                    "name": "Entrance",
-                    "dungeon_id": "1234",
-                    "doors": [
-                      {
-                        "room_id": "1001",
-                        "dungeon_id": "1234",
-                        "direction": "east"
-                      }
-                    ]
-                  },
-                  {
-                    "id": "8765",
-                    "name": "Exit",
-                    "dungeon_id": "1234",
-                    "doors": [
-                      {
-                        "room_id": "1000",
-                        "dungeon_id": "1234",
-                        "direction": "west"
-                      }
-                    ]
-                  }
-                ]
+                "entrance_room_id": "1000"
               }
         default:
           description: Unexpected errors
@@ -339,22 +288,14 @@ definitions:
                 - east
                 - west
   Dungeon:
-    required:
-      - name
+    readOnly: true
     properties:
       id:
         type: string
-        readOnly: true
       entrance_room_id:
-        type: string
-      exit_room_id:
         type: string
       name:
         type: string
-      rooms:
-        type: array
-        items:
-          $ref: "#/definitions/Room"
   Dungeons:
     type: array
     items:
