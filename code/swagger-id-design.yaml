@@ -375,23 +375,26 @@ definitions:
     readOnly: true
     properties:
       transaction_id:
-        type: integer
-        format: int64
-        description: A transaction id for the request/response cycle.
+        type: string
+        description: A transaction id for error response. Used to easily match an API user debugging their application to the errors on the server side, as discoverable by the operations team running the API.
       code:
-        type: integer
-        format: int32
-        description: The application error code. Not to be confused with the HTTP status code in the response.
+        type: string
+        description: A machine readable application error code. Not to be confused with the HTTP status code in the response.
       title:
         type: string
         description: A short, human readable title of the error.
       description:
         type: string
         description: A long, human readable description of the error.
-      href:
-        type: string
-        format: url
-        description: A link to a document contain more information
+      link:
+        properties:
+          rel:
+            type: string
+            enum: [ "help" ]
+          href:
+            type: string
+            format: url
+            description: A link to a document containing more information about the error and how to take action on it.
   Errors:
     type: array
     items:
