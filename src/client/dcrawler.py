@@ -3,20 +3,18 @@ from flask import Flask, jsonify, request, url_for
 api = Flask(__name__)
 
 gen_character_id = 0
-characters = {"characters": []}
+characters = {}
 dungeons = {
-    "dungeons": [
-        {
-            "id": "1234",
-            "name": "Dungeon of Doom",
-            "entrance_room_id": "1000"
-        },
-        {
-            "id": "9876",
-            "name": "Dungeon of Hope",
-            "entrance_room_id": "2000"
-        }
-    ]
+    "1234": {
+        "id": "1234",
+        "name": "Dungeon of Doom",
+        "entrance_room_id": "1000"
+    },
+    "9876": {
+        "id": "9876",
+        "name": "Dungeon of Hope",
+        "entrance_room_id": "2000"
+    }
 }
 rooms = {
     "1000": {
@@ -68,27 +66,26 @@ def _gen_id():
     global gen_character_id
     gen_character_id += 1
 
-    return gen_character_id
+    return str(gen_character_id)
 
 
 @api.route('/characters')
 def get_characters():
     global characters
 
-    return jsonify(characters)
+    return jsonify({"characters": list(characters.values())})
 
 
 @api.route('/characters', methods=['POST'])
 def create_character():
     global characters
 
-    new_id = str(_gen_id())
+    new_id = _gen_id()
     character = {
         "id": new_id,
         "name": request.json['name']
     }
-
-    characters['characters'].append(character)
+    characters[new_id] = character
     location = {'Location': url_for('.get_character', character_id=new_id, _external=True)}
 
     return jsonify(character), 201, location
@@ -98,19 +95,14 @@ def create_character():
 def get_character(character_id):
     global characters
 
-    for character in characters['characters']:
-        if character['id'] == character_id:
-            return jsonify(character)
+    return jsonify(characters[character_id])
 
 
 @api.route('/characters/<character_id>', methods=['PUT'])
 def update_character(character_id):
     global characters
 
-    for idx, character in enumerate(characters['characters']):
-        if character['id'] == character_id:
-            updated_character = request.json
-            characters['characters'][idx] = updated_character
+    characters[character_id] = request.json
 
     return '', 204
 
@@ -119,18 +111,17 @@ def update_character(character_id):
 def get_dungeons():
     global dungeons
 
-    return jsonify(dungeons)
+    return jsonify({"dungeons": list(dungeons.values())})
 
 
 @api.route('/dungeons/<dungeon_id>')
 def get_dungeon(dungeon_id):
     global dungeons
 
-    for dungeon in dungeons['dungeons']:
-        if dungeon['id'] == dungeon_id:
-            return jsonify(dungeon)
+    return jsonify(dungeons[dungeon_id])
 
-# TODO: looks like we don't need dungeon_id at this point
+
+# TODO: dungeon_id isn't strictly necessary but do we keep it for the pretty URL?
 @api.route('/dungeons/<dungeon_id>/rooms/<room_id>')
 def get_room(dungeon_id, room_id):
     global rooms
