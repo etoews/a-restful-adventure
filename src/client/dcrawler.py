@@ -1,5 +1,4 @@
-import json
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, url_for
 
 api = Flask(__name__)
 
@@ -42,14 +41,16 @@ def get_characters():
 def create_character():
     global characters
 
+    new_id = str(_gen_id())
     character = {
-        "id": str(_gen_id()),
+        "id": new_id,
         "name": request.json['name']
     }
 
     characters['characters'].append(character)
+    location = {'Location': url_for('.get_character', character_id=new_id, _external=True)}
 
-    return jsonify(character)
+    return jsonify(character), 201, location
 
 
 @api.route('/characters/<character_id>')
