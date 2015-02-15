@@ -41,3 +41,22 @@ printf "\n\n"
 
 echo "Enter the dungeon"
 curl -s -X PUT -H 'Content-type: application/json' -d '{ "id": "$CHARACTER_ID", "name": "Steve", "dungeon_id": "$DUNGEON_ID", "room_id": "$ENTRANCE_ROOM_ID" }' $HOST/characters/$CHARACTER_ID
+
+echo "Get a room"
+ROOM=$(curl -s -X GET -H 'Accept: application/json' $HOST/dungeons/$DUNGEON_ID/rooms/$ENTRANCE_ROOM_ID)
+ROOM_NAME=$(echo $ROOM | jq -r .name)
+NEXT_ROOM_ID=$(echo $ROOM | jq -r .doors[0].room_id)
+echo "Room name: $ROOM_NAME"
+
+echo "Get a room"
+ROOM=$(curl -s -X GET -H 'Accept: application/json' $HOST/dungeons/$DUNGEON_ID/rooms/$NEXT_ROOM_ID)
+ROOM_NAME=$(echo $ROOM | jq -r .name)
+NEXT_ROOM_ID=$(echo $ROOM | jq -r .doors[0].room_id)
+echo "Room name: $ROOM_NAME"
+
+echo "Get a room"
+ROOM=$(curl -s -X GET -H 'Accept: application/json' $HOST/dungeons/$DUNGEON_ID/rooms/$NEXT_ROOM_ID)
+ROOM_NAME=$(echo $ROOM | jq -r .name)
+NEXT_ROOM_ID=$(echo $ROOM | jq -r .doors[0].room_id)
+echo "Room name: $ROOM_NAME"
+

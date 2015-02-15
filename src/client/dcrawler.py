@@ -18,6 +18,46 @@ dungeons = {
         }
     ]
 }
+rooms = {
+    "1000": {
+        "id": "1000",
+        "name": "Entrance",
+        "dungeon_id": "1234",
+        "is_exit": False,
+        "doors": [
+            {
+                "room_id": "1001",
+                "direction": "east"
+            }
+        ]},
+    "1001": {
+        "id": "1001",
+        "name": "Hallway",
+        "dungeon_id": "1234",
+        "is_exit": False,
+        "doors": [
+            {
+                "room_id": "1002",
+                "direction": "east"
+            },
+            {
+                "room_id": "1000",
+                "direction": "west"
+            }
+        ]},
+    "1002": {
+        "id": "1002",
+        "name": "Exit",
+        "dungeon_id": "1234",
+        "is_exit": True,
+        "doors": [
+            {
+                "room_id": "1001",
+                "direction": "west"
+            }
+        ]}
+}
+
 
 @api.route('/')
 def index():
@@ -29,6 +69,7 @@ def _gen_id():
     gen_character_id += 1
 
     return gen_character_id
+
 
 @api.route('/characters')
 def get_characters():
@@ -61,6 +102,7 @@ def get_character(character_id):
         if character['id'] == character_id:
             return jsonify(character)
 
+
 @api.route('/characters/<character_id>', methods=['PUT'])
 def update_character(character_id):
     global characters
@@ -71,6 +113,7 @@ def update_character(character_id):
             characters['characters'][idx] = updated_character
 
     return '', 204
+
 
 @api.route('/dungeons')
 def get_dungeons():
@@ -86,6 +129,13 @@ def get_dungeon(dungeon_id):
     for dungeon in dungeons['dungeons']:
         if dungeon['id'] == dungeon_id:
             return jsonify(dungeon)
+
+# TODO: looks like we don't need dungeon_id at this point
+@api.route('/dungeons/<dungeon_id>/rooms/<room_id>')
+def get_room(dungeon_id, room_id):
+    global rooms
+
+    return jsonify(rooms[room_id])
 
 
 if __name__ == '__main__':

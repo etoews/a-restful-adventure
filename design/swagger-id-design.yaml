@@ -220,13 +220,13 @@ paths:
           examples:
             application/json: |-
               {
-                "id": "9876",
+                "id": "1000",
                 "name": "Entrance",
                 "dungeon_id": "1234",
+                "is_exit": false,
                 "doors": [
                   {
                     "room_id": "1001",
-                    "dungeon_id": "1234",
                     "direction": "east"
                   }
                 ]
@@ -256,24 +256,23 @@ definitions:
     items:
       $ref: "#/definitions/Character"
   Room:
-    required:
-      - name
+    readOnly: true
     properties:
       id:
         type: string
         readOnly: true
-      dungeon_id:
-        type: string
       name:
         type: string
+      dungeon_id:
+        type: string
+      is_exit:
+        type: boolean
       doors:
         type: array
         items:
           type: object
           properties:
             room_id:
-              type: string
-            dungeon_id:
               type: string
             direction:
               type: string
@@ -296,8 +295,6 @@ definitions:
     items:
       $ref: "#/definitions/Dungeon"
   Error:
-    required:
-      - title
     readOnly: true
     properties:
       transaction_id:
