@@ -13,7 +13,7 @@ printf "\n\n"
 
 echo "Get characters"
 CHARACTERS=$(curl -s -X GET -H 'Accept: application/json' $HOST/characters)
-echo $CHARACTERS
+echo $CHARACTERS | jq .
 CHARACTER_ID=$(echo $CHARACTERS | jq -r .characters[0].id)
 echo "Picked character id: $CHARACTER_ID"
 
@@ -26,7 +26,7 @@ printf "\n\n"
 
 echo "Get dungeons"
 DUNGEONS=$(curl -s -X GET -H 'Accept: application/json' $HOST/dungeons)
-echo $DUNGEONS
+echo $DUNGEONS | jq .
 DUNGEON_ID=$(echo $DUNGEONS | jq -r .dungeons[0].id)
 ENTRANCE_ROOM_ID=$(echo $DUNGEONS | jq -r .dungeons[0].entrance_room_id)
 echo "Picked dungeon id: $DUNGEON_ID"
