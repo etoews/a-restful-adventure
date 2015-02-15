@@ -1,3 +1,4 @@
+import json
 from flask import Flask, jsonify, request
 
 api = Flask(__name__)
@@ -30,6 +31,13 @@ def _gen_id():
 
     return gen_character_id
 
+@api.route('/characters')
+def get_characters():
+    global characters
+
+    return jsonify(characters)
+
+
 @api.route('/characters', methods=['POST'])
 def create_character():
     global characters
@@ -44,13 +52,6 @@ def create_character():
     return jsonify(character)
 
 
-@api.route('/characters')
-def get_characters():
-    global characters
-
-    return jsonify(characters)
-
-
 @api.route('/characters/<character_id>')
 def get_character(character_id):
     global characters
@@ -59,6 +60,16 @@ def get_character(character_id):
         if character['id'] == character_id:
             return jsonify(character)
 
+@api.route('/characters/<character_id>', methods=['PUT'])
+def update_character(character_id):
+    global characters
+
+    for idx, character in enumerate(characters['characters']):
+        if character['id'] == character_id:
+            updated_character = request.json
+            characters['characters'][idx] = updated_character
+
+    return '', 204
 
 @api.route('/dungeons')
 def get_dungeons():

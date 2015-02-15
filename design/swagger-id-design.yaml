@@ -65,7 +65,7 @@ paths:
             application/json: |-
               {
                 "id": "1234",
-                "name": "Knox Thunderbane",
+                "name": "Knox Thunderbane"
               }
         default:
           description: Unexpected errors
@@ -98,26 +98,9 @@ paths:
                 "dungeon_id": "2345",
                 "room_id": "3456"
               }
-    delete:
-      summary: Delete a Character
-      operationId: delete_character
-      parameters:
-        - name: character_id
-          in: path
-          required: true
-          type: string
-          description: The id of the Character to delete
-      responses:
-        204:
-          description: Character deleted
-        default:
-          description: Unexpected errors
-          schema:
-            $ref: "#/definitions/Errors"
-    patch:
+    put:
       summary: Update a Character
       operationId: update_character
-      # TODO: Should this use JSON Patch? http://williamdurand.fr/2014/02/14/please-do-not-patch-like-an-idiot/
       parameters:
         - name: character_id
           in: path
@@ -130,20 +113,32 @@ paths:
           schema:
             $ref: "#/definitions/Character"
       x-examples:
-        application/json: { "dungeon_id": "2345", "room_id": "4567" }
+        application/json: |-
+          {
+            "id": "1234",
+            "name": "Knox Thunderbane",
+            "dungeon_id": "2345",
+            "room_id": "4567"
+          }
       responses:
-        200:
+        204:
           description: Character updated
+        default:
+          description: Unexpected errors
           schema:
-            $ref: "#/definitions/Character"
-          examples:
-            application/json: |-
-              {
-                "id": "1234",
-                "name": "Knox Thunderbane",
-                "dungeon_id": "2345",
-                "room_id": "4567"
-              }
+            $ref: "#/definitions/Errors"
+    delete:
+      summary: Delete a Character
+      operationId: delete_character
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          type: string
+          description: The id of the Character to delete
+      responses:
+        204:
+          description: Character deleted
         default:
           description: Unexpected errors
           schema:

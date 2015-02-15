@@ -37,3 +37,7 @@ printf "\n\n"
 echo "Get a dungeon"
 curl -s -X GET -H 'Accept: application/json' $HOST/dungeons/$DUNGEON_ID
 
+printf "\n\n"
+
+echo "Enter the dungeon"
+curl -s -X PUT -H 'Content-type: application/json' -d '{ "id": "$CHARACTER_ID", "name": "Steve", "dungeon_id": "$DUNGEON_ID", "room_id": "$ENTRANCE_ROOM_ID" }' $HOST/characters/$CHARACTER_ID
