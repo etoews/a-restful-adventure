@@ -98,7 +98,79 @@
         </section>
 
         <section>
-          <h1>Add slides about design here</h1>
+          <img src="img/zork.jpg">
+        </section>
+
+        <section>
+          <h1>Requirements</h1>
+        </section>
+
+        <section>
+          <h1>Use Cases</h1>
+
+          <aside class="notes">
+          	<ul>
+          		<li>Who is your audience?</li>
+							<li>Not necessarily designing the API for everyone</li>
+							<li>Stick to known use cases without designing yourself into a corner</li>
+						</ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Example</h1>
+          <p><a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/design/use-cases.md">Safely navigate a dungeon from start to finish</a></p>
+        </section>
+
+        <section>
+          <h1>Brainstorming</h1>
+
+          <aside class="notes">
+          	<ul>
+							<li>Simple tools like text editors</li>
+							<li>Identifying resources</li>
+							<li>Typing out a list of URLs</li>
+							<li>Mocking up some sample JSON resources</li>
+							<li>Draw some pictures</li>
+          	</ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Example</h1>
+          <ul>
+          	<li>/characters</li>
+          	<li>/characters/{character_id}</li>
+          	<li>/dungeons</li>
+          	<li>/dungeons/{dungeon_id}</li>
+          	<li>/dungeons/{dungeon_id}/rooms/{room_id} ???</li>
+          	<li>or</li>
+          	<li>/rooms/{room_id} ???</li>
+          </ul>
+        </section>
+
+        <section>
+          <h1>User-Centric</h1>
+
+          <aside class="notes">
+          	<ul>
+          		<li>What kind of clients will you support?</li>
+							<li>Writing some client code for those URLs</li>
+							<li>curl</li>
+							<li>mobile</li>
+							<li>SDKs</li>
+							<li>Writing some mock server code for those URLs</li>
+							<li>Flask</li>
+          	</ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Example</h1>
+          <ul>
+          	<li><a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/src/client/curl-id-design.sh">Client: curl</a></li>
+          	<li><a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/src/client/dcrawler.py">Server: Flask</a></li>
+          </ul>
         </section>
 
         <section id="break">
