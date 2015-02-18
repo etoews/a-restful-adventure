@@ -6,8 +6,8 @@
 
 		<title>A RESTful Adventure</title>
 
-		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
-		<meta name="author" content="Hakim El Hattab">
+    <meta name="description" content="A REST workshop that guides participants through the design and implementation of a simple adventure game.">
+    <meta name="author" content="Kurt Griffiths and Everett Toews">
 
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -15,7 +15,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+		<link rel="stylesheet" href="css/theme/night.css" id="theme">
+    <link rel="stylesheet" href="css/custom.css">
 
 		<!-- Code syntax highlighting -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -40,7 +41,7 @@
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-        <section>
+        <section id="welcome">
           <h1>A RESTful Adventure</h1>
           <center>
             <table>
@@ -56,12 +57,40 @@
               </tbody>
             </table>
           </center>
+          <aside class="notes">
+            [15 sec]
+            <ul>
+              <li>Welcome to the RESTful Adventure workshop.</li>
+              <li>[introduce the instructors]</li>
+              <li>Over the next couple of hours we will take you on a journey through the creative process of designing and implementating a simple adventure game.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Goal</h1>
+          <h3>Design and Implement</h3>
+          <h3>a RESTful API</h3>
+        </section>
+
+        <section>
+          <p>
+            <span class="big">☺</span>
+            <span class="fragment big">+𝓡</span>
+            <span class="fragment big">=☁</span>
+          </p>
+          <aside class="notes">
+            [30 sec]
+            <ul>
+              <li>You'll learn how to combine a user-oriented perspective with the principles of REST to create elegant web services.</li>
+              <li>Web services that are elastic, maintainable and reliable.</li>
+            </ul>
+          </aside>
         </section>
 
         <section>
           <h1>Agenda</h1>
           <ol>
-            <li><a href="#/welcome">Welcome</a></li>
             <li><a href="#/rest">REST Fundamentals</a></li>
             <li><a href="#/design">Design the API</a></li>
             <li><a href="#/break">Break</a></li>
@@ -71,26 +100,123 @@
           </ol>
         </section>
 
-        <section id="welcome">
-          <h1>Welcome</h1>
-        </section>
-
-        <section>
-          <h1>Goal</h1>
-          <h2>Design and Implement</h2>
-          <h2>a RESTful API</h2>
-        </section>
-
-        <section>
-          <h1>Add slides about goals and objectives here</h1>
-        </section>
-
         <section id="rest">
           <h1>REST Fundamentals</h1>
         </section>
 
         <section>
-          <h1>Add slides about REST fundamentals here</h1>
+          <section>
+            <img width="400" height="345" src="img/that-word-rest.jpg"/>
+            <aside class="notes">
+
+              <ul>
+                <li>REST is often misunderstood</li>
+              </ul>
+            </aside>
+
+          </section>
+
+          <section>
+            <img height="345" src="img/eniac.jpg"/>
+            <aside class="notes">
+
+              <ul>
+                <li>So, before we go any further, we need to rewire our brains a little bit.</li>
+              </ul>
+            </aside>
+          </section>
+          <section>
+            <h2>REST is not</h2>
+            <p>
+              <span class="fragment">[URL|RPC|CRUD] over </span> HTTP
+            </p>
+            <aside class="notes">
+              <ul>
+                <li>REST is not HTTP - HTTP APIs are not inherently RESTful.</li>
+                <li>REST is not pretty URLs.</li>
+                <li>REST is not RPC over HTTP. We aren't talking about calling remote functions on a server.</li>
+                <li>And finally, REST is not simply a way to do CRUD over HTTP.</li>
+              </ul>
+            </aside>
+          </section>
+          <section>
+            <h2>REST is</h2>
+            <ul>
+              <li class="fragment">An architectural style for network-based applications</li>
+              <li class="fragment">A set of constraints formalized by Roy Fielding</li>
+              <li class="fragment">A counterpoint to RPC</li>
+            </ul>
+            <aside class="notes">
+              <ul>
+                <li>REST is an architectural style that formalizes the concepts behind the way the web was intended to work. It acts as a guide for designing systems that embody the best characteristics of the web.</li>
+                <li>REST was defined by one of the early pioneers of the web, Roy Fielding, in his doctoral dissertation.</li>
+                <li>REST avoids the brittleness, scalability, and maintainability problems typical of RPC-based architectures. Rather than thinking about "functions" or "endpoints", as you would in RPC, you think in terms of "resources" and "links".</li>
+              </ul>
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <h2>Constraints</h2>
+          <blockquote cite="http://www.brainyquote.com/quotes/quotes/w/waltwhitma136364.html">
+            &ldquo;The shallow consider liberty a release from all law, from every constraint. The wise man sees in it, on the contrary, the potent Law of Laws.&rdquo;
+          </blockquote>
+          <p>- Walt Whitman</p>
+          <aside class="notes">
+            <ul>
+              <li>REST is defined by a set of 6 architectural constraints.</li>
+              <li>Taken together, these contraints provide a mold for RESTful applications.</li>
+            </ul>
+          </aside>
+        </section>
+        <section>
+          <p>[TODO: pair down content to fit within time]</p>
+          <h3>Client-Server 🍜</h3>
+          <h3 class="fragment">Stateless 🔌</h3>
+          <h3 class="fragment">Cache 🚚</h3>
+          <h3 class="fragment">Uniform Interface 🎹</h3>
+          <h3 class="fragment">Layering 💳</h3>
+          <h3 class="fragment">Code-on-Demand 🎮</h3>
+
+          <aside class="notes">
+            <ul>
+              <li>Client-Server: This is all about creating a clear separation of concerns, which affords independent evolution and management between client and server. For example, when I sit down at my local Ramen shop, a server brings me a menu of options. I choose from the list of options and place my order. The server then goes off to interface with the backend kitchen services on my behalf. I don't need to know or care how my food is prepared, just that I get what I ordered in a timely manner.</li>
+              <li>Stateless: This doesn't mean that your system has no state, just that there is no state shared between individual requests. The idea here is to decouple session state from the transport, since transports are unreliable. The client is responsible for keeping track of session state, and including that information in every request to the server. At any time you should be able to pull the plug on a client or a server, and then recover in a deterministic way. If a server goes down, a client should be able to provide its session state to a different server in the pool and get the same answer back as it would have from the failed box. If a client crashes or it's network connection fails, it should be able to pick up later where it left off.</li>
+              <li>Cache: The idea here is to move the goods as close to the consumer as possible, to reduce latency and transportation costs. For example, when I click "buy" on Amazon, the fulfillment system routes my order to the warehouse closest to my home that has my item in stock. Amazon regularly caches popular goods in warehouses as close to the consumer as they can get them. REST provides for caching by constraining systems to explicitly define caching parameters through the uniform interface.</li>
+              <li>Uniform Interface: The idea here is to provide a set of ground-rules, an <em>a-priori</em> baseline of syntax and semantics. A pianist can sit down at any piano and know what to do. The mechanisms under the lid can and do vary wildly, but the meaning and layout of the keys remain the same. For REST this means a shared language of identifiers, methods, and media types.</li>
+              <li>Layering: This extends Client-Server to create a chain of clients and servers. Let me give you an example. Many restaurants have an informal lunch offering, where you pay your bill by stopping by the cashier on the way out. The cashier gives you your check, you hand them a credit card, they run the card, and give you a receipt. If you come back another time, but this time in the evening, the exact same thing happens, except your server acts as the cashier. This is nice because I don't have to go all the way to the cashier myself. I don't need to know or care that behind the scenes the waitress is themselves acting as a client and interacting with the cashier on my behalf; it's the same interface for both lunch and dinner. One is just more convenient.</li>
+              <li>Code-on-Demand: This is an optional constaint that allows the server to delegate processing to clients when that is more efficient, and to also provide dynamic logic to augment the client's limited abilities to understand and process resources provided by the service. When it comes to the web, this constraint people usually equite code-on-demand to JavaScript, but there isn't any reason why it can't be used in other contexts. For example, game engines typically rely on scripts to orchestrate gameplay. These scripts can be delivered dynamically from the server to the client.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Uniform Interface Elements</h2>
+          <h2>🎹</h2>
+        </section>
+
+        <section>
+          <p>[draw a big-picture diagram here, then point out the elements and talk about them briefly]</p>
+          <p>[TODO: pair down content to fit within time]</p>
+
+<!--
+          <h3 class="fragment">Components</h3>
+          <h3 class="fragment">Connectors</h3>
+          <h3 class="fragment">Resources</h3>
+          <h3 class="fragment">Representations</h3>
+          <h3 class="fragment">Control Data</h3>
+          <h3 class="fragment">Hypermedia</h3>
+ -->
+          <aside class="notes">
+            <ul>
+              <li>REST components categorize individual nodes into various roles, with each role conveying a specific set of expectations. Examples of components include origin servers, user agents, gateways, and proxies.</li>
+              <li>REST connectors define the types of actions a node performs, such as caching or acting as a client or server. A given component may implement one or more connectors.</li>
+              <li>Resources are client-facing models that map in some way to backend data entities. The mapping can be n-to-n and involve any number of transformations and amalgamations. Each resource is identified by a unique, opaque identifier, typically a URL. REST does not dictate a particular URL schema, although it can be helpful to adopt a human-friendly format, as we'll see later on. It's important to note here that the server has complete ownership of this identifier, which means that the client never constructs it, but simply "copies and pastes" identifiers it recieves from previous requests to the server. This makes it easier to evolve your API without breaking clients.</li>
+              <li>Representations are snapshots of a resource at a point in time. A single resource can have multiple representations, such as JSON, PNG, or HTML. These representations are formalized as Internet media types. The client and server perform content negotiation to determine the desired representation.</li>
+              <li>Control data is passed along with requests and responses to specify general semantics and to modify the default behavior of connectors. In HTTP, examples of control data include the HTTP method (e.g., GET and POST) and conditional headers, such as If-None-Match.</li>
+              <li>Hypermedia is one of the most often ignored aspects of REST. This is ironic, because hypermedia is probably the most important difference between REST and other architectural styles, such as RPC. Rather than relying on brittle endpoint specifications, REST uses hypermedia to identify resources and provide a living web of links that clients traverse in order to change application state. The server may provide different links to the client according to the current state of the system. In this way, REST-based systems can be very flexible, allowing different components of the system to evolve somewhat independently.</li>
+            </ul>
+          </aside>
         </section>
 
         <section id="design">
