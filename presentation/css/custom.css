@@ -1,7 +1,24 @@
 .reveal h1 {
-    font-size: 2.9em;
+  font-size: 2.9em;
 }
 
 .reveal .big {
-    font-size: 2.9em;
+  font-size: 2.9em;
+}
+
+.reveal .inline-h2 {
+  font-size: 2.11em;
+  font-family: 'Montserrat', Impact, sans-serif;
+}
+
+.reveal .inline-h3 {
+  font-size: 1.55em;
+  font-family: 'Montserrat', Impact, sans-serif;
+}
+
+.reveal ul.no-bullets {
+  list-style: none;
+  margin-left: 0;
+  padding-left: 1em;
+  text-indent: -1em;
 }

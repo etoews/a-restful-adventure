@@ -171,28 +171,29 @@
         </section>
         <section>
           <p>[TODO: pair down content to fit within time]</p>
-          <h3>Client-Server 🍜</h3>
-          <h3 class="fragment">Stateless 🔌</h3>
-          <h3 class="fragment">Cache 🚚</h3>
-          <h3 class="fragment">Uniform Interface 🎹</h3>
-          <h3 class="fragment">Layering 💳</h3>
-          <h3 class="fragment">Code-on-Demand 🎮</h3>
+          <ul class="no-bullets inline-h3">
+            <li>🍜 Client-Server</li>
+            <li class="fragment">🐘 Stateless</li>
+            <li class="fragment">📦 Cache</li>
+            <li class="fragment">🎹 Uniform Interface</li>
+            <li class="fragment">🔗 Layering</li>
+            <li class="fragment">🎮 Code-on-Demand</li>
+          </ul>
 
           <aside class="notes">
             <ul>
               <li>Client-Server: This is all about creating a clear separation of concerns, which affords independent evolution and management between client and server. For example, when I sit down at my local Ramen shop, a server brings me a menu of options. I choose from the list of options and place my order. The server then goes off to interface with the backend kitchen services on my behalf. I don't need to know or care how my food is prepared, just that I get what I ordered in a timely manner.</li>
-              <li>Stateless: This doesn't mean that your system has no state, just that there is no state shared between individual requests. The idea here is to decouple session state from the transport, since transports are unreliable. The client is responsible for keeping track of session state, and including that information in every request to the server. At any time you should be able to pull the plug on a client or a server, and then recover in a deterministic way. If a server goes down, a client should be able to provide its session state to a different server in the pool and get the same answer back as it would have from the failed box. If a client crashes or it's network connection fails, it should be able to pick up later where it left off.</li>
-              <li>Cache: The idea here is to move the goods as close to the consumer as possible, to reduce latency and transportation costs. For example, when I click "buy" on Amazon, the fulfillment system routes my order to the warehouse closest to my home that has my item in stock. Amazon regularly caches popular goods in warehouses as close to the consumer as they can get them. REST provides for caching by constraining systems to explicitly define caching parameters through the uniform interface.</li>
+              <li>Stateless: This doesn't mean that your system has no state, just that there is no state shared between individual requests. Transports are unreliable, so you want to avoid embedding state in them. The client is like an elephant that never forgets; the client is responsible for remembering its own session state, and including that information in every request to the server. If a server goes down, a client should be able to provide its session state to a different server in the pool and get the same answer back as it would have from the failed box. If a client crashes or it's network connection fails, it should be able to pick up later where it left off.</li>
+              <li>Cache: The idea here is to stock your goods as close to the consumer as possible, to reduce latency and transportation costs. For example, when I click "buy" on Amazon, the fulfillment system routes my order to the warehouse closest to my home that has my item in stock. Amazon regularly caches popular goods in warehouses as close to the consumer as they can get them. REST provides for caching by constraining systems to explicitly define caching parameters through the uniform interface.</li>
               <li>Uniform Interface: The idea here is to provide a set of ground-rules, an <em>a-priori</em> baseline of syntax and semantics. A pianist can sit down at any piano and know what to do. The mechanisms under the lid can and do vary wildly, but the meaning and layout of the keys remain the same. For REST this means a shared language of identifiers, methods, and media types.</li>
-              <li>Layering: This extends Client-Server to create a chain of clients and servers. Let me give you an example. Many restaurants have an informal lunch offering, where you pay your bill by stopping by the cashier on the way out. The cashier gives you your check, you hand them a credit card, they run the card, and give you a receipt. If you come back another time, but this time in the evening, the exact same thing happens, except your server acts as the cashier. This is nice because I don't have to go all the way to the cashier myself. I don't need to know or care that behind the scenes the waitress is themselves acting as a client and interacting with the cashier on my behalf; it's the same interface for both lunch and dinner. One is just more convenient.</li>
+              <li>Layering: This extends Client-Server to create a chain of clients and servers, each exposing the same interface. It's like a recursive function. DNS works like this. When I want to find rackspace.com, I'll usually ask a local DNS server for the address. If the local DNS server doesn't know the IP address for my domain, it will act like a client and query another DNS server for the information, and so on and so forth.</li>
               <li>Code-on-Demand: This is an optional constaint that allows the server to delegate processing to clients when that is more efficient, and to also provide dynamic logic to augment the client's limited abilities to understand and process resources provided by the service. When it comes to the web, this constraint people usually equite code-on-demand to JavaScript, but there isn't any reason why it can't be used in other contexts. For example, game engines typically rely on scripts to orchestrate gameplay. These scripts can be delivered dynamically from the server to the client.</li>
             </ul>
           </aside>
         </section>
 
         <section>
-          <h2>Uniform Interface Elements</h2>
-          <h2>🎹</h2>
+          <h2>Elements of the Uniform Interface</h2>
         </section>
 
         <section>
