@@ -1,0 +1,417 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "A RESTful Adventure"
+    },
+    "host": "localhost",
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/characters": {
+            "get": {
+                "summary": "List all Characters",
+                "operationId": "list_characters",
+                "responses": {
+                    "200": {
+                        "description": "An array of Characters",
+                        "schema": {
+                            "properties": {
+                                "characters": {
+                                    "type": "array",
+                                    "$ref": "#/definitions/Characters"
+                                }
+                            }
+                        },
+                        "examples": {
+                            "application/json": "{\n  \"characters\": [\n    {\n      \"id\": \"1234\",\n      \"name\": \"Knox Thunderbane\",\n      \"dungeon_id\": \"2345\",\n      \"room_id\": \"3456\"\n    }\n  ]\n}"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Character",
+                "operationId": "create_character",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 256
+                                }
+                            }
+                        }
+                    }
+                ],
+                "x-examples": {
+                    "application/json": {
+                        "name": "Knox Thunderbane"
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Character created",
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "format": "url",
+                                "description": "A link to the Character"
+                            }
+                        },
+                        "schema": {
+                            "$ref": "#/definitions/Character"
+                        },
+                        "examples": {
+                            "application/json": "{\n  \"id\": \"1234\",\n  \"name\": \"Knox Thunderbane\"\n}"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected errors",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            }
+        },
+        "/characters/{character_id}": {
+            "get": {
+                "summary": "Get a specific Character",
+                "operationId": "get_character",
+                "parameters": [
+                    {
+                        "name": "character_id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "The id of the Character to retrieve"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A Character",
+                        "schema": {
+                            "$ref": "#/definitions/Character"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected Errors",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        },
+                        "examples": {
+                            "application/json": "{\n  \"id\": \"1234\",\n  \"name\": \"Knox Thunderbane\",\n  \"dungeon_id\": \"2345\",\n  \"room_id\": \"3456\"\n}"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a Character",
+                "operationId": "update_character",
+                "parameters": [
+                    {
+                        "name": "character_id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "description": "Rename a Character or move them to a new room.",
+                        "schema": {
+                            "$ref": "#/definitions/Character"
+                        }
+                    }
+                ],
+                "x-examples": {
+                    "application/json": "{\n  \"id\": \"1234\",\n  \"name\": \"Knox Thunderbane\",\n  \"dungeon_id\": \"2345\",\n  \"room_id\": \"4567\"\n}"
+                },
+                "responses": {
+                    "204": {
+                        "description": "Character updated"
+                    },
+                    "default": {
+                        "description": "Unexpected errors",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Character",
+                "operationId": "delete_character",
+                "parameters": [
+                    {
+                        "name": "character_id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "The id of the Character to delete"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Character deleted"
+                    },
+                    "default": {
+                        "description": "Unexpected errors",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            }
+        },
+        "/dungeons": {
+            "get": {
+                "summary": "List all Dungeons",
+                "operationId": "list_dungeons",
+                "responses": {
+                    "200": {
+                        "description": "An array of Dungeons",
+                        "schema": {
+                            "properties": {
+                                "dungeons": {
+                                    "type": "array",
+                                    "$ref": "#/definitions/Dungeons"
+                                }
+                            }
+                        },
+                        "examples": {
+                            "application/json": "{\n  \"dungeons\": [\n    {\n      \"id\": \"1234\",\n      \"name\": \"Dungeon of Doom\",\n      \"entrance_room_id\": \"1000\"\n    },\n    {\n      \"id\": \"9876\",\n      \"name\": \"Dungeon of Hope\",\n      \"entrance_room_id\": \"2000\"\n    }\n  ]\n}"
+                        }
+                    }
+                }
+            }
+        },
+        "/dungeons/{dungeon_id}": {
+            "get": {
+                "summary": "Get a specific Dungeon",
+                "operationId": "get_dungeon",
+                "parameters": [
+                    {
+                        "name": "dungeon_id",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the Dungeon to retrieve",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A Dungeon",
+                        "schema": {
+                            "$ref": "#/definitions/Dungeon"
+                        },
+                        "examples": {
+                            "application/json": "{\n  \"id\": \"1234\",\n  \"name\": \"Dungeon of Doom\",\n  \"entrance_room_id\": \"1000\"\n}"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected errors",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            }
+        },
+        "/dungeons/{dungeon_id}/rooms/{room_id}": {
+            "get": {
+                "summary": "Get a specific Room in a specific Dungeon",
+                "operationId": "get_room",
+                "parameters": [
+                    {
+                        "name": "dungeon_id",
+                        "in": "path",
+                        "description": "The id of the Dungeon",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "room_id",
+                        "in": "path",
+                        "description": "The id of the Room",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Expected response to a valid request",
+                        "schema": {
+                            "$ref": "#/definitions/Room"
+                        },
+                        "examples": {
+                            "application/json": "{\n  \"id\": \"1000\",\n  \"name\": \"Entrance\",\n  \"dungeon_id\": \"1234\",\n  \"is_exit\": false,\n  \"doors\": [\n    {\n      \"room_id\": \"1001\",\n      \"direction\": \"east\"\n    }\n  ]\n}"
+                        }
+                    },
+                    "400": {
+                        "description": "You tried to teleport. That's just not allowed.",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        },
+                        "examples": {
+                            "application/json": "{\n  \"transaction_id\": \"71607e7c-df7c-45f3-b571-d1829de4ad9a\",\n  \"code\": \"736.9\",\n  \"title\": \"Teleport Denied\",\n  \"description\": \"The room you tried to visit does not exist or is not accessible from your current room. Thought you could get away with it didn't you.\",\n  \"link\": {\n      \"rel\": \"help\",\n      \"href\": \"http://en.wikipedia.org/wiki/No-teleportation_theorem\"\n    }\n}"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected errors",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Character": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "readOnly": true
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                },
+                "dungeon_id": {
+                    "type": "string"
+                },
+                "room_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "Characters": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Character"
+            }
+        },
+        "Room": {
+            "type": "object",
+            "readOnly": true,
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "readOnly": true
+                },
+                "name": {
+                    "type": "string"
+                },
+                "dungeon_id": {
+                    "type": "string"
+                },
+                "is_exit": {
+                    "type": "boolean"
+                },
+                "doors": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "room_id": {
+                                "type": "string"
+                            },
+                            "direction": {
+                                "type": "string",
+                                "enum": [
+                                    "north",
+                                    "south",
+                                    "east",
+                                    "west"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Dungeon": {
+            "type": "object",
+            "readOnly": true,
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "entrance_room_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Dungeons": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Dungeon"
+            }
+        },
+        "Error": {
+            "type": "object",
+            "readOnly": true,
+            "properties": {
+                "transaction_id": {
+                    "type": "string",
+                    "description": "A transaction id for error response. Used to easily match an API user debugging their application to the errors on the server side, as discoverable by the operations team running the API."
+                },
+                "code": {
+                    "type": "string",
+                    "description": "A machine readable application error code. Not to be confused with the HTTP status code in the response."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "A short, human readable title of the error."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "A long, human readable description of the error."
+                },
+                "link": {
+                    "properties": {
+                        "rel": {
+                            "type": "string",
+                            "enum": [
+                                "help"
+                            ]
+                        },
+                        "href": {
+                            "type": "string",
+                            "format": "url",
+                            "description": "A link to a document containing more information about the error and how to take action on it."
+                        }
+                    }
+                }
+            }
+        },
+        "Errors": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Error"
+            }
+        }
+    }
+}
