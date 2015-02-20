@@ -224,11 +224,49 @@
         </section>
 
         <section>
+          <h1>Before We Proceed</h1>
+        </section>
+
+        <section>
+          <h1>Your REST != My REST</h1>
+
+          <aside class="notes">
+            <ul>
+              <li>Keep calm. It's going to be okay. Be flexible.</li>
+              <li>Often times a design decision needs to be made</li>
+              <li>The important part is being consistent throughout your API</li>
+              <li>Think programming style guide</li>
+              <li>Examples:</li>
+              <ul>
+                <li>The way URLs are structured</li>
+                <li>JSON resource schema</li>
+                <li>Whether or not to use X headers</li>
+              </ul>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
           <img src="img/zork.jpg">
         </section>
 
         <section>
-          <h1>Requirements</h1>
+          <h1>Brainstorming</h1>
+
+          <aside class="notes">
+            <ul>
+              <li>Draw some pictures</li>
+              <li>Simple tools like text editors</li>
+              <li>Identifying resources</li>
+              <li>Typing out a list of URLs</li>
+              <li>Mocking up some sample JSON resources</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab</h1>
+          <h2>Whiteboarding</h2>
         </section>
 
         <section>
@@ -249,30 +287,233 @@
         </section>
 
         <section>
-          <h1>Brainstorming</h1>
+          <h1>Early Technical Decisions</h1>
+          <ul>
+            <li>Media Types</li>
+            <li>IDs vs hypermedia</li>
+            <li>Pretty URLs</li>
+            <li>Versioning</li>
+            <li>Authentication</li>
+            <li>Resource Updates</li>
+            <li>(State Transitions)</li>
+          </ul>
 
           <aside class="notes">
-          	<ul>
-							<li>Simple tools like text editors</li>
-							<li>Identifying resources</li>
-							<li>Typing out a list of URLs</li>
-							<li>Mocking up some sample JSON resources</li>
-							<li>Draw some pictures</li>
-          	</ul>
+            <ul>
+              <li>JSON vs. XML vs. YAML vs. Protocol Buffers. Pick one that meets your requirements. Default to YAML.</li>
+              <li>I'll just pose a question on this one, how much does thinking of the data model implementation affect design of the API resources?</li>
+              <li>It affects your URLs so you'll need to decide if you want them early on</li>
+              <li>Not a solved problem and there's no de facto standard.</li>
+              <li>Punt</li>
+              <li>PUT or PATCH or JSON PATCH</li>
+            </ul>
           </aside>
         </section>
 
         <section>
-          <h1>Example</h1>
+          <h1>API Definition</h1>
+          <h1>Formats</h1>
           <ul>
-          	<li>/characters</li>
-          	<li>/characters/{character_id}</li>
-          	<li>/dungeons</li>
-          	<li>/dungeons/{dungeon_id}</li>
-          	<li>/dungeons/{dungeon_id}/rooms/{room_id} ???</li>
-          	<li>or</li>
-          	<li>/rooms/{room_id} ???</li>
+            <li>API Blueprint</li>
+            <li>RAML</li>
+            <li>Swagger</li>
           </ul>
+
+          <aside class="notes">
+            <ul>
+              <li>Formalize your thinking</li>
+              <li>It's not documentation</li>
+              <li>It's the contract between client and server</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <img src="img/api-definition-contract.png">
+          <p>Image Credit: <a href="http://apievangelist.com/2014/12/21/making-sure-the-most-important-layers-of-api-space-stay-open/">Kin Lane</a></p>
+
+          <aside class="notes">
+            <ul>
+              <li>It drives the implementation of the client</li>
+              <li>It drives the implementation of the server</li>
+              <li>When it comes to the implementation of the server, there is a huge tempation to have the server generate the API defintion from code.</li>
+              <li>But doing so makes it all too easy to break the API and your clients.</li>
+              <li>Changes to the API definitions need to be considered carefully and communicated to clients.</li>
+              <li>And any time you talk about API changes it begs the question of versioning, which will be touched on a bit later.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Swagger</h1>
+          <h2><a href="https://github.com/swagger-api/swagger-spec">Spec</a></h2>
+
+          <aside class="notes">
+            <ul>
+              <li>Chosen to learn more about it</li>
+              <li>YAML and JSON. Built on JSON Schema</li>
+              <li>It's certainly not perfect</li>
+              <li>The spec can be hard to follow and there aren't examples of everything</li>
+              <li>2.0 released late last year and not all of the tooling has caught up</li>
+              <li>The editor has improved since we began creating this workshop</li>
+              <li>Some of the 3rd party tools look like they're in good shape, particularly the Python stuff</li>
+              <li>I'd also be very interested to hear from people who've worked with RAML and API Blueprint</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: Paths</h1>
+          <pre><code data-trim>
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: A RESTful Adventure
+host: localhost
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /characters:
+  ???
+          </code></pre>
+        </section>
+
+        <section>
+          <h1>Lab: Examples</h1>
+          <pre><code data-trim>
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: A RESTful Adventure
+host: localhost
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /characters:
+    get:
+      responses:
+        200:
+          examples:
+            application/json: |-
+              {
+                "?": "?"
+                ...
+              }
+    post:
+      x-examples:
+        application/json: { "?": "?" }
+      responses:
+        201:
+          examples:
+            application/json: |-
+              {
+                "?": "?"
+                ...
+              }
+          </code></pre>
+        </section>
+
+        <section>
+          <h1>Lab: Models</h1>
+          <pre><code data-trim>
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: A RESTful Adventure
+host: localhost
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /characters:
+    get:
+      summary: List all Characters
+      operationId: list_characters
+      responses:
+        200:
+          description: An array of Characters
+          schema:
+            properties:
+              characters:
+                type: array
+                $ref: "#/definitions/Characters"
+          examples:
+            application/json: |-
+              {
+                "characters": [
+                  {
+                    "id": "1234",
+                    "name": "Knox Thunderbane",
+                    "dungeon_id": "2345",
+                    "room_id": "3456"
+                  }
+                ]
+              }
+    post:
+      summary: Create a Character
+      operationId: create_character
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 256
+      x-examples:
+        application/json: { "name": "Knox Thunderbane" }
+      responses:
+        201:
+          description: Character created
+          headers:
+            Location:
+              type: string
+              format: url
+              description: A link to the Character
+          schema:
+            $ref: "#/definitions/Character"
+          # TODO: Do we want a top-level "character" key like we have with "characters"? e.g. { "character": {"id": 1234, ...}}
+          examples:
+            application/json: |-
+              {
+                "id": "1234",
+                "name": "Knox Thunderbane"
+              }
+definitions:
+  Character:
+    type: object
+    required:
+      - ?
+    properties:
+      id:
+        type: ?
+        readOnly: ?
+      name:
+        type: ?
+        minLength: ?
+        maxLength: ?
+      dungeon_id:
+        type: ?
+      room_id:
+        type: ?
+  Characters:
+    type: array
+    items:
+      $ref: "#/definitions/Character"
+          </code></pre>
         </section>
 
         <section>
@@ -292,12 +533,75 @@
         </section>
 
         <section>
+          <h1>Lab: curl</h1>
+          <pre><code data-trim>
+HOST=http://localhost:5000
+
+echo "Get characters"
+curl ?
+
+echo "Create a character"
+curl ?
+          </code></pre>
+        </section>
+
+        <section>
           <h1>Example</h1>
           <ul>
-          	<li><a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/src/client/curl-id-design.sh">Client: curl</a></li>
-          	<li><a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/src/client/dcrawler.py">Server: Flask</a></li>
+            <li>Client: <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/src/client/curl-id-design.sh">curl</a></li>
+            <li>Server: <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/src/client/dcrawler.py">Flask</a></li>
           </ul>
         </section>
+
+        <section>
+          <h1>Documentation</h1>
+
+          <aside class="notes">
+            <ul>
+              <li>APIs should as self documenting as possible</li>
+              <li>Should be as machine readable as possible</li>
+              <li>There will always be a semantic gap that requires human understanding</li>
+              <li>This is where beautiful documentation comes in</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: API Doc</h1>
+          <h2>Copy: <a href="https://raw.githubusercontent.com/everett-toews/a-restful-adventure/gh-pages/design/swagger-id-design.yaml">Swagger YAML</h2>
+          <h2>Paste: <a href="http://editor.swagger.io/">Swagger Editor</a></h2>
+        </section>
+
+        <section>
+          <h1>Errors</h1>
+
+          <aside class="notes">
+            <ul>
+              <li>Good errors can make or break your API</li>
+              <li>Take auth for example. It's the first thing developers go through and they always get it wrong the first time. If your error messages are bad, they will walk away and not come back.</li>
+              <li>Give developers actionable errors. Include a URL to a web page where they can get more information. Include a team email address where they can get support.</li>
+              <li>Include a transaction id for error response. Used to easily match an API user debugging their application to the errors on the server side, as discoverable by the operations team running the API.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Example</h1>
+
+          <pre><code data-trim>
+{
+  "transaction_id": "71607e7c-df7c-45f3-b571-d1829de4ad9a",
+  "code": "736.9",
+  "title": "Teleport Denied",
+  "description": "The room you tried to visit does not exist or is not accessible from your current room. Thought you could get away with it didn't you.",
+  "link": {
+      "rel": "help",
+      "href": "http://en.wikipedia.org/wiki/No-teleportation_theorem"
+    }
+}
+          </code></pre>
+        </section>
+
 
         <section id="break">
           <h1>Break</h1>
