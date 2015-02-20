@@ -321,7 +321,7 @@
 
           <aside class="notes">
             <ul>
-              <li>Formalize your thinking</li>
+              <li>When you're ready, it's a way to formalize your thinking</li>
               <li>It's not documentation</li>
               <li>It's the contract between client and server</li>
             </ul>
@@ -336,10 +336,12 @@
             <ul>
               <li>It drives the implementation of the client</li>
               <li>It drives the implementation of the server</li>
-              <li>When it comes to the implementation of the server, there is a huge tempation to have the server generate the API defintion from code.</li>
+              <li>When it comes to the implementation of the server, there is a huge tempation to have the server generate the API defintion from code</li>
               <li>But doing so makes it all too easy to break the API and your clients.</li>
-              <li>Changes to the API definitions need to be considered carefully and communicated to clients.</li>
-              <li>And any time you talk about API changes it begs the question of versioning, which will be touched on a bit later.</li>
+              <li>It's an option if controls are in place to ensure changes to the server code, don't change the API definition unexpectedly, e.g. controls in your CI pipeline</li>
+              <li>If you're not generating the API definition, how do you keep the definition and implementation in sync?</li>
+              <li>Request/Response validators, test frameworks, </li>
+              <li>The point is changes to the API need to be considered carefully and communicated to clients</li>
             </ul>
           </aside>
         </section>
