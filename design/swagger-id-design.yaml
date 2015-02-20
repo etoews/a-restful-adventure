@@ -3,7 +3,6 @@ info:
   version: 1.0.0
   title: A RESTful Adventure
 host: localhost
-basePath: /v1
 schemes:
   - http
 consumes:
@@ -237,6 +236,7 @@ paths:
             $ref: "#/definitions/Errors"
 definitions:
   Character:
+    type: object
     required:
       - name
     properties:
@@ -256,6 +256,7 @@ definitions:
     items:
       $ref: "#/definitions/Character"
   Room:
+    type: object
     readOnly: true
     properties:
       id:
@@ -282,6 +283,7 @@ definitions:
                 - east
                 - west
   Dungeon:
+    type: object
     readOnly: true
     properties:
       id:
@@ -295,6 +297,7 @@ definitions:
     items:
       $ref: "#/definitions/Dungeon"
   Error:
+    type: object
     readOnly: true
     properties:
       transaction_id:
