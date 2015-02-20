@@ -85,10 +85,6 @@ paths:
           description: A Character
           schema:
             $ref: "#/definitions/Character"
-        default:
-          description: Unexpected Errors
-          schema:
-            $ref: "#/definitions/Errors"
           examples:
             application/json: |-
               {
@@ -97,6 +93,10 @@ paths:
                 "dungeon_id": "2345",
                 "room_id": "3456"
               }
+        default:
+          description: Unexpected Errors
+          schema:
+            $ref: "#/definitions/Errors"
     put:
       summary: Update a Character
       operationId: update_character
