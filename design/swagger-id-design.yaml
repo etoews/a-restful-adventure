@@ -230,6 +230,22 @@ paths:
                   }
                 ]
               }
+        400:
+          description: You tried to teleport. That's just not allowed.
+          schema:
+            $ref: "#/definitions/Errors"
+          examples:
+            application/json: |-
+              {
+                "transaction_id": "71607e7c-df7c-45f3-b571-d1829de4ad9a",
+                "code": "736.9",
+                "title": "Teleport Denied",
+                "description": "The room you tried to visit does not exist or is not accessible from your current room. Thought you could get away with it didn't you.",
+                "link": {
+                    "rel": "help",
+                    "href": "http://en.wikipedia.org/wiki/No-teleportation_theorem"
+                  }
+              }
         default:
           description: Unexpected errors
           schema:
