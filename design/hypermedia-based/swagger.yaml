@@ -3,7 +3,6 @@ info:
   version: 1.0.0
   title: A RESTful Adventure
 host: localhost
-basePath: /v1
 schemes:
   - http
 consumes:
@@ -20,15 +19,45 @@ paths:
           description: An array of Characters
           schema:
             $ref: "#/definitions/Characters"
-        default:
-          description: unexpected error
-          schema:
-            $ref: "#/definitions/Error"
+          examples:
+            application/json: |-
+              {
+                "characters": [
+                  {
+                    "name": "Knox Thunderbane",
+                    "links": [
+                      {
+                        "rel": "self",
+                        "allow": [
+                          "GET", "PUT"
+                        ],
+                        "href": "/characters/1234"
+                      },
+                      {
+                        "rel": "location",
+                        "allow": [
+                          "GET", "PUT"
+                        ],
+                        "href": "/characters/1234/location"
+                      }
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                      "GET", "POST"
+                    ],
+                    "href": "/characters"
+                  }
+                ]
+              }
     post:
       summary: Create a Character
       operationId: create_character
       parameters:
-        - name: name
+        - name: body
           in: body
           required: true
           schema:
@@ -37,13 +66,43 @@ paths:
                 type: string
                 minLength: 1
                 maxLength: 256
+      x-examples:
+        application/json: { "name": "Knox Thunderbane" }
       responses:
         201:
-          description: Null response
-        default:
-          description: unexpected error
+          description: Character created
+          headers:
+            Location:
+              type: string
+              format: url
+              description: A link to the Character
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Character"
+          examples:
+            application/json: |-
+              {
+                "name": "Knox Thunderbane",
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234"
+                  },
+                  {
+                    "rel": "location",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234/location"
+                  }
+                ]
+              }
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
   /characters/{character_id}:
     get:
       summary: Get a specific Character
@@ -51,56 +110,138 @@ paths:
       parameters:
         - name: character_id
           in: path
-          description: The id of the Character to retrieve
+          required: true
           type: string
+          description: The id of the Character to retrieve
       responses:
         200:
-          description: Expected response to a valid request
+          description: A Character
           schema:
             $ref: "#/definitions/Character"
+          examples:
+            application/json: |-
+              {
+                "name": "Knox Thunderbane",
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234"
+                  },
+                  {
+                    "rel": "location",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234/location"
+                  }
+                ]
+              }
         default:
-          description: unexpected error
+          description: Unexpected Errors
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
+    put:
+      summary: Update a Character
+      operationId: update_character
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          description: Rename a Character.
+          schema:
+            $ref: "#/definitions/Character"
+      x-examples:
+        application/json: |-
+          {
+            "name": "Knox Thunderbane II"
+          }
+      responses:
+        204:
+          description: Character updated
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
     delete:
       summary: Delete a Character
       operationId: delete_character
       parameters:
         - name: character_id
           in: path
-          description: The id of the Character to delete
+          required: true
           type: string
       responses:
-        201:
-          description: Null response
+        204:
+          description: Character deleted
         default:
-          description: unexpected error
+          description: Unexpected errors
           schema:
-            $ref: "#/definitions/Error"
-    patch:
-      summary: Update a Character
-      operationId: update_character
+            $ref: "#/definitions/Errors"
+  /characters/{character_id}/location:
+    get:
+      summary: Get a specific Character's location
+      operationId: get_character_location
       parameters:
         - name: character_id
           in: path
-          description: The id of the Character to update
+          required: true
           type: string
-        - name: name
+      responses:
+        200:
+          description: A CharacterLocation
+          schema:
+            $ref: "#/definitions/CharacterLocation"
+          examples:
+            application/json: |-
+              {
+                  "allow": [
+                      "GET"
+                  ],
+                  "href": "dungeons/1234/rooms/1001",
+                  "rel": "room"
+              }
+        default:
+          description: Unexpected Errors
+          schema:
+            $ref: "#/definitions/Errors"
+    put:
+      summary: Update a Character's location
+      operationId: update_character_location
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          type: string
+        - name: body
           in: body
           required: true
           schema:
             properties:
-              name:
+              rel:
                 type: string
-                minLength: 1
-                maxLength: 256
+              href:
+                type: string
+                format: url
+      x-examples:
+        application/json: |-
+          {
+            "rel": "room",
+            "href": "/dungeons/1234/rooms/1002"
+          }
       responses:
-        201:
-          description: Null response
+        204:
+          description: Character updated
         default:
-          description: unexpected error
+          description: Unexpected errors
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
   /dungeons:
     get:
       summary: List all Dungeons
@@ -109,11 +250,42 @@ paths:
         200:
           description: An array of Dungeons
           schema:
-            $ref: "#/definitions/Dungeons"
-        default:
-          description: unexpected error
-          schema:
-            $ref: "#/definitions/Error"
+            properties:
+              dungeons:
+                type: array
+                $ref: "#/definitions/Dungeons"
+          examples:
+            application/json: |-
+              {
+                "dungeons": [
+                  {
+                    "name": "Dungeon of Doom",
+                    "entrance_room_id": "1000",
+                    "links": [
+                      {
+                        "rel": "self",
+                        "href": "/dungeons/1234"
+                      },
+                      {
+                        "rel": "room",
+                        "allow": [
+                            "GET"
+                        ],
+                        "href": "/dungeons/1234/rooms/1002",
+                        "description": "entrance"
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons"
+                  }
+                ]
+              }
   /dungeons/{dungeon_id}:
     get:
       summary: Get a specific Dungeon
@@ -121,17 +293,36 @@ paths:
       parameters:
         - name: dungeon_id
           in: path
+          required: true
           description: The id of the Dungeon to retrieve
           type: string
       responses:
         200:
-          description: Expected response to a valid request
+          description: A Dungeon
           schema:
             $ref: "#/definitions/Dungeon"
+          examples:
+            application/json: |-
+              {
+                "name": "Dungeon of Doom",
+                "links": [
+                  {
+                    "rel": "self",
+                    "href": "/dungeons/1234"
+                  },
+                  {
+                    "rel": "room",
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons/1234/rooms/1000",
+                    "description": "entrance"
+                ]
+              }
         default:
-          description: unexpected error
+          description: Unexpected errors
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
   /dungeons/{dungeon_id}/rooms/{room_id}:
     get:
       summary: Get a specific Room in a specific Dungeon
@@ -140,67 +331,112 @@ paths:
         - name: dungeon_id
           in: path
           description: The id of the Dungeon
+          required: true
           type: string
         - name: room_id
           in: path
           description: The id of the Room
+          required: true
           type: string
       responses:
         200:
           description: Expected response to a valid request
           schema:
             $ref: "#/definitions/Room"
+          examples:
+            application/json: |-
+              {
+                "name": "Entrance",
+                "is_exit": false,
+                "links": [
+                  {
+                    "rel": "self",
+                    "href": "/dungeons/1234/rooms/1000"
+                  },
+                  {
+                    "rel": "room",
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons/1234/rooms/1001"
+                    "description": "east",
+                  }
+                ]
+              }
         default:
-          description: unexpected error
+          description: Unexpected errors
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
 definitions:
   Character:
     required:
       - name
     properties:
-      id:
-        type: integer
-        format: int64
       name:
         type: string
-      location_or_link:
-        properties:
-          method:
-            type: string
-            description: This should effectively be hardcoded to GET
-          href:
-            type: string
-            format: uri
-            description: Link to a specific Room in a specific Dungeon "/dungeon/{dungeon_id}/rooms/{room_id}"
-          rel:
-            type: string
-            description: This rel should effectively be hardcoded to "room"
+        minLength: 1
+        maxLength: 256
+      links:
+        type: array
+        readOnly: true
+        items:
+          type: object
+          properties:
+            rel:
+              type: string
+            allow:
+              type: string
+            href:
+              type: string
+              format: url
   Characters:
-    type: array
-    items:
-      $ref: "#/definitions/Character"
-  Room:
-    required:
-      - name
+    readOnly: true
     properties:
-      id:
-        type: integer
-        format: int64
-      name:
-        type: string
+      characters:
+        type: array
+        items:
+          $ref: "#/definitions/Character"
       links:
         type: array
         items:
+          type: object
           properties:
-            method:
+            rel:
               type: string
-              description: This should effectively be hardcoded to GET
+            allow:
+              type: string
             href:
               type: string
-              format: uri
-              description: Link to a specific Room in a specific Dungeon "/dungeon/{dungeon_id}/rooms/{room_id}"
-            rel:
+              format: url
+  CharacterLocation:
+    properties:
+      rel:
+        type: string
+      allow:
+        type: string
+      href:
+        type: string
+        format: url
+  Room:
+    readOnly: true
+    properties:
+      id:
+        type: string
+        readOnly: true
+      name:
+        type: string
+      dungeon_id:
+        type: string
+      is_exit:
+        type: boolean
+      doors:
+        type: array
+        items:
+          type: object
+          properties:
+            room_id:
+              type: string
+            direction:
               type: string
               enum:
                 - north
@@ -208,29 +444,43 @@ definitions:
                 - east
                 - west
   Dungeon:
-    required:
-      - name
+    readOnly: true
     properties:
       id:
-        type: integer
-        format: int64
+        type: string
+      entrance_room_id:
+        type: string
       name:
         type: string
-      rooms:
-        type: array
-        items:
-          $ref: "#/definitions/Room"
   Dungeons:
     type: array
     items:
       $ref: "#/definitions/Dungeon"
   Error:
-    required:
-      - code
-      - message
+    readOnly: true
     properties:
-      code:
-        type: integer
-        format: int32
-      message:
+      transaction_id:
         type: string
+        description: A transaction id for error response. Used to easily match an API user debugging their application to the errors on the server side, as discoverable by the operations team running the API.
+      code:
+        type: string
+        description: A machine readable application error code. Not to be confused with the HTTP status code in the response.
+      title:
+        type: string
+        description: A short, human readable title of the error.
+      description:
+        type: string
+        description: A long, human readable description of the error.
+      link:
+        properties:
+          rel:
+            type: string
+            enum: [ "help" ]
+          href:
+            type: string
+            format: url
+            description: A link to a document containing more information about the error and how to take action on it.
+  Errors:
+    type: array
+    items:
+      $ref: "#/definitions/Error"
