@@ -14,7 +14,10 @@ class Controller(object):
         # Store data in MyLDB
 
         self._characters = {
-            # <d1>
+            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
+                'name': 'Knox Thunderbane',
+                'room_id': None
+            }
         }
 
         self._dungeons = {
@@ -28,8 +31,18 @@ class Controller(object):
         }
 
     def list_characters(self):
-        # <d5>
-        pass
+        # Convert "database" result to an entity
+
+        # TODO: Handle the case that our DB can't be reached
+        return [
+            {
+                'id': character_id,
+                'name': details['name'],
+                'room_id': details['room_id']
+            }
+
+            for character_id, details in self._characters.items()
+        ]
 
     def add_character(self, name):
         # <d6>
@@ -64,12 +77,31 @@ class CharacterBase(object):
     """
 
     def _entity_to_resource(self, character):
-        # <a1>
-        pass
+        base_href = self._id_to_href(character['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href
+            },
+            {
+                'rel': 'location',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href + '/location'
+            }
+        ]
+
+        return {
+            'name': character['name'],
+            'links': links
+        }
 
     def _id_to_href(self, character_id):
-        # <a2>
-        pass
+        return '/characters/{0}'.format(character_id)
 
     def _room_href_to_id(self, href):
         # <a3>
@@ -103,8 +135,22 @@ class CharacterList(CharacterBase):
         self._controller = controller
 
     def on_get(self, req, resp):
-        # <a7>
-        pass
+        # Ask the DAL for a list of entities
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        characters = self._controller.list_characters()
+
+        # Map the entities to the resource
+        resource = [self._entity_to_resource(c) for c in characters]
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+        # Falcon defaults to the JSON media type for the content
+        # resp.content_type = 'application/json'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp):
         # <a8>
@@ -180,10 +226,10 @@ class HelloResource(object):  # <w3>
 
 # An instance of falcon.API is a WSGI application
 api = falcon.API()
-api.add_route('/', HelloResource())  # <w4>
+# api.add_route('/', HelloResource())  # <w4>
 
 controller = Controller()
-# <a14>
+api.add_route('/characters', CharacterList(controller))
 # <a15>
 # <a16>
 # <a17>
@@ -202,5 +248,5 @@ def application(env, start_response):  # <w1>
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
 
-    server = make_server('127.0.0.1', 8000, application)  # <w2>
+    server = make_server('127.0.0.1', 8000, api)  # <w2>
     server.serve_forever()
