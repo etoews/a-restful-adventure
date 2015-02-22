@@ -59,11 +59,12 @@
             </table>
           </center>
           <aside class="notes">
-            [15 sec]
+            [30 sec]
             <ul>
               <li>Welcome to the RESTful Adventure workshop.</li>
               <li>[introduce the instructors]</li>
               <li>Over the next couple of hours we will take you on a journey through the creative process of designing and implementating a simple adventure game.</li>
+              <li>Before we move on, let's make sure everyone can bring up the slides and the code samples.</li>
             </ul>
           </aside>
         </section>
@@ -133,7 +134,7 @@
             </p>
             <aside class="notes">
               <ul>
-                <li>REST is not HTTP - HTTP APIs are not inherently RESTful.</li>
+                <li>REST is not HTTP - HTTP APIs are <em>not</em> inherently RESTful.</li>
                 <li>REST is not pretty URLs.</li>
                 <li>REST is not RPC over HTTP. We aren't talking about calling remote functions on a server.</li>
                 <li>And finally, REST is not simply a way to do CRUD over HTTP.</li>
@@ -169,7 +170,6 @@
           </aside>
         </section>
         <section>
-          <p>[TODO: pair down content to fit within time]</p>
           <ul class="no-bullets inline-h3">
             <li>🍜 Client-Server</li>
             <li class="fragment">🐘 Stateless</li>
@@ -196,17 +196,16 @@
         </section>
 
         <section>
-          <p>[draw a big-picture diagram here, then point out the elements and talk about them briefly]</p>
-          <p>[TODO: pair down content to fit within time]</p>
-
 <!--
+          <p>[draw a big-picture diagram here, then point out the elements and talk about them briefly]</p>
+ -->
           <h3 class="fragment">Components</h3>
           <h3 class="fragment">Connectors</h3>
           <h3 class="fragment">Resources</h3>
           <h3 class="fragment">Representations</h3>
           <h3 class="fragment">Control Data</h3>
           <h3 class="fragment">Hypermedia</h3>
- -->
+
           <aside class="notes">
             <ul>
               <li>REST components categorize individual nodes into various roles, with each role conveying a specific set of expectations. Examples of components include origin servers, user agents, gateways, and proxies.</li>
@@ -607,14 +606,3988 @@ curl ?
 
         <section id="break">
           <h1>Break</h1>
+          <aside class="notes">
+            We're going to now take a short break. In the next module we will be working in python, so please make sure you are ready to go with python installed and your favorite text-editor or IDE. If you need help getting set up, please let one of us know and we'd be glad to help.
+          </aside>
         </section>
 
         <section id="impl">
           <h1>Implement the Design</h1>
+          <h2><a href="http://rack.to/rest#impl">rack.to/rest#impl</a></h2>
+          <aside class="notes">
+            <ul>
+              <li>Welcome back! Let's get started.</li>
+              <li>During this next module we are going to implement a RESTful web service using python.</li>
+              <li>We'll approach this by implementing slices of the API at a time.</li>
+              <li>We <em>will</em> need to move quickly, so I'd like to encourage everyone to follow along with the slides in your own browser, and copy-paste the code snippets as we work through the labs.</li>
+              <li>Everett will be walking around to help, so please flag him down at any time during the labs if you colid use a hand.</li>
+            </ul>
+          </aside>
         </section>
 
         <section>
-          <h1>Add slides about implementation here</h1>
+          <h1>The API Spec</h1>
+          https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/design/hypermedia-based/swagger.yaml
+        </section>
+
+        <section>
+          <pre><code class="tall" data-trim>
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: A RESTful Adventure
+host: localhost
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /characters:
+    get:
+      summary: List all Characters
+      operationId: list_characters
+      responses:
+        200:
+          description: An array of Characters
+          schema:
+            $ref: "#/definitions/Characters"
+          examples:
+            application/json: |-
+              {
+                "characters": [
+                  {
+                    "name": "Knox Thunderbane",
+                    "links": [
+                      {
+                        "rel": "self",
+                        "allow": [
+                          "GET", "PUT"
+                        ],
+                        "href": "/characters/1234"
+                      },
+                      {
+                        "rel": "location",
+                        "allow": [
+                          "GET", "PUT"
+                        ],
+                        "href": "/characters/1234/location"
+                      }
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                      "GET", "POST"
+                    ],
+                    "href": "/characters"
+                  }
+                ]
+              }
+    post:
+      summary: Create a Character
+      operationId: create_character
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 256
+      x-examples:
+        application/json: { "name": "Knox Thunderbane" }
+      responses:
+        201:
+          description: Character created
+          headers:
+            Location:
+              type: string
+              format: url
+              description: A link to the Character
+          schema:
+            $ref: "#/definitions/Character"
+          examples:
+            application/json: |-
+              {
+                "name": "Knox Thunderbane",
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234"
+                  },
+                  {
+                    "rel": "location",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234/location"
+                  }
+                ]
+              }
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
+  /characters/{character_id}:
+    get:
+      summary: Get a specific Character
+      operationId: get_character
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          type: string
+          description: The id of the Character to retrieve
+      responses:
+        200:
+          description: A Character
+          schema:
+            $ref: "#/definitions/Character"
+          examples:
+            application/json: |-
+              {
+                "name": "Knox Thunderbane",
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234"
+                  },
+                  {
+                    "rel": "location",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234/location"
+                  }
+                ]
+              }
+        default:
+          description: Unexpected Errors
+          schema:
+            $ref: "#/definitions/Errors"
+    put:
+      summary: Update a Character
+      operationId: update_character
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          description: Rename a Character.
+          schema:
+            $ref: "#/definitions/Character"
+      x-examples:
+        application/json: |-
+          {
+            "name": "Knox Thunderbane II"
+          }
+      responses:
+        204:
+          description: Character updated
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
+    delete:
+      summary: Delete a Character
+      operationId: delete_character
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Character deleted
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
+  /characters/{character_id}/location:
+    get:
+      summary: Get a specific Character's location
+      operationId: get_character_location
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: A CharacterLocation
+          schema:
+            $ref: "#/definitions/CharacterLocation"
+          examples:
+            application/json: |-
+              {
+                  "allow": [
+                      "GET"
+                  ],
+                  "href": "dungeons/1234/rooms/1001",
+                  "rel": "room"
+              }
+        default:
+          description: Unexpected Errors
+          schema:
+            $ref: "#/definitions/Errors"
+    put:
+      summary: Update a Character's location
+      operationId: update_character_location
+      parameters:
+        - name: character_id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            properties:
+              rel:
+                type: string
+              href:
+                type: string
+                format: url
+      x-examples:
+        application/json: |-
+          {
+            "rel": "room",
+            "href": "/dungeons/1234/rooms/1002"
+          }
+      responses:
+        204:
+          description: Character updated
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
+  /dungeons:
+    get:
+      summary: List all Dungeons
+      operationId: list_dungeons
+      responses:
+        200:
+          description: An array of Dungeons
+          schema:
+            properties:
+              dungeons:
+                type: array
+                $ref: "#/definitions/Dungeons"
+          examples:
+            application/json: |-
+              {
+                "dungeons": [
+                  {
+                    "name": "Dungeon of Doom",
+                    "entrance_room_id": "1000",
+                    "links": [
+                      {
+                        "rel": "self",
+                        "href": "/dungeons/1234"
+                      },
+                      {
+                        "rel": "room",
+                        "allow": [
+                            "GET"
+                        ],
+                        "href": "/dungeons/1234/rooms/1002",
+                        "description": "entrance"
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons"
+                  }
+                ]
+              }
+  /dungeons/{dungeon_id}:
+    get:
+      summary: Get a specific Dungeon
+      operationId: get_dungeon
+      parameters:
+        - name: dungeon_id
+          in: path
+          required: true
+          description: The id of the Dungeon to retrieve
+          type: string
+      responses:
+        200:
+          description: A Dungeon
+          schema:
+            $ref: "#/definitions/Dungeon"
+          examples:
+            application/json: |-
+              {
+                "name": "Dungeon of Doom",
+                "links": [
+                  {
+                    "rel": "self",
+                    "href": "/dungeons/1234"
+                  },
+                  {
+                    "rel": "room",
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons/1234/rooms/1000",
+                    "description": "entrance"
+                ]
+              }
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
+  /dungeons/{dungeon_id}/rooms/{room_id}:
+    get:
+      summary: Get a specific Room in a specific Dungeon
+      operationId: get_room
+      parameters:
+        - name: dungeon_id
+          in: path
+          description: The id of the Dungeon
+          required: true
+          type: string
+        - name: room_id
+          in: path
+          description: The id of the Room
+          required: true
+          type: string
+      responses:
+        200:
+          description: Expected response to a valid request
+          schema:
+            $ref: "#/definitions/Room"
+          examples:
+            application/json: |-
+              {
+                "name": "Entrance",
+                "is_exit": false,
+                "links": [
+                  {
+                    "rel": "self",
+                    "href": "/dungeons/1234/rooms/1000"
+                  },
+                  {
+                    "rel": "room",
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons/1234/rooms/1001"
+                    "description": "east",
+                  }
+                ]
+              }
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
+definitions:
+  Character:
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        minLength: 1
+        maxLength: 256
+      links:
+        type: array
+        readOnly: true
+        items:
+          type: object
+          properties:
+            rel:
+              type: string
+            allow:
+              type: string
+            href:
+              type: string
+              format: url
+  Characters:
+    readOnly: true
+    properties:
+      characters:
+        type: array
+        items:
+          $ref: "#/definitions/Character"
+      links:
+        type: array
+        items:
+          type: object
+          properties:
+            rel:
+              type: string
+            allow:
+              type: string
+            href:
+              type: string
+              format: url
+  CharacterLocation:
+    properties:
+      rel:
+        type: string
+      allow:
+        type: string
+      href:
+        type: string
+        format: url
+  Room:
+    readOnly: true
+    properties:
+      id:
+        type: string
+        readOnly: true
+      name:
+        type: string
+      dungeon_id:
+        type: string
+      is_exit:
+        type: boolean
+      doors:
+        type: array
+        items:
+          type: object
+          properties:
+            room_id:
+              type: string
+            direction:
+              type: string
+              enum:
+                - north
+                - south
+                - east
+                - west
+  Dungeon:
+    readOnly: true
+    properties:
+      id:
+        type: string
+      entrance_room_id:
+        type: string
+      name:
+        type: string
+  Dungeons:
+    type: array
+    items:
+      $ref: "#/definitions/Dungeon"
+  Error:
+    readOnly: true
+    properties:
+      transaction_id:
+        type: string
+        description: A transaction id for error response. Used to easily match an API user debugging their application to the errors on the server side, as discoverable by the operations team running the API.
+      code:
+        type: string
+        description: A machine readable application error code. Not to be confused with the HTTP status code in the response.
+      title:
+        type: string
+        description: A short, human readable title of the error.
+      description:
+        type: string
+        description: A long, human readable description of the error.
+      link:
+        properties:
+          rel:
+            type: string
+            enum: [ "help" ]
+          href:
+            type: string
+            format: url
+            description: A link to a document containing more information about the error and how to take action on it.
+  Errors:
+    type: array
+    items:
+      $ref: "#/definitions/Error"
+          </code></pre>
+          <aside class="notes">
+            <ul>Here's the design we'll be implementing.</ul>
+            <ul>I won't spend much time on it now, but we'll refer back to portions of it as we go along.</ul>
+            <ul>I'll explain more along the way.</ul>
+            <ul>It probably isn't a perfectly RESTful design, but it is a fairly pragmatic one and showcases some of the more salient design principles of the REST architectural style.</ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: Hello world!</h1>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ mkdir restful-adventure
+$ cd restful-adventure
+$ subl .
+          </code></pre>
+          <aside class="notes">
+            First, let's create a directory for our project and cd into it. If you are using an IDE, you can create a new project within that, but I'm using a combination of the command line and a text editor called Sublime Text, so I'll do it like this:
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ wget https://raw.githubusercontent.com/everett-toews/a-restful-adventure/gh-pages/code/api.py
+          </code></pre>
+          <aside class="notes">
+            <p>Next, download the skeleton api.py file to your project directory. You can do this through the browser or with wget.</p>
+            <p>Now open that file in your editor. We will be filling this out in a series of labs. See those funny-looking comments with the angle brackets? Those are placeholders that we'll replace with code as we go along. Each placholder comment has a unique tag that I'll reference. OK?</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>w1</h3>
+          <pre><code data-trim class="lang-py">
+def application(env, start_response):
+    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
+
+    start_response("200 OK", [('Content-Type', 'text/plain')])
+    return [body.encode('utf-8')]
+
+          </code></pre>
+          <aside class="notes">
+            Let's get a simple "hello world" app working. Do a search in api.py for the tag *w1*. This function is a simple hello world WSGI application. WSGI is a standard for connecting python applications to any of a number of web servers, such as apache httpd or gunicorn. Headers and other information about each request are passed in through the environment dict. The application sets the status code and headers for the response using the start_response callback, and then returns an iterable containing the response body.
+
+            The Python standard library includes a basic references WSGI server that we will use to self-host our application for our labs. Let's try it out.
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ python api.py
+          </code></pre>
+          <aside class="notes">
+            We need to run api.py. I'm using the command line, but if you are using an IDE, you can run the file directly from there if you like.
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ curl 127.0.0.1:8000 -H 'X-Name: Adventurer'
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+Hello Adventurer
+
+          </code></pre>
+        <aside class="notes">
+            <p>Now, open another console tab and type this on the command line.</p>
+            <p>[Next fragment]</p>
+            <p>
+            I'm sure all of you are familiar with curl. It works well enough, but I like to use another tool that's a little friendlier called httpie.
+            </p>p
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ pip install httpie
+$ http 127.0.0.1:8000 X-Name:Adventurer
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Content-Length: 11
+Content-Type: text/plain
+Date: Wed, 18 Feb 2015 19:29:29 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+
+Hello Adventurer
+
+          </code></pre>
+          <aside class="notes">
+            Let's install that real quick and give it a try. Enter this at the command line.
+          </aside>
+        </section>
+
+        <section>
+          <h3>WSGI</h3>
+          <aside class="notes">
+            OK, so we've seen what a basic WSGI app looks like. But working directly with WSGI is pretty tedious, so we're going to actually use a lightweight REST framework I developed, called Falcon, to make things easier.
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ pip install falcon
+          </code></pre>
+          <aside class="notes">
+            Let's install falcon now. Enter the following to install falcon with pip.
+          </aside>
+        </section>
+
+        <section>
+          <h3>w3</h3>
+          <pre><code data-trim>
+class HelloResource(object):
+    def on_get(self, req, resp):
+        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.content_type = 'text/plain'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+          </code></pre>
+          <aside class="notes">
+            <p>Now let's go back to our app.py file and replace the raw WSGI app with a Falcon app. Find the tag *w4*. Here we define a class to represent a REST resource. It has a single responder method to handle GET requests.</p>
+
+            <p>Note that Falcon defaults to returning 200 OK if you don't specify a status.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>w4</h3>
+          <pre><code data-trim class="lang-py">
+# An instance of falcon.API is a WSGI application
+api = falcon.API()
+api.add_route('/', HelloResource())
+          </code></pre>
+          <aside class="notes">
+            Next, find the tag *w4*. Here we create an instance of falcon.API and add a route. This route says that if the user agent requests the root path of our API, that will be handled by an instance of HelloResource.
+          </aside>
+        </section>
+
+        <section>
+          <h3>w2</h3>
+          <pre><code data-trim class="lang-py">
+server = make_server('127.0.0.1', 8000, api)
+
+          </code></pre>
+          <aside class="notes">
+            <p>Now, scroll down to find the *w2* tag. Replace "application" with "api" so that the server will use our falcon app instead. It will look like this.</p>
+
+            <p>All set? Now let's test our work.</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000 x-name:Adventurer
+
+          </code></pre>
+          <aside class="notes">
+            <p>If your server is still running from the last test, kill it with ctrl-c and restart it to pick up the changes. Then, in another console, enter this.</p>
+
+            <p>OK, did that work for everyone? Any questions so far?</p>
+
+            <p>Now that you have a feel for how WSGI apps work, let's dive into creating our game! (yay!)</p>
+
+            <p>We'll take this step by step from the player's perspective. We want to keep the end user in mind.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: Choosing a character</h1>
+          <aside class="notes">
+            The first thing a player needs to do is choose their character. They will have to find out what characters are available, so we'll start with implementing a collection resource to represent a list of characters.
+
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-yaml">
+/characters:
+    get:
+      summary: List all Characters
+      operationId: list_characters
+      responses:
+        200:
+          description: An array of Characters
+          schema:
+            $ref: "#/definitions/Characters"
+          examples:
+            application/json: |-
+              {
+                "characters": [
+                  {
+                    "name": "Knox Thunderbane",
+                    "links": [
+                      {
+                        "rel": "self",
+                        "allow": [
+                          "GET", "PUT"
+                        ],
+                        "href": "/characters/1234"
+                      },
+                      {
+                        "rel": "location",
+                        "allow": [
+                          "GET", "PUT"
+                        ],
+                        "href": "/characters/1234/location"
+                      }
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                      "GET", "POST"
+                    ],
+                    "href": "/characters"
+                  }
+                ]
+              }
+          </code></pre>
+          <aside class="notes">
+            Let's remind ourselves what this is supposed to look like. Here's the swagger spec.
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>w4</h3>
+          <pre><code data-trim class="lang-py">
+# api.add_route('/', HelloResource())
+
+          </code></pre>
+          <aside class="notes">
+            <p>OK, so let's go back to app.py to implement this. We'll start by adding a route to a CharacterList resource.</p>
+
+            <p>Find the tag *w4*.</p>
+
+            <p>Go ahead and just comment out that line to remove the test route.</p>
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>a14</h3>
+          <pre><code data-trim class="lang-py">
+controller = Controller()
+api.add_route('/characters', CharacterList(controller))
+
+          </code></pre>
+          <aside class="notes">
+            <p>Next, locate the tag *a14*.</p>
+
+            <p>Replace it with a route for the "/characters" path we saw a few moments ago in our swagger spec.</p>
+
+            <p>The CharacterList class takes an instance of controller, which is part of our data access layer. More about that in a minute.</p>
+
+            <p>Good so far?</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>a7</h3>
+          <pre><code data-trim class="lang-py">
+def on_get(self, req, resp):
+    # Ask the DAL for a list of entities
+    # TODO: If an error is raised, convert it to an instance
+    #       of falcon.HTTPError
+    characters = self._controller.list_characters()
+
+    # Map the entities to the resource
+    resource = [self._entity_to_resource(c) for c in characters]
+
+    # Create a JSON representation of the resource
+    resp.body = json.dumps(resource, ensure_ascii=False)
+
+    # Falcon defaults to the JSON media type for the content
+    # resp.content_type = 'application/json'
+
+    # Falcon defaults to 200 OK
+    # resp.status = falcon.HTTP_200
+
+          </code></pre>
+          <aside class="notes">
+            <p>OK, next let's fill out the CharacterList resource. Search for the *a7* tag.</p>
+
+            <p>We'll modify the on_get responder to look like this.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>a1</h3>
+          <pre><code data-trim class="lang-py">
+def _entity_to_resource(self, character):
+    base_href = self._id_to_href(character['id'])
+    links = [
+        {
+            'rel': 'self',
+            'allow': [
+                'GET', 'PUT'
+            ],
+            'href': base_href
+        },
+        {
+            'rel': 'location',
+            'allow': [
+                'GET', 'PUT'
+            ],
+            'href': base_href + '/location'
+        }
+    ]
+
+    return {
+        'name': character['name'],
+        'links': links
+    }
+          </code></pre>
+          <aside class="notes">
+            <p>Next, let's implement that _entity_to_resource() method. We'll put it in a base class so that we can reuse the same function later on when we create the individual character resource class.</p>
+
+            <p>Search for the tag *a1*, and replace it with the code shown here.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>a2</h3>
+          <pre><code data-trim class="lang-py">
+def _id_to_href(self, character_id):
+    return '/characters/{0}'.format(character_id)
+
+          </code></pre>
+          <aside class="notes">
+            <p>Then find the tag *a2* and modify the _id_to_href function to look like this.</p>
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>d5</h3>
+          <pre><code data-trim class="lang-py">
+def list_characters(self):
+    # Convert "database" result to an entity
+
+    # TODO: Handle the case that our DB can't be reached
+    return [
+        {
+            'id': character_id,
+            'name': details['name'],
+            'room_id': details['room_id']
+        }
+
+        for character_id, details in self._characters.items()
+    ]
+
+          </code></pre>
+          <aside class="notes">
+            <p>Next, let's start filling in our Data Access Layer or DAL. We need to implement the list_characters() method in the Controller class. Find the *d5* tag and replace it with the code shown here.</p>
+
+            <p>Note the TODO there regarding errors, We don't have time to cover this today, but it important to keep in mind everything that could go wrong in a real application.</p>
+
+            <p>Any time an error occurs, you should log a human-friendly description of the error and a system or database code. This is often more helpful than a stack trace.</p>
+
+            <p>Then, you should return an error to the user that includes helpful diagnostic information.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>d1</h3>
+          <pre><code data-trim class="lang-py">
+self._characters = {
+    uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
+        'name': 'Knox Thunderbane',
+        'room_id': None
+    }
+}
+
+          </code></pre>
+          <aside class="notes">
+            <p>Now find the *d1* tag. In the interest of time, we are going to just store everything in memory using a python dictionary, otherwise known as "My Lousy Database". Replace the *d1* comment with a sample character record so your code looks like this.</p>
+
+            <p>Note that we are using UUIDs rather than simple integers as was shown in the spec. This was done to highlight the fact that the server owns the URL schema, not the client. The client should not know or care what individual sections of the URL look like.</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-py tall">
+from copy import deepcopy
+import json
+import uuid
+
+import falcon
+
+
+# ===========================================================================
+# DAL (backend, storage and entities)
+# ===========================================================================
+
+class Controller(object):
+    def __init__(self):
+        # Store data in MyLDB
+
+        self._characters = {
+            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
+                'name': 'Knox Thunderbane',
+                'room_id': None
+            }
+        }
+
+        self._dungeons = {
+            # &lt;d2&gt;
+        }
+
+        self._rooms = {
+            # &lt;d3&gt;
+
+            # &lt;d4&gt;
+        }
+
+    def list_characters(self):
+        # Convert &quot;database&quot; result to an entity
+
+        # TODO: Handle the case that our DB can't be reached
+        return [
+            {
+                'id': character_id,
+                'name': details['name'],
+                'room_id': details['room_id']
+            }
+
+            for character_id, details in self._characters.items()
+        ]
+
+    def add_character(self, name):
+        # &lt;d6&gt;
+        pass
+
+    def move_character(self, character_id, room_id):
+        # &lt;d7&gt;
+        pass
+
+    def get_location(self, character_id):
+        # &lt;d8&gt;
+        pass
+
+    def get_room(self, room_id):
+        # &lt;d9&gt;
+        pass
+
+    def list_dungeons(self):
+        # &lt;d9&gt;
+        pass
+
+
+# ===========================================================================
+# API (frontend, resources and representations)
+# ===========================================================================
+
+class CharacterBase(object):
+    &quot;&quot;&quot;Base class for character resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, character):
+        base_href = self._id_to_href(character['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href
+            },
+            {
+                'rel': 'location',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href + '/location'
+            }
+        ]
+
+        return {
+            'name': character['name'],
+            'links': links
+        }
+
+    def _id_to_href(self, character_id):
+        return '/characters/{0}'.format(character_id)
+
+    def _room_href_to_id(self, href):
+        # &lt;a3&gt;
+        pass
+
+    def _room_id_to_location(self, room_id, dungeon_id):
+        # &lt;a4&gt;
+        pass
+
+
+class CharacterLocation(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character location concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, character_id):
+        # &lt;a5&gt;
+        pass
+
+    def on_put(self, req, resp, character_id):
+        # &lt;a6&gt;
+        pass
+
+
+class CharacterList(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # Ask the DAL for a list of entities
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        characters = self._controller.list_characters()
+
+        # Map the entities to the resource
+        resource = [self._entity_to_resource(c) for c in characters]
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+        # Falcon defaults to the JSON media type for the content
+        # resp.content_type = 'application/json'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+    def on_post(self, req, resp):
+        # &lt;a8&gt;
+        pass
+
+
+class RoomBase(object):
+    &quot;&quot;&quot;Base class for room resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, room):
+        # &lt;a9&gt;
+        pass
+
+    def _id_to_href(self, room_id, dungeon_id):
+        # &lt;a10&gt;
+        pass
+
+
+class Room(RoomBase):
+    &quot;&quot;&quot;Resource class for the room concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, dungeon_id, room_id):
+        # &lt;a11&gt;
+        pass
+
+
+class DungeonBase(object):
+    &quot;&quot;&quot;Base class for dungeon resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, dungeon):
+        # &lt;a12&gt;
+        pass
+
+class DungeonList(DungeonBase):
+    &quot;&quot;&quot;Resource class for the dungeon list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # &lt;a13&gt;
+        pass
+
+
+# ===========================================================================
+# Hello world
+# ===========================================================================
+
+class HelloResource(object):  # &lt;w3&gt;
+    def on_get(self, req, resp):
+        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.content_type = 'text/plain'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+
+# ===========================================================================
+# Routing
+# ===========================================================================
+
+# An instance of falcon.API is a WSGI application
+api = falcon.API()
+# api.add_route('/', HelloResource())  # &lt;w4&gt;
+
+controller = Controller()
+api.add_route('/characters', CharacterList(controller))
+# &lt;a15&gt;
+# &lt;a16&gt;
+# &lt;a17&gt;
+
+
+# ===========================================================================
+# WSGI
+# ===========================================================================
+
+def application(env, start_response):  # &lt;w1&gt;
+    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
+
+    start_response(&quot;200 OK&quot;, [('Content-Type', 'text/plain')])
+    return [body.encode('utf-8')]
+
+if __name__ == '__main__':
+    from wsgiref.simple_server import make_server
+
+    server = make_server('127.0.0.1', 8000, api)  # &lt;w2&gt;
+    server.serve_forever()
+
+          </code></pre>
+          <aside class="notes">
+            Your api.py file should now look like this.
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000/characters
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Date: Sat, 21 Feb 2015 22:52:54 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 258
+content-type: application/json; charset=utf-8
+
+[
+    {
+        "links": [
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
+                "rel": "self"
+            },
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
+                "rel": "location"
+            }
+        ],
+        "name": "Knox Thunderbane"
+    }
+]
+          </code></pre>
+          <aside class="notes">
+            <p>Let's test this out. First, ctrl-c the running script, if needed, and restart it to pick up the changes. Then in your other console, run this.</p>
+
+            <p>Great! Now we can list the characters and choose one.</p>
+
+            <p>But wait. What if we don't *want* to be Knox Thunderbane?</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: Adding a new character</h1>
+          <aside class="notes">
+            <p>Let's give the player a way to create their own character. We'll begin by reviewing the API design.</p>
+
+            <p>Here's the relevant portion... [next slide]</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-yaml tall">
+
+post:
+      summary: Create a Character
+      operationId: create_character
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 256
+      x-examples:
+        application/json: { "name": "Knox Thunderbane" }
+      responses:
+        201:
+          description: Character created
+          headers:
+            Location:
+              type: string
+              format: url
+              description: A link to the Character
+          schema:
+            $ref: "#/definitions/Character"
+          examples:
+            application/json: |-
+              {
+                "name": "Knox Thunderbane",
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234"
+                  },
+                  {
+                    "rel": "location",
+                    "allow": [
+                      "GET", "PUT"
+                    ],
+                    "href": "/characters/1234/location"
+                  }
+                ]
+              }
+        default:
+          description: Unexpected errors
+          schema:
+            $ref: "#/definitions/Errors"
+          </code></pre>
+          <aside class="notes">
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>a8</h3>
+          <pre><code data-trim class="lang-py">
+def on_post(self, req, resp):
+    # Parse the incoming representation. This can be factored out into
+    # Falcon hooks or middleware, but we'll keep it inline for now.
+    # TODO: Validate against a schema
+    representation = req.stream.read().decode('utf-8')
+    representation = json.loads(representation)
+
+    # Create a new entity from the representation
+    # TODO: If an error is raised, convert it to an instance
+    #       of falcon.HTTPError
+    character = self._controller.add_character(representation['name'])
+
+    # Map the entity to the resource. Again, this sort of thing
+    # could be factored out into a Falcon hook (DRY).
+    resource = self._entity_to_resource(character)
+
+    resp.location = self._id_to_href(character['id'])
+    resp.body = json.dumps(resource, ensure_ascii=False)
+
+          </code></pre>
+          <aside class="notes">
+            OK, so let's go back to our api.py file and add a responder to handle that POST request. We'll implement the on_post method in the CharacterList class. Find the tag *a8* in api.py and update the on_post method to look like this:
+          </aside>
+        </section>
+
+        <section>
+          <h3>d6</h3>
+          <pre><code data-trim class="lang-py">
+def add_character(self, name):
+        character_id = uuid.uuid4()
+
+        # TODO: Handle the case that the name is too long
+        character = {
+            'name': name,
+            'room_id': None
+        }
+
+        # TODO: Handle the case that our DB can't be reached
+        self._characters[character_id] = character
+
+        character['id'] = character_id
+        return character
+          </code></pre>
+          <aside class="notes">
+            Next we need to implement that add_character() method in the Controller class. Search for the *d6* tag and update add_character to look like this.
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-py tall">
+from copy import deepcopy
+import json
+import uuid
+
+import falcon
+
+
+# ===========================================================================
+# DAL (backend, storage and entities)
+# ===========================================================================
+
+class Controller(object):
+    def __init__(self):
+        # Store data in MyLDB
+
+        self._characters = {
+            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
+                'name': 'Knox Thunderbane',
+                'room_id': None
+            }
+        }
+
+        self._dungeons = {
+            # &lt;d2&gt;
+        }
+
+        self._rooms = {
+            # &lt;d3&gt;
+
+            # &lt;d4&gt;
+        }
+
+    def list_characters(self):
+        # Convert &quot;database&quot; result to an entity
+
+        # TODO: Handle the case that our DB can't be reached
+        return [
+            {
+                'id': character_id,
+                'name': details['name'],
+                'room_id': details['room_id']
+            }
+
+            for character_id, details in self._characters.items()
+        ]
+
+    def add_character(self, name):
+        character_id = uuid.uuid4()
+
+        # TODO: Handle the case that the name is too long
+        character = {
+            'name': name,
+            'room_id': None
+        }
+
+        # TODO: Handle the case that our DB can't be reached
+        self._characters[character_id] = character
+
+        character['id'] = character_id
+        return character
+
+    def move_character(self, character_id, room_id):
+        # &lt;d7&gt;
+        pass
+
+    def get_location(self, character_id):
+        # &lt;d8&gt;
+        pass
+
+    def get_room(self, room_id):
+        # &lt;d9&gt;
+        pass
+
+    def list_dungeons(self):
+        # &lt;d9&gt;
+        pass
+
+
+# ===========================================================================
+# API (frontend, resources and representations)
+# ===========================================================================
+
+class CharacterBase(object):
+    &quot;&quot;&quot;Base class for character resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, character):
+        base_href = self._id_to_href(character['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href
+            },
+            {
+                'rel': 'location',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href + '/location'
+            }
+        ]
+
+        return {
+            'name': character['name'],
+            'links': links
+        }
+
+    def _id_to_href(self, character_id):
+        return '/characters/{0}'.format(character_id)
+
+    def _room_href_to_id(self, href):
+        # &lt;a3&gt;
+        pass
+
+    def _room_id_to_location(self, room_id, dungeon_id):
+        # &lt;a4&gt;
+        pass
+
+
+class CharacterLocation(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character location concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, character_id):
+        # &lt;a5&gt;
+        pass
+
+    def on_put(self, req, resp, character_id):
+        # &lt;a6&gt;
+        pass
+
+
+class CharacterList(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # Ask the DAL for a list of entities
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        characters = self._controller.list_characters()
+
+        # Map the entities to the resource
+        resource = [self._entity_to_resource(c) for c in characters]
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+        # Falcon defaults to the JSON media type for the content
+        # resp.content_type = 'application/json'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+    def on_post(self, req, resp):
+        # Parse the incoming representation. This can be factored out into
+        # Falcon hooks or middleware, but we'll keep it inline for now.
+        # TODO: Validate against a schema
+        representation = req.stream.read().decode('utf-8')
+        representation = json.loads(representation)
+
+        # Create a new entity from the representation
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        character = self._controller.add_character(representation['name'])
+
+        # Map the entity to the resource. Again, this sort of thing
+        # could be factored out into a Falcon hook (DRY).
+        resource = self._entity_to_resource(character)
+
+        resp.location = self._id_to_href(character['id'])
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+
+class RoomBase(object):
+    &quot;&quot;&quot;Base class for room resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, room):
+        # &lt;a9&gt;
+        pass
+
+    def _id_to_href(self, room_id, dungeon_id):
+        # &lt;a10&gt;
+        pass
+
+
+class Room(RoomBase):
+    &quot;&quot;&quot;Resource class for the room concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, dungeon_id, room_id):
+        # &lt;a11&gt;
+        pass
+
+
+class DungeonBase(object):
+    &quot;&quot;&quot;Base class for dungeon resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, dungeon):
+        # &lt;a12&gt;
+        pass
+
+class DungeonList(DungeonBase):
+    &quot;&quot;&quot;Resource class for the dungeon list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # &lt;a13&gt;
+        pass
+
+
+# ===========================================================================
+# Hello world
+# ===========================================================================
+
+class HelloResource(object):  # &lt;w3&gt;
+    def on_get(self, req, resp):
+        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.content_type = 'text/plain'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+
+# ===========================================================================
+# Routing
+# ===========================================================================
+
+# An instance of falcon.API is a WSGI application
+api = falcon.API()
+# api.add_route('/', HelloResource())  # &lt;w4&gt;
+
+controller = Controller()
+api.add_route('/characters', CharacterList(controller))
+# &lt;a15&gt;
+# &lt;a16&gt;
+# &lt;a17&gt;
+
+
+# ===========================================================================
+# WSGI
+# ===========================================================================
+
+def application(env, start_response):  # &lt;w1&gt;
+    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
+
+    start_response(&quot;200 OK&quot;, [('Content-Type', 'text/plain')])
+    return [body.encode('utf-8')]
+
+if __name__ == '__main__':
+    from wsgiref.simple_server import make_server
+
+    server = make_server('127.0.0.1', 8000, api)  # &lt;w2&gt;
+    server.serve_forever()
+
+          </code></pre>
+          <aside class="notes">
+            Now your api.py file should look like this:
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http OPTIONS 127.0.0.1:8000/characters
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 204 No Content
+Content-Length: 0
+Date: Sat, 21 Feb 2015 22:59:18 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+allow: GET, POST
+          </code></pre>
+          <aside class="notes">
+            <p>Let's take this for a spin. First, ctrl-c the running script, if needed, and restart it.</p>
+
+            <p>Then in your other console, enter this at the command line to make sure everything is wired up correctly.</p>
+
+            <p>As you can see, the Falcon framework knows which methods the resource supports, and responds with the correct Allow header.</p>
+
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http POST 127.0.0.1:8000/characters name="Commander Keen"
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Date: Sat, 21 Feb 2015 23:00:02 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 254
+content-type: application/json; charset=utf-8
+location: /characters/8713e99b-d4d2-4855-85a2-9d0a32fec0b7
+
+{
+    "links": [
+        {
+            "allow": [
+                "GET",
+                "PUT"
+            ],
+            "href": "/characters/8713e99b-d4d2-4855-85a2-9d0a32fec0b7",
+            "rel": "self"
+        },
+        {
+            "allow": [
+                "GET",
+                "PUT"
+            ],
+            "href": "/characters/8713e99b-d4d2-4855-85a2-9d0a32fec0b7/location",
+            "rel": "location"
+        }
+    ],
+    "name": "Commander Keen"
+}
+          </code></pre>
+          <aside class="notes">
+            Now let's add a new character. We'll post a JSON document with a name field to the character list resource like so:
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000/characters
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Date: Sat, 21 Feb 2015 23:00:58 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 514
+content-type: application/json; charset=utf-8
+
+[
+    {
+        "links": [
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
+                "rel": "self"
+            },
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
+                "rel": "location"
+            }
+        ],
+        "name": "Knox Thunderbane"
+    },
+    {
+        "links": [
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/8713e99b-d4d2-4855-85a2-9d0a32fec0b7",
+                "rel": "self"
+            },
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/8713e99b-d4d2-4855-85a2-9d0a32fec0b7/location",
+                "rel": "location"
+            }
+        ],
+        "name": "Commander Keen"
+    }
+]
+          </code></pre>
+          <aside class="notes">
+<p>And for good measure, let's make sure Commander Keen got added to the list. Run this to list the game characters again.</p>
+
+<p>[next fragment]</p>
+
+<p>Great! Looks like we're in business.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: Choosing a dungeon</h1>
+          <aside class="notes">
+Now that we can choose a character, or create a new one if we don't like any of the choices, we need to pick a dungeon to play. We want to provide the user agent a set of choices that it can display to the player.
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-yaml tall">
+/dungeons:
+    get:
+      summary: List all Dungeons
+      operationId: list_dungeons
+      responses:
+        200:
+          description: An array of Dungeons
+          schema:
+            properties:
+              dungeons:
+                type: array
+                $ref: "#/definitions/Dungeons"
+          examples:
+            application/json: |-
+              {
+                "dungeons": [
+                  {
+                    "name": "Dungeon of Doom",
+                    "entrance_room_id": "1000",
+                    "links": [
+                      {
+                        "rel": "self",
+                        "href": "/dungeons/1234"
+                      },
+                      {
+                        "rel": "room",
+                        "allow": [
+                            "GET"
+                        ],
+                        "href": "/dungeons/1234/rooms/1002",
+                        "description": "entrance"
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "rel": "self",
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons"
+                  }
+                ]
+              }
+          </code></pre>
+          <aside class="notes">
+<p>Here's the relevant part of our spec.</p>
+
+<p>The implementation is going to look similar to what we did to list characters.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>a13</h3>
+          <pre><code data-trim class="lang-py">
+def on_get(self, req, resp):
+    # Ask the DAL for a list of entities
+    dungeons = self._controller.list_dungeons()
+
+    # Map the entities to the resource
+    resource = [self._entity_to_resource(d) for d in dungeons]
+
+    # Create a JSON representation of the resource
+    resp.body = json.dumps(resource, ensure_ascii=False)
+
+          </code></pre>
+          <aside class="notes">
+<p>First, search for the tag *a13*.</p>
+
+<p>When the UA sends us a GET request, we need to return a JSON representation of the list of dungeons in the game.</p>
+
+<p>Update the on_get responder to look like this.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>a12</h3>
+          <pre><code data-trim class="lang-py">
+def _entity_to_resource(self, dungeon):
+    base_href = '/dungeons/{0}'.format(dungeon['id'])
+    links = [
+        {
+            'rel': 'self',
+            'allow': ['GET'],
+            'href': base_href
+        },
+        {
+            'rel': 'room first',
+            'allow': [
+                'GET', 'PUT'
+            ],
+            'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
+        }
+    ]
+
+    return {
+        'name': dungeon['name'],
+        'links': links
+    }
+          </code></pre>
+          <aside class="notes">
+Next let's implement that _entity_to_resource helper method. Find the tag *a12* and update the method to look like this:
+          </aside>
+        </section>
+
+        <section>
+          <h3>a17</h3>
+          <pre><code data-trim class="lang-py">
+api.add_route('/dungeons', DungeonList(controller))
+
+          </code></pre>
+          <aside class="notes">
+<p>OK, now we need to wire up the resource to a route. Find the tag *a17* and replace it with this line of code.</p>
+
+<p>OK, so now we have our frontend taken care of.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>d2</h3>
+          <pre><code data-trim class="lang-py">
+self._dungeons = {
+    uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
+        'name': 'Dungeon of Doom',
+        'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
+    },
+    uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
+        'name': 'Dungeon of Hope',
+        'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
+    }
+}
+
+          </code></pre>
+          <aside class="notes">
+<p>Let's go implement the controller's list_dungeons() method. First we will need to add some dungeon records to our data set. Find the comment tag *d2*.</p>
+
+<p>Let's add a couple of dungeon records to make the data set look likes this.</p>
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>d9</h3>
+          <pre><code data-trim class="lang-py">
+# Convert "database" result to entities
+
+# TODO: Handle the case that our DB can't be reached
+return [
+    {
+        'id': dungeon_id,
+        'name': details['name'],
+        'entry_id': details['entry_id']
+    }
+    for dungeon_id, details in self._dungeons.items()
+]
+
+          </code></pre>
+          <aside class="notes">
+<p>Next, find the comment tag *d9*.</p>
+
+<p>Modify the list_dungeons method as shown here.</p>
+
+<p>Once that is done, the user agent will be able to list the dungeons in the game, and let the player choose one to enter.</p>
+
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-py tall">
+from copy import deepcopy
+import json
+import uuid
+
+import falcon
+
+
+# ===========================================================================
+# DAL (backend, storage and entities)
+# ===========================================================================
+
+class Controller(object):
+    def __init__(self):
+        # Store data in MyLDB
+
+        self._characters = {
+            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
+                'name': 'Knox Thunderbane',
+                'room_id': None
+            }
+        }
+
+        self._dungeons = {
+            uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
+                'name': 'Dungeon of Doom',
+                'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
+            },
+            uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
+                'name': 'Dungeon of Hope',
+                'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
+            }
+        }
+
+        self._rooms = {
+            # &lt;d3&gt;
+
+            # &lt;d4&gt;
+        }
+
+    def list_characters(self):
+        # Convert &quot;database&quot; result to an entity
+
+        # TODO: Handle the case that our DB can't be reached
+        return [
+            {
+                'id': character_id,
+                'name': details['name'],
+                'room_id': details['room_id']
+            }
+
+            for character_id, details in self._characters.items()
+        ]
+
+    def add_character(self, name):
+        character_id = uuid.uuid4()
+
+        # TODO: Handle the case that the name is too long
+        character = {
+            'name': name,
+            'room_id': None
+        }
+
+        # TODO: Handle the case that our DB can't be reached
+        self._characters[character_id] = character
+
+        character['id'] = character_id
+        return character
+
+    def move_character(self, character_id, room_id):
+        # &lt;d7&gt;
+        pass
+
+    def get_location(self, character_id):
+        # &lt;d8&gt;
+        pass
+
+    def get_room(self, room_id):
+        # &lt;d9&gt;
+        pass
+
+    def list_dungeons(self):
+        # Convert the database result to a list of entities
+
+        # TODO: Handle the case that our DB can't be reached
+        return [
+            {
+                'id': dungeon_id,
+                'name': details['name'],
+                'entry_id': details['entry_id']
+            }
+            for dungeon_id, details in self._dungeons.items()
+        ]
+
+
+# ===========================================================================
+# API (frontend, resources and representations)
+# ===========================================================================
+
+class CharacterBase(object):
+    &quot;&quot;&quot;Base class for character resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, character):
+        base_href = self._id_to_href(character['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href
+            },
+            {
+                'rel': 'location',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href + '/location'
+            }
+        ]
+
+        return {
+            'name': character['name'],
+            'links': links
+        }
+
+    def _id_to_href(self, character_id):
+        return '/characters/{0}'.format(character_id)
+
+    def _room_href_to_id(self, href):
+        # &lt;a3&gt;
+        pass
+
+    def _room_id_to_location(self, room_id, dungeon_id):
+        # &lt;a4&gt;
+        pass
+
+
+class CharacterLocation(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character location concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, character_id):
+        # &lt;a5&gt;
+        pass
+
+    def on_put(self, req, resp, character_id):
+        # &lt;a6&gt;
+        pass
+
+
+class CharacterList(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # Ask the DAL for a list of entities
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        characters = self._controller.list_characters()
+
+        # Map the entities to the resource
+        resource = [self._entity_to_resource(c) for c in characters]
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+        # Falcon defaults to the JSON media type for the content
+        # resp.content_type = 'application/json'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+    def on_post(self, req, resp):
+        # Parse the incoming representation. This can be factored out into
+        # Falcon hooks or middleware, but we'll keep it inline for now.
+        # TODO: Validate against a schema
+        representation = req.stream.read().decode('utf-8')
+        representation = json.loads(representation)
+
+        # Create a new entity from the representation
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        character = self._controller.add_character(representation['name'])
+
+        # Map the entity to the resource. Again, this sort of thing
+        # could be factored out into a Falcon hook (DRY).
+        resource = self._entity_to_resource(character)
+
+        resp.location = self._id_to_href(character['id'])
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+
+class RoomBase(object):
+    &quot;&quot;&quot;Base class for room resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, room):
+        # &lt;a9&gt;
+        pass
+
+    def _id_to_href(self, room_id, dungeon_id):
+        # &lt;a10&gt;
+        pass
+
+
+class Room(RoomBase):
+    &quot;&quot;&quot;Resource class for the room concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, dungeon_id, room_id):
+        # &lt;a11&gt;
+        pass
+
+
+class DungeonBase(object):
+    &quot;&quot;&quot;Base class for dungeon resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, dungeon):
+        base_href = '/dungeons/{0}'.format(dungeon['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': ['GET'],
+                'href': base_href
+            },
+            {
+                'rel': 'room first',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
+            }
+        ]
+
+        return {
+            'name': dungeon['name'],
+            'links': links
+        }
+
+
+class DungeonList(DungeonBase):
+    &quot;&quot;&quot;Resource class for the dungeon list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # Ask the DAL for a list of entities
+        dungeons = self._controller.list_dungeons()
+
+        # Map the entities to the resource
+        resource = [self._entity_to_resource(d) for d in dungeons]
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+
+# ===========================================================================
+# Hello world
+# ===========================================================================
+
+class HelloResource(object):  # &lt;w3&gt;
+    def on_get(self, req, resp):
+        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.content_type = 'text/plain'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+
+# ===========================================================================
+# Routing
+# ===========================================================================
+
+# An instance of falcon.API is a WSGI application
+api = falcon.API()
+# api.add_route('/', HelloResource())  # &lt;w4&gt;
+
+controller = Controller()
+api.add_route('/characters', CharacterList(controller))
+# &lt;a15&gt;
+# &lt;a16&gt;
+api.add_route('/dungeons', DungeonList(controller))
+
+
+# ===========================================================================
+# WSGI
+# ===========================================================================
+
+def application(env, start_response):  # &lt;w1&gt;
+    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
+
+    start_response(&quot;200 OK&quot;, [('Content-Type', 'text/plain')])
+    return [body.encode('utf-8')]
+
+if __name__ == '__main__':
+    from wsgiref.simple_server import make_server
+
+    server = make_server('127.0.0.1', 8000, api)  # &lt;w2&gt;
+    server.serve_forever()
+
+          </code></pre>
+          <aside class="notes">
+<p>At this point your api.py file should like this.</p>
+
+<p>Cool? Now let's give this a try.</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000/dungeons
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Date: Sun, 22 Feb 2015 02:13:32 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 564
+content-type: application/json; charset=utf-8
+
+[
+    {
+        "links": [
+            {
+                "allow": [
+                    "GET"
+                ],
+                "href": "/dungeons/f2e557e6-6b07-417b-b416-17d693f3eadd",
+                "rel": "self"
+            },
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/dungeons/f2e557e6-6b07-417b-b416-17d693f3eadd/rooms/29cf865c-936e-4dec-8626-9bab41ea619f",
+                "rel": "room first"
+            }
+        ],
+        "name": "Dungeon of Hope"
+    },
+    {
+        "links": [
+            {
+                "allow": [
+                    "GET"
+                ],
+                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117",
+                "rel": "self"
+            },
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27",
+                "rel": "room first"
+            }
+        ],
+        "name": "Dungeon of Doom"
+    }
+]
+          </code></pre>
+          <aside class="notes">
+ctrl-c your app and restart it. Then in your other console window, enter the command shown here.
+
+Cool. So far we've given players the ability to choose a character to play and a dungeon to enter. What's next?
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: Entering the dungeon</h1>
+          <aside class="notes">
+<p>We need to move our character to the dungeon entrance.</p>
+
+<p>Let's remind ourselves what the characters representation looks like.</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000/characters
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Date: Sun, 22 Feb 2015 02:32:23 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 258
+content-type: application/json; charset=utf-8
+
+[
+    {
+        "links": [
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
+                "rel": "self"
+            },
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
+                "rel": "location"
+            }
+        ],
+        "name": "Knox Thunderbane"
+    }
+]
+          </code></pre>
+          <aside class="notes">
+<p>Enter this in your console to list the characters...</p>
+
+<p>[next fragment]</p>
+
+<p>Any user agent (UA) can take this list, present it to the player and let them make a choice. In this case, there's just one to choose, so we'll just assume the player picks Knox. The UA then remembers Knox as part of its session data.</p>
+
+<p>Next, the UA queries the link to the dungeon list resource, and presents the results to the player to make a selection. Once the player chooses a dungeon, the UA has all the information it needs to move the character to the dungeon entrance room.</p>
+
+<p>We'll represent this state transition in our API by linking the character's current location to the dungeon's entrance room. The user agent does this by PUTing the link it obtained from the dungeon resource to the location link specified in the character resource.</p>
+
+<p>Let's see how this works.</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ CHAR_LOCATION_URL=/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location
+
+          </code></pre>
+          <aside class="notes">
+First, we'll copy and paste the href from the location link we got in our previous query.
+
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ ROOM_URL=/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27
+
+          </code></pre>
+          <aside class="notes">
+<p>Next let's copy and paste the href from the Dungeon of Doom's entrance room link. Remember, that's the link with the "room first" relation.</p>
+
+<p>Got it?</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 404 OK
+Date: Fri, 20 Feb 2015 18:45:24 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 0
+
+          </code></pre>
+          <aside class="notes">
+<p>OK. Now let's link the character to the dungeon entrance room. We will PUT a JSON representation of a link with a "room" relation type, and an href to identify the entrace room. This representation will update the character's location resource so that it points to the Dungeon of Doom's entrance.</p>
+
+<p>So let's try this. Enter the following at the command line.</p>
+
+<p>[next fragment]</p>
+
+<p>OK, we got a 404. That's because Falcon knows we haven't set up a room location resource. Let's go ahead and take care of that next.</p>
+
+<!-- TODO: This could use a graphic to illustrate the point. -->
+          </aside>
+        </section>
+
+        <section>
+          <h3>a6</h3>
+          <pre><code data-trim class="lang-py">
+def on_put(self, req, resp, character_id):
+    # TODO: Validate against a schema
+    representation = req.stream.read().decode('utf-8')
+    representation = json.loads(representation)
+
+    # TODO: Raise falcon.HTTPError if ID is not a UUID
+    character_id = uuid.UUID(character_id)
+
+    # TODO: Raise falcon.HTTPError if ID is not a UUID
+    room_href = representation['href']
+    room_id = self._room_href_to_id(room_href)
+
+    # TODO: If an error is raised, convert it to an instance
+    #       of falcon.HTTPError
+    self._controller.move_character(character_id, room_id)
+
+    # Success!
+    resp.status = falcon.HTTP_204
+          </code></pre>
+          <aside class="notes">
+Bring up your api.py code again, and search for the tag *a6*. Update the CharacterLocation class's on_put method to look like this:
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>a5</h3>
+          <pre><code data-trim class="lang-py">
+def on_get(self, req, resp, character_id):
+    # TODO: Handle the case that character_id is not a valid UUID
+    character_id = uuid.UUID(character_id)
+
+    # TODO: If an error is raised, convert it to an instance
+    #       of falcon.HTTPError
+    room_id, dungeon_id = self._controller.get_location(character_id)
+
+    # Define the resource. We have to translate the DAL's notion
+    # of a "location" to the API's concept of a "location".
+    # TODO: If an error is raised, convert it to an instance
+    #       of falcon.HTTPError
+    resource = self._room_id_to_location(room_id, dungeon_id)
+
+    # Create a JSON representation of the resource
+    # TODO: Use functools.partial to create a version of json.dumps that
+    #       defaults to ensure_ascii=False
+    resp.body = json.dumps(resource, ensure_ascii=False)
+
+          </code></pre>
+          <aside class="notes">
+Let's also provide a way to query the location state, so that we can verity our PUT is working. Find the tag *a5* and update the on_get method to look like this:
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>a3</h3>
+          <pre><code data-trim class="lang-py">
+def _room_href_to_id(self, href):
+    # ID will be the last part of the URL.
+    return uuid.UUID(href.split('/')[-1])
+
+          </code></pre>
+          <aside class="notes">
+Now let's define the self._room_href_to_id() and self._room_id_to_location() methods. Find the tag *a3* and update the code there to look like this:
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>a4</h3>
+          <pre><code data-trim class="lang-py">
+def _room_id_to_location(self, room_id, dungeon_id):
+    return {
+        'rel': 'room',
+        'allow': ['GET'],
+        'href': 'dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
+    }
+
+          </code></pre>
+          <aside class="notes">
+Then, right below that, replace the tag *a4* like so.
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>d3</h3>
+          <pre><code data-trim class="lang-py">
+uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27'): {
+    'name': 'Super Creepy Entrance',
+    'is_exit': False,
+    'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
+    'doorways': [
+        {
+            'direction': 'north',
+            'room_id': uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2')
+        },
+        {
+            'direction': 'east',
+            'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
+        }
+    ]
+},
+
+          </code></pre>
+          <aside class="notes">
+All set? OK, next, we need to Add a room record to our data set that we can play around with. Find the tag *d3* and replace it with the following entrace room for the Dungeon of Doom.
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>d7</h3>
+          <pre><code data-trim class="lang-py">
+def move_character(self, character_id, room_id):
+    # TODO: Handle the case that character_id is invalid
+    # TODO: Handle the case that our DB can't be reached
+    character = self._characters[character_id]
+
+    # TODO: Check that room_id can be reached from the character's
+    #       current position (no teleportation allowed!)
+    character['room_id'] = room_id
+
+          </code></pre>
+          <aside class="notes">
+Now we need to fill out the Controller's move_character and get_location methods, since those are needed by the CharacterLocation class. Find the tag *d7* and update the move_character() method to look like this.
+          </aside>
+        </section>
+
+        <section>
+          <h3>d8</h3>
+          <pre><code data-trim class="lang-py">
+def get_location(self, character_id):
+    # TODO: Handle the case that character_id is invalid
+    # TODO: Handle the case that our DB can't be reached
+    character = self._characters[character_id]
+
+    room_id = character['room_id']
+    room = self._rooms[room_id]
+
+    return room_id, room['dungeon_id']
+
+          </code></pre>
+          <aside class="notes">
+And then, right below that, replace the tag *d8* with the this code.
+          </aside>
+        </section>
+
+        <section>
+          <h3>a15</h3>
+          <pre><code data-trim class="lang-py">
+api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
+
+          </code></pre>
+          <aside class="notes">
+<p>Finally, we need to tell Falcon about our CharacterLocation resource. Find the tag *a15* and replace it with the following call to add_route:</p>
+
+<p>Got it?</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-py tall">
+from copy import deepcopy
+import json
+import uuid
+
+import falcon
+
+
+# ===========================================================================
+# DAL (backend, storage and entities)
+# ===========================================================================
+
+class Controller(object):
+    def __init__(self):
+        # Store data in MyLDB
+
+        self._characters = {
+            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
+                'name': 'Knox Thunderbane',
+                'room_id': None
+            }
+        }
+
+        self._dungeons = {
+            uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
+                'name': 'Dungeon of Doom',
+                'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
+            },
+            uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
+                'name': 'Dungeon of Hope',
+                'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
+            }
+        }
+
+        self._rooms = {
+            uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27'): {
+                'name': 'Super Creepy Entrance',
+                'is_exit': False,
+                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
+                'doorways': [
+                    {
+                        'direction': 'north',
+                        'room_id': uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2')
+                    },
+                    {
+                        'direction': 'east',
+                        'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
+                    }
+                ]
+            },
+
+            # &lt;d4&gt;
+        }
+
+    def list_characters(self):
+        # Convert &quot;database&quot; result to an entity
+
+        # TODO: Handle the case that our DB can't be reached
+        return [
+            {
+                'id': character_id,
+                'name': details['name'],
+                'room_id': details['room_id']
+            }
+
+            for character_id, details in self._characters.items()
+        ]
+
+    def add_character(self, name):
+        character_id = uuid.uuid4()
+
+        # TODO: Handle the case that the name is too long
+        character = {
+            'name': name,
+            'room_id': None
+        }
+
+        # TODO: Handle the case that our DB can't be reached
+        self._characters[character_id] = character
+
+        character['id'] = character_id
+        return character
+
+    def move_character(self, character_id, room_id):
+        # TODO: Handle the case that character_id is invalid
+        # TODO: Handle the case that our DB can't be reached
+        character = self._characters[character_id]
+
+        # TODO: Check that room_id can be reached from the character's
+        #       current position (no teleportation allowed!)
+        character['room_id'] = room_id
+
+    def get_location(self, character_id):
+        # TODO: Handle the case that character_id is invalid
+        # TODO: Handle the case that our DB can't be reached
+        character = self._characters[character_id]
+
+        room_id = character['room_id']
+        room = self._rooms[room_id]
+
+        return room_id, room['dungeon_id']
+
+    def get_room(self, room_id):
+        # &lt;d9&gt;
+        pass
+
+    def list_dungeons(self):
+        # Convert the database result to a list of entities
+
+        # TODO: Handle the case that our DB can't be reached
+        return [
+            {
+                'id': dungeon_id,
+                'name': details['name'],
+                'entry_id': details['entry_id']
+            }
+            for dungeon_id, details in self._dungeons.items()
+        ]
+
+
+# ===========================================================================
+# API (frontend, resources and representations)
+# ===========================================================================
+
+class CharacterBase(object):
+    &quot;&quot;&quot;Base class for character resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, character):
+        base_href = self._id_to_href(character['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href
+            },
+            {
+                'rel': 'location',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href + '/location'
+            }
+        ]
+
+        return {
+            'name': character['name'],
+            'links': links
+        }
+
+    def _id_to_href(self, character_id):
+        return '/characters/{0}'.format(character_id)
+
+    def _room_href_to_id(self, href):
+        # ID will be the last part of the URL.
+        return uuid.UUID(href.split('/')[-1])
+
+    def _room_id_to_location(self, room_id, dungeon_id):
+        return {
+            'rel': 'room',
+            'allow': ['GET'],
+            'href': 'dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
+        }
+
+
+class CharacterLocation(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character location concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, character_id):
+        # TODO: Handle the case that character_id is not a valid UUID
+        character_id = uuid.UUID(character_id)
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        room_id, dungeon_id = self._controller.get_location(character_id)
+
+        # Define the resource. We have to translate the DAL's notion
+        # of a &quot;location&quot; to the API's concept of a &quot;location&quot;.
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        resource = self._room_id_to_location(room_id, dungeon_id)
+
+        # Create a JSON representation of the resource
+        # TODO: Use functools.partial to create a version of json.dumps that
+        #       defaults to ensure_ascii=False
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+    def on_put(self, req, resp, character_id):
+        # TODO: Validate against a schema
+        representation = req.stream.read().decode('utf-8')
+        representation = json.loads(representation)
+
+        # TODO: Raise falcon.HTTPError if ID is not a UUID
+        character_id = uuid.UUID(character_id)
+
+        # TODO: Raise falcon.HTTPError if ID is not a UUID
+        room_href = representation['href']
+        room_id = self._room_href_to_id(room_href)
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        self._controller.move_character(character_id, room_id)
+
+        # Success!
+        resp.status = falcon.HTTP_204
+
+
+class CharacterList(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # Ask the DAL for a list of entities
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        characters = self._controller.list_characters()
+
+        # Map the entities to the resource
+        resource = [self._entity_to_resource(c) for c in characters]
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+        # Falcon defaults to the JSON media type for the content
+        # resp.content_type = 'application/json'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+    def on_post(self, req, resp):
+        # Parse the incoming representation. This can be factored out into
+        # Falcon hooks or middleware, but we'll keep it inline for now.
+        # TODO: Validate against a schema
+        representation = req.stream.read().decode('utf-8')
+        representation = json.loads(representation)
+
+        # Create a new entity from the representation
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        character = self._controller.add_character(representation['name'])
+
+        # Map the entity to the resource. Again, this sort of thing
+        # could be factored out into a Falcon hook (DRY).
+        resource = self._entity_to_resource(character)
+
+        resp.location = self._id_to_href(character['id'])
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+
+class RoomBase(object):
+    &quot;&quot;&quot;Base class for room resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, room):
+        # &lt;a9&gt;
+        pass
+
+    def _id_to_href(self, room_id, dungeon_id):
+        # &lt;a10&gt;
+        pass
+
+
+class Room(RoomBase):
+    &quot;&quot;&quot;Resource class for the room concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, dungeon_id, room_id):
+        # &lt;a11&gt;
+        pass
+
+
+class DungeonBase(object):
+    &quot;&quot;&quot;Base class for dungeon resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, dungeon):
+        base_href = '/dungeons/{0}'.format(dungeon['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': ['GET'],
+                'href': base_href
+            },
+            {
+                'rel': 'room first',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
+            }
+        ]
+
+        return {
+            'name': dungeon['name'],
+            'links': links
+        }
+
+
+class DungeonList(DungeonBase):
+    &quot;&quot;&quot;Resource class for the dungeon list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # Ask the DAL for a list of entities
+        dungeons = self._controller.list_dungeons()
+
+        # Map the entities to the resource
+        resource = [self._entity_to_resource(d) for d in dungeons]
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+
+# ===========================================================================
+# Hello world
+# ===========================================================================
+
+class HelloResource(object):  # &lt;w3&gt;
+    def on_get(self, req, resp):
+        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.content_type = 'text/plain'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+
+# ===========================================================================
+# Routing
+# ===========================================================================
+
+# An instance of falcon.API is a WSGI application
+api = falcon.API()
+# api.add_route('/', HelloResource())  # &lt;w4&gt;
+
+controller = Controller()
+api.add_route('/characters', CharacterList(controller))
+api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
+# &lt;a16&gt;
+api.add_route('/dungeons', DungeonList(controller))
+
+
+# ===========================================================================
+# WSGI
+# ===========================================================================
+
+def application(env, start_response):  # &lt;w1&gt;
+    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
+
+    start_response(&quot;200 OK&quot;, [('Content-Type', 'text/plain')])
+    return [body.encode('utf-8')]
+
+if __name__ == '__main__':
+    from wsgiref.simple_server import make_server
+
+    server = make_server('127.0.0.1', 8000, api)  # &lt;w2&gt;
+    server.serve_forever()
+
+          </code></pre>
+          <aside class="notes">
+At this point your api.py file should look like this.
+
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 204 No Content
+Content-Length: 0
+Date: Sun, 22 Feb 2015 03:35:06 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+          </code></pre>
+          <aside class="notes">
+OK, now let's try again to move the character to the dungeon entrance. Restart your app, then in another console run this command.
+
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000$CHAR_LOCATION_URL
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Date: Sun, 22 Feb 2015 03:36:20 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 133
+content-type: application/json; charset=utf-8
+
+{
+    "allow": [
+        "GET"
+    ],
+    "href": "dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27",
+    "rel": "room"
+}
+          </code></pre>
+          <aside class="notes">
+<p>That seemed to work, but let's make sure. Run this to read back the character's location.</p>
+
+<p>[next fragment]</p>
+
+<p>Success! We're on our way!</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: Finding a way out!</h1>
+          <aside class="notes">
+Now that we've entered the dungeon, we need to traverse the rooms in search of the exit.
+
+          </aside>
+        </section>
+
+        <section>
+          <ol>
+            <li>Dereference the room link for the character's current location to get a list of doorways.</li>
+            <li>Present the list of doorways to the player, and let them to choose one.</li>
+            <li>Move the character to the chosen room.</li>
+            <li>Are we at the exit? If not, go to (1).</li>
+          </ol>
+          <aside class="notes">
+            The User Agent will follow these steps.
+          </aside>
+        </section>
+
+        <section>
+          <h3>Step 1: Get a list of doorways</h3>
+          <aside class="notes">
+To get a list of doorways, we need to implement a Room resource that will provide a list of links to other rooms. Each of these links represent a doorway out of the room.
+          </aside>
+        </section>
+
+        <section>
+          <p>TODO: description vs. rel - html-ish approach, may be a better way, but I went with this for the impl - maybe make array... could probably change it if necessary...</p>
+          <pre><code data-trim class="lang-yaml tall">
+/dungeons/{dungeon_id}/rooms/{room_id}:
+get:
+  summary: Get a specific Room in a specific Dungeon
+  operationId: get_room
+  parameters:
+    - name: dungeon_id
+      in: path
+      description: The id of the Dungeon
+      required: true
+      type: string
+    - name: room_id
+      in: path
+      description: The id of the Room
+      required: true
+      type: string
+  responses:
+    200:
+      description: Expected response to a valid request
+      schema:
+        $ref: "#/definitions/Room"
+      examples:
+        application/json: |-
+          {
+            "name": "Entrance",
+            "is_exit": false,
+            "links": [
+              {
+                "rel": "self",
+                "allow": [ "GET" ],
+                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27"
+              },
+              {
+                "rel": "dungeon",
+                "allow": [ "GET" ],
+                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117"
+              },
+              {
+                "rel": "room north",
+                "allow": [ "GET" ],
+                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/6e7311fa-6045-4daf-a55c-9e8a714e5972"
+              },
+              {
+                "rel": "room east",
+                "allow": [ "GET" ],
+                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/adb6b3db-cfd7-4be8-8ab2-bba4e7990706"
+              }
+            ]
+          }
+    default:
+      description: Unexpected errors
+      schema:
+        $ref: "#/definitions/Errors"
+
+          </code></pre>
+          <aside class="notes">
+<p>Let's look at our spec to remind ourselves how these doorway links work:</p>
+
+<p>OK, so we need to implement a Room resource that can return a JSON representation like the example given in this spec.</p>
+
+<p>Let's go back to our api.py file.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>a11</h3>
+          <pre><code data-trim class="lang-py">
+def on_get(self, req, resp, dungeon_id, room_id):
+    # TODO: Handle the case that these are not valid UUIDs
+    dungeon_id = uuid.UUID(dungeon_id)
+    room_id = uuid.UUID(room_id)
+
+    # Note that we don't actually need the dungeon_id, since
+    # the DAL just wants the room_id. We'll just ignore it
+    # for now.
+
+    # TODO: If an error is raised, convert it to an instance
+    #       of falcon.HTTPError
+    room = self._controller.get_room(room_id)
+
+    # Create a resource based on the room entity
+    # TODO: If an error is raised, convert it to an instance
+    #       of falcon.HTTPError
+    resource = self._entity_to_resource(room)
+
+    # Create a JSON representation of the resource
+    resp.body = json.dumps(resource, ensure_ascii=False)
+
+          </code></pre>
+          <aside class="notes">
+<p>Find the tag *a11*.</p>
+
+<p>Update the on_get responder to look like this.</p>
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>a9, a10</h3>
+          <pre><code data-trim class="lang-py">
+def _entity_to_resource(self, room):
+    dungeon_id = room['dungeon_id']
+    room_id = room['id']
+
+    base_href = 'dungeons/{0}'.format(dungeon_id)
+
+    links = [
+        {
+            'rel': 'self',
+            'allow': ['GET'],
+            'href': '{0}/rooms/{1}'.format(base_href, room_id)
+        },
+        {
+            'rel': 'dungeon',
+            'allow': ['GET'],
+            'href': base_href
+        }
+    ]
+
+    # Add additional links, one per doorway to another room
+    links.extend([
+        {
+            'rel': 'room ' + doorway['direction'],
+            'allow': ['GET'],
+            'href': self._id_to_href(doorway['room_id'], dungeon_id)
+        }
+
+        for doorway in room['doorways']
+    ])
+
+    return {
+        'name': room['name'],
+        'is_exit': room['is_exit'],
+        'links': links
+    }
+
+def _id_to_href(self, room_id, dungeon_id):
+    return '/dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
+
+          </code></pre>
+          <aside class="notes">
+Next, fill in tags *a9* and *a10* as show here, to make self._entity_to_resource() work as it should.
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>d9</h3>
+          <pre><code data-trim class="lang-py">
+def get_room(self, room_id):
+    # TODO: Handle the case that room_id is invalid
+    # TODO: Handle the case that our DB can't be reached
+    room = self._rooms[room_id]
+
+    entity = deepcopy(room)
+    entity['id'] = room_id
+
+    return entity
+          </code></pre>
+          <aside class="notes">
+<p>We're almost done! We need to implement the Controller's get_room() method since the Room class depends on it.</p>
+
+<p>Search for the tag *d9*.</p>
+
+<p>Update the get_room method to look like this.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>d4</h3>
+          <pre><code data-trim class="lang-py">
+uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2'): {
+    'name': 'Room',
+    'is_exit': False,
+    'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
+    'doorways': [
+        {
+            'direction': 'south',
+            'room_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
+        }
+    ]
+},
+uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e'): {
+    'name': 'Armory',
+    'is_exit': False,
+    'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
+    'doorways': [
+        {
+            'direction': 'west',
+            'room_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
+        },
+        {
+            'direction': 'north',
+            'room_id': uuid.UUID('a7092981-3ceb-401a-9db2-4ed64b08b2bb')
+        }
+    ]
+},
+uuid.UUID('a7092981-3ceb-401a-9db2-4ed64b08b2bb'): {
+    'name': 'Exit',
+    'is_exit': True,
+    'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
+    'doorways': [
+        {
+            'direction': 'south',
+            'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
+        }
+    ]
+}
+          </code></pre>
+          <aside class="notes">
+<p>Now, a dungeon with just one room isn't really very interesting, is it? Let's add a few more rooms, and create doorways between them.</p>
+
+<p>Find the tag *d4*. Replace it with these room records. Make sure that the first record that is already in the dictionary has a trailing comma after it's closing curly bracket.</p>
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>tag</h3>
+          <pre><code data-trim class="lang-py">
+api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
+
+          </code></pre>
+          <aside class="notes">
+<p>Finally, we just need to add a route to the Room resource. Find the tag *a16*.</p>
+
+<p>Replace it with this call to add_route.</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-py tall">
+from copy import deepcopy
+import json
+import uuid
+
+import falcon
+
+
+# ===========================================================================
+# DAL (backend, storage and entities)
+# ===========================================================================
+
+class Controller(object):
+    def __init__(self):
+        # Store data in MyLDB
+
+        self._characters = {
+            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
+                'name': 'Knox Thunderbane',
+                'room_id': None
+            }
+        }
+
+        self._dungeons = {
+            uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
+                'name': 'Dungeon of Doom',
+                'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
+            },
+            uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
+                'name': 'Dungeon of Hope',
+                'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
+            }
+        }
+
+        self._rooms = {
+            uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27'): {
+                'name': 'Super Creepy Entrance',
+                'is_exit': False,
+                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
+                'doorways': [
+                    {
+                        'direction': 'north',
+                        'room_id': uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2')
+                    },
+                    {
+                        'direction': 'east',
+                        'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
+                    }
+                ]
+            },
+            uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2'): {
+                'name': 'Room',
+                'is_exit': False,
+                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
+                'doorways': [
+                    {
+                        'direction': 'south',
+                        'room_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
+                    }
+                ]
+            },
+            uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e'): {
+                'name': 'Armory',
+                'is_exit': False,
+                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
+                'doorways': [
+                    {
+                        'direction': 'west',
+                        'room_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
+                    },
+                    {
+                        'direction': 'north',
+                        'room_id': uuid.UUID('a7092981-3ceb-401a-9db2-4ed64b08b2bb')
+                    }
+                ]
+            },
+            uuid.UUID('a7092981-3ceb-401a-9db2-4ed64b08b2bb'): {
+                'name': 'Exit',
+                'is_exit': True,
+                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
+                'doorways': [
+                    {
+                        'direction': 'south',
+                        'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
+                    }
+                ]
+            }
+        }
+
+    def list_characters(self):
+        # Convert &quot;database&quot; result to an entity
+
+        # TODO: Handle the case that our DB can't be reached
+        return [
+            {
+                'id': character_id,
+                'name': details['name'],
+                'room_id': details['room_id']
+            }
+
+            for character_id, details in self._characters.items()
+        ]
+
+    def add_character(self, name):
+        character_id = uuid.uuid4()
+
+        # TODO: Handle the case that the name is too long
+        character = {
+            'name': name,
+            'room_id': None
+        }
+
+        # TODO: Handle the case that our DB can't be reached
+        self._characters[character_id] = character
+
+        character['id'] = character_id
+        return character
+
+    def move_character(self, character_id, room_id):
+        # TODO: Handle the case that character_id is invalid
+        # TODO: Handle the case that our DB can't be reached
+        character = self._characters[character_id]
+
+        # TODO: Check that room_id can be reached from the character's
+        #       current position (no teleportation allowed!)
+        character['room_id'] = room_id
+
+    def get_location(self, character_id):
+        # TODO: Handle the case that character_id is invalid
+        # TODO: Handle the case that our DB can't be reached
+        character = self._characters[character_id]
+
+        room_id = character['room_id']
+        room = self._rooms[room_id]
+
+        return room_id, room['dungeon_id']
+
+    def get_room(self, room_id):
+        # TODO: Handle the case that room_id is invalid
+        # TODO: Handle the case that our DB can't be reached
+        room = self._rooms[room_id]
+
+        entity = deepcopy(room)
+        entity['id'] = room_id
+
+        return entity
+
+    def list_dungeons(self):
+        # Convert the database result to a list of entities
+
+        # TODO: Handle the case that our DB can't be reached
+        return [
+            {
+                'id': dungeon_id,
+                'name': details['name'],
+                'entry_id': details['entry_id']
+            }
+            for dungeon_id, details in self._dungeons.items()
+        ]
+
+
+# ===========================================================================
+# API (frontend, resources and representations)
+# ===========================================================================
+
+class CharacterBase(object):
+    &quot;&quot;&quot;Base class for character resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, character):
+        base_href = self._id_to_href(character['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href
+            },
+            {
+                'rel': 'location',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href + '/location'
+            }
+        ]
+
+        return {
+            'name': character['name'],
+            'links': links
+        }
+
+    def _id_to_href(self, character_id):
+        return '/characters/{0}'.format(character_id)
+
+    def _room_href_to_id(self, href):
+        # ID will be the last part of the URL.
+        return uuid.UUID(href.split('/')[-1])
+
+    def _room_id_to_location(self, room_id, dungeon_id):
+        return {
+            'rel': 'room',
+            'allow': ['GET'],
+            'href': 'dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
+        }
+
+
+class CharacterLocation(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character location concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, character_id):
+        # TODO: Handle the case that character_id is not a valid UUID
+        character_id = uuid.UUID(character_id)
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        room_id, dungeon_id = self._controller.get_location(character_id)
+
+        # Define the resource. We have to translate the DAL's notion
+        # of a &quot;location&quot; to the API's concept of a &quot;location&quot;.
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        resource = self._room_id_to_location(room_id, dungeon_id)
+
+        # Create a JSON representation of the resource
+        # TODO: Use functools.partial to create a version of json.dumps that
+        #       defaults to ensure_ascii=False
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+    def on_put(self, req, resp, character_id):
+        # TODO: Validate against a schema
+        representation = req.stream.read().decode('utf-8')
+        representation = json.loads(representation)
+
+        # TODO: Raise falcon.HTTPError if ID is not a UUID
+        character_id = uuid.UUID(character_id)
+
+        # TODO: Raise falcon.HTTPError if ID is not a UUID
+        room_href = representation['href']
+        room_id = self._room_href_to_id(room_href)
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        self._controller.move_character(character_id, room_id)
+
+        # Success!
+        resp.status = falcon.HTTP_204
+
+
+class CharacterList(CharacterBase):
+    &quot;&quot;&quot;Resource class for the character list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # Ask the DAL for a list of entities
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        characters = self._controller.list_characters()
+
+        # Map the entities to the resource
+        resource = [self._entity_to_resource(c) for c in characters]
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+        # Falcon defaults to the JSON media type for the content
+        # resp.content_type = 'application/json'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+    def on_post(self, req, resp):
+        # Parse the incoming representation. This can be factored out into
+        # Falcon hooks or middleware, but we'll keep it inline for now.
+        # TODO: Validate against a schema
+        representation = req.stream.read().decode('utf-8')
+        representation = json.loads(representation)
+
+        # Create a new entity from the representation
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        character = self._controller.add_character(representation['name'])
+
+        # Map the entity to the resource. Again, this sort of thing
+        # could be factored out into a Falcon hook (DRY).
+        resource = self._entity_to_resource(character)
+
+        resp.location = self._id_to_href(character['id'])
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+
+class RoomBase(object):
+    &quot;&quot;&quot;Base class for room resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, room):
+        dungeon_id = room['dungeon_id']
+        room_id = room['id']
+
+        base_href = 'dungeons/{0}'.format(dungeon_id)
+
+        links = [
+            {
+                'rel': 'self',
+                'allow': ['GET'],
+                'href': '{0}/rooms/{1}'.format(base_href, room_id)
+            },
+            {
+                'rel': 'dungeon',
+                'allow': ['GET'],
+                'href': base_href
+            }
+        ]
+
+        # Add additional links, one per doorway to another room
+        links.extend([
+            {
+                'rel': 'room ' + doorway['direction'],
+                'allow': ['GET'],
+                'href': self._id_to_href(doorway['room_id'], dungeon_id)
+            }
+
+            for doorway in room['doorways']
+        ])
+
+        return {
+            'name': room['name'],
+            'is_exit': room['is_exit'],
+            'links': links
+        }
+
+    def _id_to_href(self, room_id, dungeon_id):
+        return '/dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
+
+
+class Room(RoomBase):
+    &quot;&quot;&quot;Resource class for the room concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        self._controller = controller
+
+    def on_get(self, req, resp, dungeon_id, room_id):
+        # TODO: Handle the case that these are not valid UUIDs
+        dungeon_id = uuid.UUID(dungeon_id)
+        room_id = uuid.UUID(room_id)
+
+        # Note that we don't actually need the dungeon_id, since
+        # the DAL just wants the room_id. We'll just ignore it
+        # for now.
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        room = self._controller.get_room(room_id)
+
+        # Create a resource based on the room entity
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        resource = self._entity_to_resource(room)
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+
+class DungeonBase(object):
+    &quot;&quot;&quot;Base class for dungeon resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    &quot;&quot;&quot;
+
+    def _entity_to_resource(self, dungeon):
+        base_href = '/dungeons/{0}'.format(dungeon['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': ['GET'],
+                'href': base_href
+            },
+            {
+                'rel': 'room first',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
+            }
+        ]
+
+        return {
+            'name': dungeon['name'],
+            'links': links
+        }
+
+
+class DungeonList(DungeonBase):
+    &quot;&quot;&quot;Resource class for the dungeon list concept.&quot;&quot;&quot;
+
+    def __init__(self, controller):
+        # Controller instance is shared between resource classes
+        self._controller = controller
+
+    def on_get(self, req, resp):
+        # Ask the DAL for a list of entities
+        dungeons = self._controller.list_dungeons()
+
+        # Map the entities to the resource
+        resource = [self._entity_to_resource(d) for d in dungeons]
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+
+# ===========================================================================
+# Hello world
+# ===========================================================================
+
+class HelloResource(object):  # &lt;w3&gt;
+    def on_get(self, req, resp):
+        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.content_type = 'text/plain'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+
+# ===========================================================================
+# Routing
+# ===========================================================================
+
+# An instance of falcon.API is a WSGI application
+api = falcon.API()
+# api.add_route('/', HelloResource())  # &lt;w4&gt;
+
+controller = Controller()
+api.add_route('/characters', CharacterList(controller))
+api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
+api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
+api.add_route('/dungeons', DungeonList(controller))
+
+
+# ===========================================================================
+# WSGI
+# ===========================================================================
+
+def application(env, start_response):  # &lt;w1&gt;
+    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
+
+    start_response(&quot;200 OK&quot;, [('Content-Type', 'text/plain')])
+    return [body.encode('utf-8')]
+
+if __name__ == '__main__':
+    from wsgiref.simple_server import make_server
+
+    server = make_server('127.0.0.1', 8000, api)  # &lt;w2&gt;
+    server.serve_forever()
+
+          </code></pre>
+          <aside class="notes">
+Phew! At this point, your code should look like this:
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>Step 2: Choose a doorway</h3>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ ROOM_URL=/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27
+$ http 127.0.0.1:8000$ROOM_URL
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Date: Sun, 22 Feb 2015 08:31:48 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 575
+content-type: application/json; charset=utf-8
+
+{
+    "is_exit": false,
+    "links": [
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27",
+            "rel": "self"
+        },
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "dungeons/5a024cd8-2db3-446e-b777-bdc60185a117",
+            "rel": "dungeon"
+        },
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/751d5812-144d-40f8-a82d-221dbb3075e2",
+            "rel": "room north"
+        },
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/65840050-12d3-4e29-9412-7c3b22fdd52e",
+            "rel": "room east"
+        }
+    ],
+    "name": "Super Creepy Entrance"
+}
+          </code></pre>
+          <aside class="notes">
+<p>Before we move on, ctrl-c and restart your WSGI server to pick up the changes we just made.</p>
+
+<p>Let's list the doorways in the entrance room.</p>
+
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ ROOM_URL=/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/751d5812-144d-40f8-a82d-221dbb3075e2
+
+          </code></pre>
+          <aside class="notes">
+Let's choose the north doorway out of the entrance room. We'll copy and paste the href from that link relation. Go back to your console and paste this on the command line.
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>Step 3: Move the character</h3>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$  http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 204 No Content
+Content-Length: 0
+Date: Sun, 22 Feb 2015 03:56:54 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+
+          </code></pre>
+          <aside class="notes">
+Now let's move the character by linking their location to the room we've chosen to enter. Here's the command.
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>Are we at the exit? If not, go to (2)</h3>
+        </section>
+
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000$ROOM_URL
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Date: Sun, 22 Feb 2015 03:58:01 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 417
+content-type: application/json; charset=utf-8
+
+{
+    "is_exit": false,
+    "links": [
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/751d5812-144d-40f8-a82d-221dbb3075e2",
+            "rel": "self"
+        },
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "dungeons/5a024cd8-2db3-446e-b777-bdc60185a117",
+            "rel": "dungeon"
+        },
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27",
+            "rel": "room south"
+        }
+    ],
+    "name": "Room"
+}
+          </code></pre>
+          <aside class="notes">
+<p>Let's see what we can find out about this new room. Here's the command.</p>
+
+<p>[next fragment]</p>
+
+<p>Darn! It's a dead end! The only way out is back the way we just came, so we'll have to backtrack.</p>
+
+<p>So you get the idea. You would continue repeating this process, exploring the dungeon one room at a time until you reach the exit. If you temporarily lose your network connection, or simply get tired and want to take a break, the user agent will still remember the character you were playing with last, and can GET it's last location from the server when you are ready to pick up again where you left off.</p>
+
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: Independent evolution</h1>
+          <aside class="notes">
+<p>Can you imagine a world in which each time you made a change to your website, everyone had to update their web browsers to a new version? It simply would not scale.</p>
+
+<p>During our RESTful adventure we saw how we can use hypermedia to change the state of the game.</p>
+
+<p>Since the UA is just following links around, it is easier to evolve the server independently of the UA. Changing something in the server is less likely to break the UA, because the UA is making fewer assumptions.</p>
+
+<p>Let's see an example of this real quick.</p>
+
+<p>Suppose we were to change our URL schema for some reason.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>/location &nbsp; ➟ &nbsp; /foo</h3>
+          <aside class="notes">
+Go back to your api.py file and find-and-replace all instances of the string '/location' with the string '/foo'. There should be only two instances.
+
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000/characters
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 200 OK
+Date: Sun, 22 Feb 2015 04:21:58 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+content-length: 258
+content-type: application/json; charset=utf-8
+
+[
+    {
+        "links": [
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
+                "rel": "self"
+            },
+            {
+                "allow": [
+                    "GET",
+                    "PUT"
+                ],
+                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/foo",
+                "rel": "location"
+            }
+        ],
+        "name": "Knox Thunderbane"
+    }
+]
+          </code></pre>
+          <aside class="notes">
+Restart the WSGI app, and then in another console list the characters:
+
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ CHAR_LOCATION_URL=/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/foo
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+$ http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
+
+          </code></pre>
+          <aside class="notes">
+<p>The user agent would then simply copy-paste the location href as before.</p>
+
+<p>[next fragment]</p>
+
+<p>And then proceed to move the character around exactly as before.</p>
+
+<p>Note how the user agent didn't have to change its logic at all to handle the URL schema change. This is just one example of how REST allows clients and servers to evolve independently.</p>
+
+          </aside>
         </section>
 
         <section id="conclusion">

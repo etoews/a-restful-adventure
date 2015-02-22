@@ -22,3 +22,9 @@
   padding-left: 1em;
   text-indent: -1em;
 }
+
+.reveal pre code.tall {
+  max-height: 600px;
+  font-size: 12px;
+  line-height: 1.25em;
+}
