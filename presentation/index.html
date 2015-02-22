@@ -1394,7 +1394,16 @@ def on_get(self, req, resp):
     characters = self._controller.list_characters()
 
     # Map the entities to the resource
-    resource = [self._entity_to_resource(c) for c in characters]
+        resource = {
+            'characters': [self._entity_to_resource(c) for c in characters],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET', 'POST'],
+                    'href': '/characters'
+                }
+            ]
+        }
 
     # Create a JSON representation of the resource
     resp.body = json.dumps(resource, ensure_ascii=False)
@@ -1652,7 +1661,16 @@ class CharacterList(CharacterBase):
         characters = self._controller.list_characters()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(c) for c in characters]
+        resource = {
+            'characters': [self._entity_to_resource(c) for c in characters],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET', 'POST'],
+                    'href': '/characters'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
@@ -1780,29 +1798,41 @@ Server: WSGIServer/0.1 Python/2.7.9
 content-length: 258
 content-type: application/json; charset=utf-8
 
-[
-    {
-        "links": [
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
-                "rel": "self"
-            },
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
-                "rel": "location"
-            }
-        ],
-        "name": "Knox Thunderbane"
-    }
-]
+{
+    "characters": [
+        {
+            "links": [
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
+                    "rel": "self"
+                },
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
+                    "rel": "location"
+                }
+            ],
+            "name": "Knox Thunderbane"
+        }
+    ],
+    "links": [
+        {
+            "allow": [
+                "GET",
+                "POST"
+            ],
+            "href": "/characters",
+            "rel": "self"
+        }
+    ]
+}
           </code></pre>
           <aside class="notes">
             <p>Let's test this out. First, ctrl-c the running script, if needed, and restart it to pick up the changes. Then in your other console, run this.</p>
@@ -2088,7 +2118,16 @@ class CharacterList(CharacterBase):
         characters = self._controller.list_characters()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(c) for c in characters]
+        resource = {
+            'characters': [self._entity_to_resource(c) for c in characters],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET', 'POST'],
+                    'href': '/characters'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
@@ -2293,50 +2332,62 @@ Server: WSGIServer/0.1 Python/2.7.9
 content-length: 514
 content-type: application/json; charset=utf-8
 
-[
-    {
-        "links": [
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
-                "rel": "self"
-            },
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
-                "rel": "location"
-            }
-        ],
-        "name": "Knox Thunderbane"
-    },
-    {
-        "links": [
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/8713e99b-d4d2-4855-85a2-9d0a32fec0b7",
-                "rel": "self"
-            },
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/8713e99b-d4d2-4855-85a2-9d0a32fec0b7/location",
-                "rel": "location"
-            }
-        ],
-        "name": "Commander Keen"
-    }
-]
+{
+    "characters": [
+        {
+            "links": [
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
+                    "rel": "self"
+                },
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
+                    "rel": "location"
+                }
+            ],
+            "name": "Knox Thunderbane"
+        },
+        {
+            "links": [
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/13742b78-be28-4662-b379-c9bba55b476c",
+                    "rel": "self"
+                },
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/13742b78-be28-4662-b379-c9bba55b476c/location",
+                    "rel": "location"
+                }
+            ],
+            "name": "Commander Keen"
+        }
+    ],
+    "links": [
+        {
+            "allow": [
+                "GET",
+                "POST"
+            ],
+            "href": "/characters",
+            "rel": "self"
+        }
+    ]
+}
           </code></pre>
           <aside class="notes">
 <p>And for good measure, let's make sure Commander Keen got added to the list. Run this to list the game characters again.</p>
@@ -2416,7 +2467,16 @@ def on_get(self, req, resp):
     dungeons = self._controller.list_dungeons()
 
     # Map the entities to the resource
-    resource = [self._entity_to_resource(d) for d in dungeons]
+    resource = {
+        'dungeons': [self._entity_to_resource(d) for d in dungeons],
+        'links': [
+            {
+                'rel': 'self',
+                'allow': ['GET'],
+                'href': '/dungeons'
+            }
+        ]
+    }
 
     # Create a JSON representation of the resource
     resp.body = json.dumps(resource, ensure_ascii=False)
@@ -2695,7 +2755,16 @@ class CharacterList(CharacterBase):
         characters = self._controller.list_characters()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(c) for c in characters]
+        resource = {
+            'characters': [self._entity_to_resource(c) for c in characters],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET', 'POST'],
+                    'href': '/characters'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
@@ -2795,7 +2864,16 @@ class DungeonList(DungeonBase):
         dungeons = self._controller.list_dungeons()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(d) for d in dungeons]
+        resource = {
+            'dungeons': [self._entity_to_resource(d) for d in dungeons],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET'],
+                    'href': '/dungeons'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
@@ -2865,53 +2943,64 @@ Server: WSGIServer/0.1 Python/2.7.9
 content-length: 564
 content-type: application/json; charset=utf-8
 
-[
-    {
-        "links": [
-            {
-                "allow": [
-                    "GET"
-                ],
-                "href": "/dungeons/f2e557e6-6b07-417b-b416-17d693f3eadd",
-                "rel": "self"
-            },
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/dungeons/f2e557e6-6b07-417b-b416-17d693f3eadd/rooms/29cf865c-936e-4dec-8626-9bab41ea619f",
-                "rel": "room first"
-            }
-        ],
-        "name": "Dungeon of Hope"
-    },
-    {
-        "links": [
-            {
-                "allow": [
-                    "GET"
-                ],
-                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117",
-                "rel": "self"
-            },
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27",
-                "rel": "room first"
-            }
-        ],
-        "name": "Dungeon of Doom"
-    }
-]
+{
+    "dungeons": [
+        {
+            "links": [
+                {
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons/f2e557e6-6b07-417b-b416-17d693f3eadd",
+                    "rel": "self"
+                },
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/dungeons/f2e557e6-6b07-417b-b416-17d693f3eadd/rooms/29cf865c-936e-4dec-8626-9bab41ea619f",
+                    "rel": "room first"
+                }
+            ],
+            "name": "Dungeon of Hope"
+        },
+        {
+            "links": [
+                {
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117",
+                    "rel": "self"
+                },
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27",
+                    "rel": "room first"
+                }
+            ],
+            "name": "Dungeon of Doom"
+        }
+    ],
+    "links": [
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "/dungeons",
+            "rel": "self"
+        }
+    ]
+}
           </code></pre>
           <aside class="notes">
-ctrl-c your app and restart it. Then in your other console window, enter the command shown here.
+<p>ctrl-c your app and restart it. Then in your other console window, enter the command shown here.</p>
 
-Cool. So far we've given players the ability to choose a character to play and a dungeon to enter. What's next?
+<p>Cool. So far we've given players the ability to choose a character to play and a dungeon to enter. What's next?</p>
           </aside>
         </section>
 
@@ -2936,29 +3025,41 @@ Server: WSGIServer/0.1 Python/2.7.9
 content-length: 258
 content-type: application/json; charset=utf-8
 
-[
-    {
-        "links": [
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
-                "rel": "self"
-            },
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
-                "rel": "location"
-            }
-        ],
-        "name": "Knox Thunderbane"
-    }
-]
+{
+    "characters": [
+        {
+            "links": [
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
+                    "rel": "self"
+                },
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
+                    "rel": "location"
+                }
+            ],
+            "name": "Knox Thunderbane"
+        }
+    ],
+    "links": [
+        {
+            "allow": [
+                "GET",
+                "POST"
+            ],
+            "href": "/characters",
+            "rel": "self"
+        }
+    ]
+}
           </code></pre>
           <aside class="notes">
 <p>Enter this in your console to list the characters...</p>
@@ -3417,7 +3518,16 @@ class CharacterList(CharacterBase):
         characters = self._controller.list_characters()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(c) for c in characters]
+        resource = {
+            'characters': [self._entity_to_resource(c) for c in characters],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET', 'POST'],
+                    'href': '/characters'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
@@ -3517,7 +3627,16 @@ class DungeonList(DungeonBase):
         dungeons = self._controller.list_dungeons()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(d) for d in dungeons]
+        resource = {
+            'dungeons': [self._entity_to_resource(d) for d in dungeons],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET'],
+                    'href': '/dungeons'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
@@ -4150,7 +4269,16 @@ class CharacterList(CharacterBase):
         characters = self._controller.list_characters()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(c) for c in characters]
+        resource = {
+            'characters': [self._entity_to_resource(c) for c in characters],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET', 'POST'],
+                    'href': '/characters'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
@@ -4298,7 +4426,16 @@ class DungeonList(DungeonBase):
         dungeons = self._controller.list_dungeons()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(d) for d in dungeons]
+        resource = {
+            'dungeons': [self._entity_to_resource(d) for d in dungeons],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET'],
+                    'href': '/dungeons'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
@@ -4539,29 +4676,41 @@ Server: WSGIServer/0.1 Python/2.7.9
 content-length: 258
 content-type: application/json; charset=utf-8
 
-[
-    {
-        "links": [
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
-                "rel": "self"
-            },
-            {
-                "allow": [
-                    "GET",
-                    "PUT"
-                ],
-                "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/foo",
-                "rel": "location"
-            }
-        ],
-        "name": "Knox Thunderbane"
-    }
-]
+{
+    "characters": [
+        {
+            "links": [
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1",
+                    "rel": "self"
+                },
+                {
+                    "allow": [
+                        "GET",
+                        "PUT"
+                    ],
+                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
+                    "rel": "location"
+                }
+            ],
+            "name": "Knox Thunderbane"
+        }
+    ],
+    "links": [
+        {
+            "allow": [
+                "GET",
+                "POST"
+            ],
+            "href": "/characters",
+            "rel": "self"
+        }
+    ]
+}
           </code></pre>
           <aside class="notes">
 Restart the WSGI app, and then in another console list the characters:

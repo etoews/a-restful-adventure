@@ -267,7 +267,16 @@ class CharacterList(CharacterBase):
         characters = self._controller.list_characters()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(c) for c in characters]
+        resource = {
+            'characters': [self._entity_to_resource(c) for c in characters],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET', 'POST'],
+                    'href': '/characters'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
@@ -415,7 +424,16 @@ class DungeonList(DungeonBase):
         dungeons = self._controller.list_dungeons()
 
         # Map the entities to the resource
-        resource = [self._entity_to_resource(d) for d in dungeons]
+        resource = {
+            'dungeons': [self._entity_to_resource(d) for d in dungeons],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET'],
+                    'href': '/dungeons'
+                }
+            ]
+        }
 
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
