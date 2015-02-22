@@ -5,7 +5,9 @@ import uuid
 import falcon
 
 
-# DAL (backend)
+# ===========================================================================
+# DAL (backend, storage and entities)
+# ===========================================================================
 
 class Controller(object):
     def __init__(self):
@@ -22,6 +24,10 @@ class Controller(object):
             uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
                 'name': 'Dungeon of Doom',
                 'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
+            },
+            uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
+                'name': 'Dungeon of Hope',
+                'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
             }
         }
 
@@ -138,9 +144,8 @@ class Controller(object):
 
         return entity
 
-
     def list_dungeons(self):
-        # Convert "database" result to entities
+        # Convert the database result to a list of entities
 
         # TODO: Handle the case that our DB can't be reached
         return [
@@ -153,9 +158,17 @@ class Controller(object):
         ]
 
 
-# API (frontend)
+# ===========================================================================
+# API (frontend, resources and representations)
+# ===========================================================================
 
 class CharacterBase(object):
+    """Base class for character resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    """
+
     def _entity_to_resource(self, character):
         base_href = self._id_to_href(character['id'])
         links = [
@@ -183,9 +196,6 @@ class CharacterBase(object):
     def _id_to_href(self, character_id):
         return '/characters/{0}'.format(character_id)
 
-    # Let's encapsulate the logic that understands the
-    # translation between entity concepts and API concepts
-    # in the same class.
     def _room_href_to_id(self, href):
         # ID will be the last part of the URL.
         return uuid.UUID(href.split('/')[-1])
@@ -198,8 +208,9 @@ class CharacterBase(object):
         }
 
 
-# Character's location concept
 class CharacterLocation(CharacterBase):
+    """Resource class for the character location concept."""
+
     def __init__(self, controller):
         self._controller = controller
 
@@ -242,8 +253,9 @@ class CharacterLocation(CharacterBase):
         resp.status = falcon.HTTP_204
 
 
-# List of characters concept
 class CharacterList(CharacterBase):
+    """Resource class for the character list concept."""
+
     def __init__(self, controller):
         # Controller instance is shared between resource classes
         self._controller = controller
@@ -286,8 +298,13 @@ class CharacterList(CharacterBase):
         resp.body = json.dumps(resource, ensure_ascii=False)
 
 
-# Room concept
 class RoomBase(object):
+    """Base class for room resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    """
+
     def _entity_to_resource(self, room):
         dungeon_id = room['dungeon_id']
         room_id = room['id']
@@ -329,6 +346,8 @@ class RoomBase(object):
 
 
 class Room(RoomBase):
+    """Resource class for the room concept."""
+
     def __init__(self, controller):
         self._controller = controller
 
@@ -355,6 +374,12 @@ class Room(RoomBase):
 
 
 class DungeonBase(object):
+    """Base class for dungeon resources.
+
+    This class consolidates the translation logic between backend and
+    frontent concepts.
+    """
+
     def _entity_to_resource(self, dungeon):
         base_href = '/dungeons/{0}'.format(dungeon['id'])
         links = [
@@ -377,8 +402,10 @@ class DungeonBase(object):
             'links': links
         }
 
-# List of dungeons concept
+
 class DungeonList(DungeonBase):
+    """Resource class for the dungeon list concept."""
+
     def __init__(self, controller):
         # Controller instance is shared between resource classes
         self._controller = controller
@@ -394,16 +421,46 @@ class DungeonList(DungeonBase):
         resp.body = json.dumps(resource, ensure_ascii=False)
 
 
-application = api = falcon.API()
+# ===========================================================================
+# Hello world
+# ===========================================================================
+
+class HelloResource(object):  # <w3>
+    def on_get(self, req, resp):
+        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.content_type = 'text/plain'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+
+
+# ===========================================================================
+# Routing
+# ===========================================================================
+
+# An instance of falcon.API is a WSGI application
+api = falcon.API()
+# api.add_route('/', HelloResource())  # <w4>
 
 controller = Controller()
-api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
 api.add_route('/characters', CharacterList(controller))
+api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
 api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
 api.add_route('/dungeons', DungeonList(controller))
 
 
+# ===========================================================================
+# WSGI
+# ===========================================================================
+
+def application(env, start_response):  # <w1>
+    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
+
+    start_response("200 OK", [('Content-Type', 'text/plain')])
+    return [body.encode('utf-8')]
+
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
-    server = make_server('127.0.0.1', 8000, application)
+
+    server = make_server('127.0.0.1', 8000, api)  # <w2>
     server.serve_forever()
