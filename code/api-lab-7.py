@@ -24,10 +24,6 @@ class Controller(object):
             uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
                 'name': 'Dungeon of Doom',
                 'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
-            },
-            uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
-                'name': 'Dungeon of Hope',
-                'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
             }
         }
 
@@ -399,9 +395,7 @@ class DungeonBase(object):
             },
             {
                 'rel': 'room first',
-                'allow': [
-                    'GET', 'PUT'
-                ],
+                'allow': ['GET'],
                 'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
             }
         ]
