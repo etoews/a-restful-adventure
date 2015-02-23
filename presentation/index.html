@@ -299,12 +299,12 @@
 
           <aside class="notes">
             <ul>
-              <li>JSON vs. XML vs. YAML vs. Protocol Buffers. Pick one that meets your requirements. Default to YAML.</li>
-              <li>I'll just pose a question on this one, how much does thinking of the data model implementation affect design of the API resources?</li>
-              <li>It affects your URLs so you'll need to decide if you want them early on</li>
-              <li>Not a solved problem and there's no de facto standard.</li>
-              <li>Punt</li>
-              <li>PUT or PATCH or JSON PATCH</li>
+              <li>Media Types: JSON vs. XML vs. YAML vs. Protocol Buffers. Pick one that meets your requirements. Default to JSON.</li>
+              <li>IDs vs hypermedia: I'll just pose a question on this one, how much does thinking of the data model implementation affect design of the API resource model?</li>
+              <li>Pretty URLs: This decision has a bigger impact if you're not doing hypermedia. If you're relying on clients to construct the URLs, the prettiness of the URLs matters a lot early on.</li>
+              <li>Versioning: Not a solved problem and there's no de facto standard. Put the version in a header, probably the Accept header.</li>
+              <li>Auth: Punt</li>
+              <li>Resouce Updates: PUT or PATCH or JSON PATCH</li>
             </ul>
           </aside>
         </section>
@@ -335,7 +335,7 @@
             <ul>
               <li>It drives the implementation of the client</li>
               <li>It drives the implementation of the server</li>
-              <li>When it comes to the implementation of the server, there is a huge tempation to have the server generate the API defintion from code</li>
+              <li>When it comes to the implementation of the server, there is a huge temptation to have the server generate the API definition from code</li>
               <li>But doing so makes it all too easy to break the API and your clients.</li>
               <li>It's an option if controls are in place to ensure changes to the server code, don't change the API definition unexpectedly, e.g. controls in your CI pipeline</li>
               <li>If you're not generating the API definition, how do you keep the definition and implementation in sync?</li>
@@ -347,7 +347,7 @@
 
         <section>
           <h1>Swagger</h1>
-          <h2><a href="https://github.com/swagger-api/swagger-spec" target="_blank">Spec</a></h2>
+          <h2><a href="https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md" target="_blank">Spec</a></h2>
 
           <aside class="notes">
             <ul>
@@ -356,6 +356,7 @@
               <li>It's certainly not perfect</li>
               <li>The spec can be hard to follow and there aren't examples of everything</li>
               <li>2.0 released late last year and not all of the tooling has caught up</li>
+              <li>A bunch of tools for 2.0 were just released last week</li>
               <li>The editor has improved since we began creating this workshop</li>
               <li>Some of the 3rd party tools look like they're in good shape, particularly the Python stuff</li>
               <li>I'd also be very interested to hear from people who've worked with RAML and API Blueprint</li>
@@ -413,6 +414,11 @@ paths:
         application/json: { "?": "?" }
       responses:
         201:
+          headers:
+            Location:
+              type: ?
+              format: ?
+              description: ?
           examples:
             application/json: |-
               {
@@ -424,6 +430,7 @@ paths:
 
         <section>
           <h1>Lab: Models</h1>
+          <p>Hint: <a href="https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#data-types" target="_blank">Data Types</a></p>
           <pre><code data-trim>
 swagger: "2.0"
 info:
@@ -438,78 +445,17 @@ produces:
   - application/json
 paths:
   /characters:
-    get:
-      summary: List all Characters
-      operationId: list_characters
-      responses:
-        200:
-          description: An array of Characters
-          schema:
-            properties:
-              characters:
-                type: array
-                $ref: "#/definitions/Characters"
-          examples:
-            application/json: |-
-              {
-                "characters": [
-                  {
-                    "id": "1234",
-                    "name": "Knox Thunderbane",
-                    "dungeon_id": "2345",
-                    "room_id": "3456"
-                  }
-                ]
-              }
-    post:
-      summary: Create a Character
-      operationId: create_character
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            properties:
-              name:
-                type: string
-                minLength: 1
-                maxLength: 256
-      x-examples:
-        application/json: { "name": "Knox Thunderbane" }
-      responses:
-        201:
-          description: Character created
-          headers:
-            Location:
-              type: string
-              format: url
-              description: A link to the Character
-          schema:
-            $ref: "#/definitions/Character"
-          # TODO: Do we want a top-level "character" key like we have with "characters"? e.g. { "character": {"id": 1234, ...}}
-          examples:
-            application/json: |-
-              {
-                "id": "1234",
-                "name": "Knox Thunderbane"
-              }
+  ...
 definitions:
   Character:
     type: object
-    required:
-      - ?
     properties:
-      id:
+      replace-this-with-name-of-property-1:
         type: ?
-        readOnly: ?
-      name:
+        format: ?
+      replace-this-with-name-of-property-2:
         type: ?
-        minLength: ?
-        maxLength: ?
-      dungeon_id:
-        type: ?
-      room_id:
-        type: ?
+        format: ?
   Characters:
     type: array
     items:
@@ -549,30 +495,10 @@ curl ?
         <section>
           <h1>Example</h1>
           <ul>
-            <li>Client: <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/design/id-based/curl.sh" target="_blank">curl</a></li>
-            <li>Server: <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/design/id-based/dungeon_crawler.py" target="_blank">Flask</a></li>
+            <li>Client: <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/design/id-based/mock_client.sh" target="_blank">httpie</a></li>
+            <li>Server: <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/design/id-based/mock_server.py" target="_blank">Flask</a></li>
           </ul>
         </section>
-
-        <section>
-          <h1>Documentation</h1>
-
-          <aside class="notes">
-            <ul>
-              <li>APIs should as self documenting as possible</li>
-              <li>Should be as machine readable as possible</li>
-              <li>There will always be a semantic gap that requires human understanding</li>
-              <li>This is where beautiful documentation comes in</li>
-            </ul>
-          </aside>
-        </section>
-
-        <section>
-          <h1>Lab: API Doc</h1>
-          <h2>Copy: <a href="https://raw.githubusercontent.com/everett-toews/a-restful-adventure/gh-pages/design/hypermedia-based/swagger.yaml" target="_blank">Swagger YAML</a></h2>
-          <h2>Paste: <a href="http://editor.swagger.io/" target="_blank">Swagger Editor</a></h2>
-        </section>
-
         <section>
           <h1>Errors</h1>
 
@@ -603,8 +529,26 @@ curl ?
           </code></pre>
         </section>
 
+        <section>
+          <h1>Documentation</h1>
 
-        <section id="break">
+          <aside class="notes">
+            <ul>
+              <li>APIs should as self documenting as possible</li>
+              <li>Should be as machine readable as possible</li>
+              <li>There will always be a semantic gap that requires human understanding</li>
+              <li>This is where beautiful documentation comes in</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Lab: API Doc</h1>
+          <h2>Copy: <a href="https://raw.githubusercontent.com/everett-toews/a-restful-adventure/gh-pages/design/hypermedia-based/swagger.yaml" target="_blank">Swagger YAML</a></h2>
+          <h2>Paste: <a href="http://editor.swagger.io/" target="_blank">Swagger Editor</a></h2>
+        </section>
+
+          <section id="break">
           <h1>Break</h1>
           <aside class="notes">
             We're going to now take a short break. In the next module we will be working in python, so please make sure you are ready to go with python installed and your favorite text-editor or IDE. If you need help getting set up, please let one of us know and we'd be glad to help.
@@ -620,505 +564,15 @@ curl ?
               <li>During this next module we are going to implement a RESTful web service using python.</li>
               <li>We'll approach this by implementing slices of the API at a time.</li>
               <li>We <em>will</em> need to move quickly, so I'd like to encourage everyone to follow along with the slides in your own browser, and copy-paste the code snippets as we work through the labs.</li>
-              <li>Everett will be walking around to help, so please flag him down at any time during the labs if you colid use a hand.</li>
+              <li>Everett will be walking around to help, so please flag him down at any time during the labs if you could use a hand.</li>
             </ul>
           </aside>
         </section>
 
         <section>
           <h1>The API Spec</h1>
-          https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/design/hypermedia-based/swagger.yaml
-        </section>
+          <p><a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/design/hypermedia-based/swagger.yaml" target="_blank">/design/hypermedia-based/swagger.yaml</a></p>
 
-        <section>
-          <pre><code class="tall" data-trim>
-swagger: "2.0"
-info:
-  version: 1.0.0
-  title: A RESTful Adventure
-host: localhost
-schemes:
-  - http
-consumes:
-  - application/json
-produces:
-  - application/json
-paths:
-  /characters:
-    get:
-      summary: List all Characters
-      operationId: list_characters
-      responses:
-        200:
-          description: An array of Characters
-          schema:
-            $ref: "#/definitions/Characters"
-          examples:
-            application/json: |-
-              {
-                "characters": [
-                  {
-                    "name": "Knox Thunderbane",
-                    "links": [
-                      {
-                        "rel": "self",
-                        "allow": [
-                          "GET", "PUT"
-                        ],
-                        "href": "/characters/1234"
-                      },
-                      {
-                        "rel": "location",
-                        "allow": [
-                          "GET", "PUT"
-                        ],
-                        "href": "/characters/1234/location"
-                      }
-                    ]
-                  }
-                ],
-                "links": [
-                  {
-                    "rel": "self",
-                    "allow": [
-                      "GET", "POST"
-                    ],
-                    "href": "/characters"
-                  }
-                ]
-              }
-    post:
-      summary: Create a Character
-      operationId: create_character
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            properties:
-              name:
-                type: string
-                minLength: 1
-                maxLength: 256
-      x-examples:
-        application/json: { "name": "Knox Thunderbane" }
-      responses:
-        201:
-          description: Character created
-          headers:
-            Location:
-              type: string
-              format: url
-              description: A link to the Character
-          schema:
-            $ref: "#/definitions/Character"
-          examples:
-            application/json: |-
-              {
-                "name": "Knox Thunderbane",
-                "links": [
-                  {
-                    "rel": "self",
-                    "allow": [
-                      "GET", "PUT"
-                    ],
-                    "href": "/characters/1234"
-                  },
-                  {
-                    "rel": "location",
-                    "allow": [
-                      "GET", "PUT"
-                    ],
-                    "href": "/characters/1234/location"
-                  }
-                ]
-              }
-        default:
-          description: Unexpected errors
-          schema:
-            $ref: "#/definitions/Errors"
-  /characters/{character_id}:
-    get:
-      summary: Get a specific Character
-      operationId: get_character
-      parameters:
-        - name: character_id
-          in: path
-          required: true
-          type: string
-          description: The id of the Character to retrieve
-      responses:
-        200:
-          description: A Character
-          schema:
-            $ref: "#/definitions/Character"
-          examples:
-            application/json: |-
-              {
-                "name": "Knox Thunderbane",
-                "links": [
-                  {
-                    "rel": "self",
-                    "allow": [
-                      "GET", "PUT"
-                    ],
-                    "href": "/characters/1234"
-                  },
-                  {
-                    "rel": "location",
-                    "allow": [
-                      "GET", "PUT"
-                    ],
-                    "href": "/characters/1234/location"
-                  }
-                ]
-              }
-        default:
-          description: Unexpected Errors
-          schema:
-            $ref: "#/definitions/Errors"
-    put:
-      summary: Update a Character
-      operationId: update_character
-      parameters:
-        - name: character_id
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          description: Rename a Character.
-          schema:
-            $ref: "#/definitions/Character"
-      x-examples:
-        application/json: |-
-          {
-            "name": "Knox Thunderbane II"
-          }
-      responses:
-        204:
-          description: Character updated
-        default:
-          description: Unexpected errors
-          schema:
-            $ref: "#/definitions/Errors"
-    delete:
-      summary: Delete a Character
-      operationId: delete_character
-      parameters:
-        - name: character_id
-          in: path
-          required: true
-          type: string
-      responses:
-        204:
-          description: Character deleted
-        default:
-          description: Unexpected errors
-          schema:
-            $ref: "#/definitions/Errors"
-  /characters/{character_id}/location:
-    get:
-      summary: Get a specific Character's location
-      operationId: get_character_location
-      parameters:
-        - name: character_id
-          in: path
-          required: true
-          type: string
-      responses:
-        200:
-          description: A CharacterLocation
-          schema:
-            $ref: "#/definitions/CharacterLocation"
-          examples:
-            application/json: |-
-              {
-                  "allow": [
-                      "GET"
-                  ],
-                  "href": "dungeons/1234/rooms/1001",
-                  "rel": "room"
-              }
-        default:
-          description: Unexpected Errors
-          schema:
-            $ref: "#/definitions/Errors"
-    put:
-      summary: Update a Character's location
-      operationId: update_character_location
-      parameters:
-        - name: character_id
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            properties:
-              rel:
-                type: string
-              href:
-                type: string
-                format: url
-      x-examples:
-        application/json: |-
-          {
-            "rel": "room",
-            "href": "/dungeons/1234/rooms/1002"
-          }
-      responses:
-        204:
-          description: Character updated
-        default:
-          description: Unexpected errors
-          schema:
-            $ref: "#/definitions/Errors"
-  /dungeons:
-    get:
-      summary: List all Dungeons
-      operationId: list_dungeons
-      responses:
-        200:
-          description: An array of Dungeons
-          schema:
-            properties:
-              dungeons:
-                type: array
-                $ref: "#/definitions/Dungeons"
-          examples:
-            application/json: |-
-              {
-                "dungeons": [
-                  {
-                    "name": "Dungeon of Doom",
-                    "entrance_room_id": "1000",
-                    "links": [
-                      {
-                        "rel": "self",
-                        "href": "/dungeons/1234"
-                      },
-                      {
-                        "rel": "room",
-                        "allow": [
-                            "GET"
-                        ],
-                        "href": "/dungeons/1234/rooms/1002",
-                        "description": "entrance"
-                    ]
-                  }
-                ],
-                "links": [
-                  {
-                    "rel": "self",
-                    "allow": [
-                        "GET"
-                    ],
-                    "href": "/dungeons"
-                  }
-                ]
-              }
-  /dungeons/{dungeon_id}:
-    get:
-      summary: Get a specific Dungeon
-      operationId: get_dungeon
-      parameters:
-        - name: dungeon_id
-          in: path
-          required: true
-          description: The id of the Dungeon to retrieve
-          type: string
-      responses:
-        200:
-          description: A Dungeon
-          schema:
-            $ref: "#/definitions/Dungeon"
-          examples:
-            application/json: |-
-              {
-                "name": "Dungeon of Doom",
-                "links": [
-                  {
-                    "rel": "self",
-                    "href": "/dungeons/1234"
-                  },
-                  {
-                    "rel": "room",
-                    "allow": [
-                        "GET"
-                    ],
-                    "href": "/dungeons/1234/rooms/1000",
-                    "description": "entrance"
-                ]
-              }
-        default:
-          description: Unexpected errors
-          schema:
-            $ref: "#/definitions/Errors"
-  /dungeons/{dungeon_id}/rooms/{room_id}:
-    get:
-      summary: Get a specific Room in a specific Dungeon
-      operationId: get_room
-      parameters:
-        - name: dungeon_id
-          in: path
-          description: The id of the Dungeon
-          required: true
-          type: string
-        - name: room_id
-          in: path
-          description: The id of the Room
-          required: true
-          type: string
-      responses:
-        200:
-          description: Expected response to a valid request
-          schema:
-            $ref: "#/definitions/Room"
-          examples:
-            application/json: |-
-              {
-                "name": "Entrance",
-                "is_exit": false,
-                "links": [
-                  {
-                    "rel": "self",
-                    "href": "/dungeons/1234/rooms/1000"
-                  },
-                  {
-                    "rel": "room",
-                    "allow": [
-                        "GET"
-                    ],
-                    "href": "/dungeons/1234/rooms/1001"
-                    "description": "east",
-                  }
-                ]
-              }
-        default:
-          description: Unexpected errors
-          schema:
-            $ref: "#/definitions/Errors"
-definitions:
-  Character:
-    required:
-      - name
-    properties:
-      name:
-        type: string
-        minLength: 1
-        maxLength: 256
-      links:
-        type: array
-        readOnly: true
-        items:
-          type: object
-          properties:
-            rel:
-              type: string
-            allow:
-              type: string
-            href:
-              type: string
-              format: url
-  Characters:
-    readOnly: true
-    properties:
-      characters:
-        type: array
-        items:
-          $ref: "#/definitions/Character"
-      links:
-        type: array
-        items:
-          type: object
-          properties:
-            rel:
-              type: string
-            allow:
-              type: string
-            href:
-              type: string
-              format: url
-  CharacterLocation:
-    properties:
-      rel:
-        type: string
-      allow:
-        type: string
-      href:
-        type: string
-        format: url
-  Room:
-    readOnly: true
-    properties:
-      id:
-        type: string
-        readOnly: true
-      name:
-        type: string
-      dungeon_id:
-        type: string
-      is_exit:
-        type: boolean
-      doors:
-        type: array
-        items:
-          type: object
-          properties:
-            room_id:
-              type: string
-            direction:
-              type: string
-              enum:
-                - north
-                - south
-                - east
-                - west
-  Dungeon:
-    readOnly: true
-    properties:
-      id:
-        type: string
-      entrance_room_id:
-        type: string
-      name:
-        type: string
-  Dungeons:
-    type: array
-    items:
-      $ref: "#/definitions/Dungeon"
-  Error:
-    readOnly: true
-    properties:
-      transaction_id:
-        type: string
-        description: A transaction id for error response. Used to easily match an API user debugging their application to the errors on the server side, as discoverable by the operations team running the API.
-      code:
-        type: string
-        description: A machine readable application error code. Not to be confused with the HTTP status code in the response.
-      title:
-        type: string
-        description: A short, human readable title of the error.
-      description:
-        type: string
-        description: A long, human readable description of the error.
-      link:
-        properties:
-          rel:
-            type: string
-            enum: [ "help" ]
-          href:
-            type: string
-            format: url
-            description: A link to a document containing more information about the error and how to take action on it.
-  Errors:
-    type: array
-    items:
-      $ref: "#/definitions/Error"
-          </code></pre>
           <aside class="notes">
             <ul>Here's the design we'll be implementing.</ul>
             <ul>I won't spend much time on it now, but we'll refer back to portions of it as we go along.</ul>
