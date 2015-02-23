@@ -157,5 +157,9 @@ def application(env, start_response):  # <w1>
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
 
-    server = make_server('127.0.0.1', 8000, application)  # <w2>
+    host = '127.0.0.1'
+    port = 8000
+    server = make_server(host, port, application)  # <w2>
+
+    print('Listening on {0}:{1}'.format(host, port))
     server.serve_forever()
