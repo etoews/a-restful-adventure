@@ -1,18 +1,20 @@
 #!/bin/bash
 
-# requirements: jq (see http://stedolan.github.io/jq/)
+# requirements:
+#   jq (see http://stedolan.github.io/jq/)
+#   httpie (see http://httpie.org)
 
 set -euo pipefail
 
 HOST=http://localhost:5000
 
 echo "Create a character"
-curl -s -X POST -H 'Content-type: application/json' -d '{ "name": "Steve" }' $HOST/characters
+http POST $HOST/characters name=Steve
 
 printf "\n\n"
 
 echo "Get characters"
-CHARACTERS=$(curl -s -X GET -H 'Accept: application/json' $HOST/characters)
+CHARACTERS=$(http $HOST/characters)
 echo $CHARACTERS | jq .
 CHARACTER_ID=$(echo $CHARACTERS | jq -r .characters[0].id)
 echo "Picked character id: $CHARACTER_ID"
@@ -20,12 +22,12 @@ echo "Picked character id: $CHARACTER_ID"
 printf "\n\n"
 
 echo "Get a character"
-curl -s -X GET -H 'Accept: application/json' $HOST/characters/$CHARACTER_ID
+http $HOST/characters/$CHARACTER_ID
 
 printf "\n\n"
 
 echo "Get dungeons"
-DUNGEONS=$(curl -s -X GET -H 'Accept: application/json' $HOST/dungeons)
+DUNGEONS=$(http $HOST/dungeons)
 echo $DUNGEONS | jq .
 DUNGEON_ID=$(echo $DUNGEONS | jq -r .dungeons[0].id)
 ENTRANCE_ROOM_ID=$(echo $DUNGEONS | jq -r .dungeons[0].entrance_room_id)
@@ -35,28 +37,27 @@ echo "Entrance room id: $ENTRANCE_ROOM_ID"
 printf "\n\n"
 
 echo "Get a dungeon"
-curl -s -X GET -H 'Accept: application/json' $HOST/dungeons/$DUNGEON_ID
+http $HOST/dungeons/$DUNGEON_ID
 
 printf "\n\n"
 
 echo "Enter the dungeon"
-curl -s -X PUT -H 'Content-type: application/json' -d '{ "id": "$CHARACTER_ID", "name": "Steve", "dungeon_id": "$DUNGEON_ID", "room_id": "$ENTRANCE_ROOM_ID" }' $HOST/characters/$CHARACTER_ID
+http PUT $HOST/characters/$CHARACTER_ID id=$CHARACTER_ID name=Steve dungeon_id=$DUNGEON_ID room_id=$ENTRANCE_ROOM_ID
 
 echo "Get a room"
-ROOM=$(curl -s -X GET -H 'Accept: application/json' $HOST/dungeons/$DUNGEON_ID/rooms/$ENTRANCE_ROOM_ID)
+ROOM=$(http $HOST/dungeons/$DUNGEON_ID/rooms/$ENTRANCE_ROOM_ID)
 ROOM_NAME=$(echo $ROOM | jq -r .name)
 NEXT_ROOM_ID=$(echo $ROOM | jq -r .doors[0].room_id)
 echo "Room name: $ROOM_NAME"
 
 echo "Get a room"
-ROOM=$(curl -s -X GET -H 'Accept: application/json' $HOST/dungeons/$DUNGEON_ID/rooms/$NEXT_ROOM_ID)
+ROOM=$(http $HOST/dungeons/$DUNGEON_ID/rooms/$NEXT_ROOM_ID)
 ROOM_NAME=$(echo $ROOM | jq -r .name)
 NEXT_ROOM_ID=$(echo $ROOM | jq -r .doors[0].room_id)
 echo "Room name: $ROOM_NAME"
 
 echo "Get a room"
-ROOM=$(curl -s -X GET -H 'Accept: application/json' $HOST/dungeons/$DUNGEON_ID/rooms/$NEXT_ROOM_ID)
+ROOM=$(http $HOST/dungeons/$DUNGEON_ID/rooms/$NEXT_ROOM_ID)
 ROOM_NAME=$(echo $ROOM | jq -r .name)
 NEXT_ROOM_ID=$(echo $ROOM | jq -r .doors[0].room_id)
 echo "Room name: $ROOM_NAME"
-
