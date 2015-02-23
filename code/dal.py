@@ -18,12 +18,6 @@ class Controller(object):
         }
 
         self._dungeons = {
-            # Special "dungeon" that represents a location outside any dungeon
-            uuid.UUID('aeac18ba-9323-455b-a20d-453cf28d5caa') : {
-                'name': '*',
-                'entry_id': uuid.UUID('4e99416c-f018-4636-b81d-06853163fe9a')
-            },
-
             uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
                 'name': 'Dungeon of Doom',
                 'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
@@ -31,14 +25,6 @@ class Controller(object):
         }
 
         self._rooms = {
-            # Special "room" that represents a location outside any dungeon
-            uuid.UUID('4e99416c-f018-4636-b81d-06853163fe9a'): {
-                'name': '*',
-                'is_exit': False,
-                'dungeon_id': uuid.UUID('aeac18ba-9323-455b-a20d-453cf28d5caa'),
-                'doorways': []
-            },
-
             uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27'): {
                 'name': 'Super Creepy Entrance',
                 'is_exit': False,

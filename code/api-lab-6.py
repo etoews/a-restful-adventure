@@ -199,9 +199,7 @@ class DungeonBase(object):
             },
             {
                 'rel': 'room first',
-                'allow': [
-                    'GET', 'PUT'
-                ],
+                'allow': ['GET'],
                 'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
             }
         ]

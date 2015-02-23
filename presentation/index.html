@@ -1305,6 +1305,7 @@ Now that we can choose a character, or create a new one if we don't like any of 
                       ],
                       "href": "/dungeons/1234/rooms/1002",
                       "description": "entrance"
+                    }
                   ]
                 }
               ],
@@ -1371,9 +1372,7 @@ def _entity_to_resource(self, dungeon):
         },
         {
             'rel': 'room first',
-            'allow': [
-                'GET', 'PUT'
-            ],
+            'allow': ['GET'],
             'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
         }
     ]
@@ -1432,33 +1431,12 @@ content-type: application/json; charset=utf-8
                     "allow": [
                         "GET"
                     ],
-                    "href": "/dungeons/f2e557e6-6b07-417b-b416-17d693f3eadd",
-                    "rel": "self"
-                },
-                {
-                    "allow": [
-                        "GET",
-                        "PUT"
-                    ],
-                    "href": "/dungeons/f2e557e6-6b07-417b-b416-17d693f3eadd/rooms/29cf865c-936e-4dec-8626-9bab41ea619f",
-                    "rel": "room first"
-                }
-            ],
-            "name": "Dungeon of Hope"
-        },
-        {
-            "links": [
-                {
-                    "allow": [
-                        "GET"
-                    ],
                     "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117",
                     "rel": "self"
                 },
                 {
                     "allow": [
-                        "GET",
-                        "PUT"
+                        "GET"
                     ],
                     "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27",
                     "rel": "room first"
@@ -1558,7 +1536,7 @@ content-type: application/json; charset=utf-8
         </section>
 
         <section>
-          <pre><code data-trim class="lang-sh">
+          <pre><code data-trim class="nohighlight">
 $ CHAR_LOCATION_URL=/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location
 
           </code></pre>
@@ -1569,7 +1547,7 @@ First, we'll copy and paste the href from the location link we got in our previo
         </section>
 
         <section>
-          <pre><code data-trim class="lang-sh">
+          <pre><code data-trim class="nohighlight smaller-text">
 $ ROOM_URL=/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27
 
           </code></pre>
@@ -1896,7 +1874,7 @@ def on_get(self, req, resp, dungeon_id, room_id):
         </section>
 
         <section>
-          <h3>a9, a10</h3>
+          <h3>a9</h3>
           <pre><code data-trim class="lang-py">
 def _entity_to_resource(self, room):
     dungeon_id = room['dungeon_id']
@@ -1939,7 +1917,20 @@ def _id_to_href(self, room_id, dungeon_id):
 
           </code></pre>
           <aside class="notes">
-Next, fill in tags *a9* and *a10* as show here, to make self._entity_to_resource() work as it should.
+Next, fill in the *a9* tag as show here, to make self._entity_to_resource() work as it should.
+
+          </aside>
+        </section>
+
+        <section>
+          <h3>a10</h3>
+          <pre><code data-trim class="lang-py">
+def _id_to_href(self, room_id, dungeon_id):
+    return '/dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
+
+          </code></pre>
+          <aside class="notes">
+And then, right below that, find tag *a10* and implement the _id_to_href() method, as shown here.
 
           </aside>
         </section>
@@ -1971,7 +1962,7 @@ api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
         </section>
 
         <section>
-          <pre><code data-trim class="lang-sh">
+          <pre><code data-trim class="nohighlight smaller-text">
 $ ROOM_URL=/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/751d5812-144d-40f8-a82d-221dbb3075e2
 
           </code></pre>
