@@ -779,48 +779,48 @@ $ http 127.0.0.1:8000 x-name:Adventurer
         <section>
           <pre><code data-trim class="lang-yaml">
 /characters:
-    get:
-      summary: List all Characters
-      operationId: list_characters
-      responses:
-        200:
-          description: An array of Characters
-          schema:
-            $ref: "#/definitions/Characters"
-          examples:
-            application/json: |-
-              {
-                "characters": [
-                  {
-                    "name": "Knox Thunderbane",
-                    "links": [
-                      {
-                        "rel": "self",
-                        "allow": [
-                          "GET", "PUT"
-                        ],
-                        "href": "/characters/1234"
-                      },
-                      {
-                        "rel": "location",
-                        "allow": [
-                          "GET", "PUT"
-                        ],
-                        "href": "/characters/1234/location"
-                      }
-                    ]
-                  }
-                ],
-                "links": [
-                  {
-                    "rel": "self",
-                    "allow": [
-                      "GET", "POST"
-                    ],
-                    "href": "/characters"
-                  }
-                ]
-              }
+  get:
+    summary: List all Characters
+    operationId: list_characters
+    responses:
+      200:
+        description: An array of Characters
+        schema:
+          $ref: "#/definitions/Characters"
+        examples:
+          application/json: |-
+            {
+              "characters": [
+                {
+                  "name": "Knox Thunderbane",
+                  "links": [
+                    {
+                      "rel": "self",
+                      "allow": [
+                        "GET", "PUT"
+                      ],
+                      "href": "/characters/1234"
+                    },
+                    {
+                      "rel": "location",
+                      "allow": [
+                        "GET", "PUT"
+                      ],
+                      "href": "/characters/1234/location"
+                    }
+                  ]
+                }
+              ],
+              "links": [
+                {
+                  "rel": "self",
+                  "allow": [
+                    "GET", "POST"
+                  ],
+                  "href": "/characters"
+                }
+              ]
+            }
           </code></pre>
           <aside class="notes">
             Let's remind ourselves what this is supposed to look like. Here's the swagger spec.
@@ -1027,55 +1027,56 @@ content-type: application/json; charset=utf-8
           <pre><code data-trim class="lang-yaml tall">
 
 post:
-      summary: Create a Character
-      operationId: create_character
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            properties:
-              name:
-                type: string
-                minLength: 1
-                maxLength: 256
-      x-examples:
-        application/json: { "name": "Knox Thunderbane" }
-      responses:
-        201:
-          description: Character created
-          headers:
-            Location:
-              type: string
-              format: url
-              description: A link to the Character
-          schema:
-            $ref: "#/definitions/Character"
-          examples:
-            application/json: |-
+  summary: Create a Character
+  operationId: create_character
+  parameters:
+    - name: body
+      in: body
+      required: true
+      schema:
+        properties:
+          name:
+            type: string
+            minLength: 1
+            maxLength: 256
+  x-examples:
+    application/json: { "name": "Knox Thunderbane" }
+  responses:
+    201:
+      description: Character created
+      headers:
+        Location:
+          type: string
+          format: url
+          description: A link to the Character
+      schema:
+        $ref: "#/definitions/Character"
+      examples:
+        application/json: |-
+          {
+            "name": "Knox Thunderbane",
+            "links": [
               {
-                "name": "Knox Thunderbane",
-                "links": [
-                  {
-                    "rel": "self",
-                    "allow": [
-                      "GET", "PUT"
-                    ],
-                    "href": "/characters/1234"
-                  },
-                  {
-                    "rel": "location",
-                    "allow": [
-                      "GET", "PUT"
-                    ],
-                    "href": "/characters/1234/location"
-                  }
-                ]
+                "rel": "self",
+                "allow": [
+                  "GET", "PUT"
+                ],
+                "href": "/characters/1234"
+              },
+              {
+                "rel": "location",
+                "allow": [
+                  "GET", "PUT"
+                ],
+                "href": "/characters/1234/location"
               }
-        default:
-          description: Unexpected errors
-          schema:
-            $ref: "#/definitions/Errors"
+            ]
+          }
+    default:
+      description: Unexpected errors
+      schema:
+        $ref: "#/definitions/Error"
+
           </code></pre>
           <aside class="notes">
 
@@ -1271,49 +1272,48 @@ Now that we can choose a character, or create a new one if we don't like any of 
         <section>
           <pre><code data-trim class="lang-yaml tall">
 /dungeons:
-    get:
-      summary: List all Dungeons
-      operationId: list_dungeons
-      responses:
-        200:
-          description: An array of Dungeons
-          schema:
-            properties:
-              dungeons:
-                type: array
-                $ref: "#/definitions/Dungeons"
-          examples:
-            application/json: |-
-              {
-                "dungeons": [
-                  {
-                    "name": "Dungeon of Doom",
-                    "entrance_room_id": "1000",
-                    "links": [
-                      {
-                        "rel": "self",
-                        "href": "/dungeons/1234"
-                      },
-                      {
-                        "rel": "room",
-                        "allow": [
-                            "GET"
-                        ],
-                        "href": "/dungeons/1234/rooms/1002",
-                        "description": "entrance"
-                    ]
-                  }
-                ],
-                "links": [
-                  {
-                    "rel": "self",
-                    "allow": [
-                        "GET"
-                    ],
-                    "href": "/dungeons"
-                  }
-                ]
-              }
+  get:
+    summary: List all Dungeons
+    operationId: list_dungeons
+    responses:
+      200:
+        description: An array of Dungeons
+        schema:
+          $ref: "#/definitions/Dungeons"
+        examples:
+          application/json: |-
+            {
+              "dungeons": [
+                {
+                  "name": "Dungeon of Doom",
+                  "links": [
+                    {
+                      "rel": "self",
+                      "allow": [
+                          "GET"
+                      ],
+                      "href": "/dungeons/1234"
+                    },
+                    {
+                      "rel": "room first",
+                      "allow": [
+                          "GET"
+                      ],
+                      "href": "/dungeons/1234/rooms/1002",
+                      "description": "entrance"
+                  ]
+                }
+              ],
+              "links": [
+                {
+                  "rel": "self",
+                  "allow": [
+                      "GET"
+                  ],
+                  "href": "/dungeons"
+                }
+              ]
+            }
           </code></pre>
           <aside class="notes">
 <p>Here's the relevant part of our spec.</p>
@@ -1653,57 +1653,64 @@ To get a list of doorways, we need to implement a Room resource that will provid
           <p>TODO: description vs. rel - html-ish approach, may be a better way, but I went with this for the impl - maybe make array... could probably change it if necessary...</p>
           <pre><code data-trim class="lang-yaml tall">
 /dungeons/{dungeon_id}/rooms/{room_id}:
-get:
-  summary: Get a specific Room in a specific Dungeon
-  operationId: get_room
-  parameters:
-    - name: dungeon_id
-      in: path
-      description: The id of the Dungeon
-      required: true
-      type: string
-    - name: room_id
-      in: path
-      description: The id of the Room
-      required: true
-      type: string
-  responses:
-    200:
-      description: Expected response to a valid request
-      schema:
-        $ref: "#/definitions/Room"
-      examples:
-        application/json: |-
-          {
-            "name": "Entrance",
-            "is_exit": false,
-            "links": [
-              {
-                "rel": "self",
-                "allow": [ "GET" ],
-                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27"
-              },
-              {
-                "rel": "dungeon",
-                "allow": [ "GET" ],
-                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117"
-              },
-              {
-                "rel": "room north",
-                "allow": [ "GET" ],
-                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/6e7311fa-6045-4daf-a55c-9e8a714e5972"
-              },
-              {
-                "rel": "room east",
-                "allow": [ "GET" ],
-                "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/adb6b3db-cfd7-4be8-8ab2-bba4e7990706"
-              }
-            ]
-          }
-    default:
-      description: Unexpected errors
-      schema:
-        $ref: "#/definitions/Errors"
+  get:
+    summary: Get a specific Room in a specific Dungeon
+    operationId: get_room
+    parameters:
+      - name: dungeon_id
+        in: path
+        description: The id of the Dungeon
+        required: true
+        type: string
+      - name: room_id
+        in: path
+        description: The id of the Room
+        required: true
+        type: string
+    responses:
+      200:
+        description: Expected response to a valid request
+        schema:
+          $ref: "#/definitions/Room"
+        examples:
+          application/json: |-
+            {
+              "name": "Entrance",
+              "is_exit": false,
+              "links": [
+                {
+                  "rel": "self",
+                  "href": "/dungeons/1234/rooms/1000"
+                },
+                {
+                  "rel": "room east",
+                  "allow": [
+                      "GET"
+                  ],
+                  "href": "/dungeons/1234/rooms/1001"
+                }
+              ]
+            }
+      400:
+        description: You tried to teleport. That's just not allowed.
+        schema:
+          $ref: "#/definitions/Error"
+        examples:
+          application/json: |-
+            {
+              "transaction_id": "71607e7c-df7c-45f3-b571-d1829de4ad9a",
+              "code": "736.9",
+              "title": "Teleport Denied",
+              "description": "The room you tried to visit does not exist or is not accessible from your current room. Thought you could get away with it didn't you.",
+              "link": {
+                  "rel": "help",
+                  "href": "http://en.wikipedia.org/wiki/No-teleportation_theorem"
+                }
+            }
+      default:
+        description: Unexpected errors
+        schema:
+          $ref: "#/definitions/Error"
 
           </code></pre>
           <aside class="notes">
@@ -1898,7 +1905,7 @@ content-type: application/json; charset=utf-8
             "rel": "room south"
         }
     ],
-    "name": "Room"
+    "name": "Armory"
 }
           </code></pre>
           <aside class="notes">

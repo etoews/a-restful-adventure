@@ -55,7 +55,7 @@ class Controller(object):
                 ]
             },
             uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2'): {
-                'name': 'Room',
+                'name': 'Armory',
                 'is_exit': False,
                 'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
                 'doorways': [
@@ -66,7 +66,7 @@ class Controller(object):
                 ]
             },
             uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e'): {
-                'name': 'Armory',
+                'name': 'Gaurd Room',
                 'is_exit': False,
                 'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
                 'doorways': [
