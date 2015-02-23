@@ -4,76 +4,7 @@ import uuid
 
 import falcon
 
-
-# ===========================================================================
-# DAL (backend, storage and entities)
-# ===========================================================================
-
-class Controller(object):
-    def __init__(self):
-        # Store data in MyLDB
-
-        self._characters = {
-            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
-                'name': 'Knox Thunderbane',
-                'room_id': None
-            }
-        }
-
-        self._dungeons = {
-            # <d2>
-        }
-
-        self._rooms = {
-            # <d3>
-
-            # <d4>
-        }
-
-    def list_characters(self):
-        # Convert "database" result to an entity
-
-        # TODO: Handle the case that our DB can't be reached
-        return [
-            {
-                'id': character_id,
-                'name': details['name'],
-                'room_id': details['room_id']
-            }
-
-            for character_id, details in self._characters.items()
-        ]
-
-    def add_character(self, name):
-        character_id = uuid.uuid4()
-
-        # TODO: Handle the case that the name is too long
-        character = {
-            'name': name,
-            'room_id': None
-        }
-
-        # TODO: Handle the case that our DB can't be reached
-        self._characters[character_id] = character
-
-        character['id'] = character_id
-        return character
-
-    def move_character(self, character_id, room_id):
-        # <d7>
-        pass
-
-    def get_location(self, character_id):
-        # <d8>
-        pass
-
-    def get_room(self, room_id):
-        # <d9>
-        pass
-
-    def list_dungeons(self):
-        # <d9>
-        pass
+import dal
 
 
 # ===========================================================================
@@ -262,7 +193,7 @@ class HelloResource(object):  # <w3>
 api = falcon.API()
 # api.add_route('/', HelloResource())  # <w4>
 
-controller = Controller()
+controller = dal.Controller()
 api.add_route('/characters', CharacterList(controller))
 # <a15>
 # <a16>

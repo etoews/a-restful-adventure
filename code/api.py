@@ -4,52 +4,7 @@ import uuid
 
 import falcon
 
-
-# ===========================================================================
-# DAL (backend, storage and entities)
-# ===========================================================================
-
-class Controller(object):
-    def __init__(self):
-        # Store data in MyLDB
-
-        self._characters = {
-            # <d1>
-        }
-
-        self._dungeons = {
-            # <d2>
-        }
-
-        self._rooms = {
-            # <d3>
-
-            # <d4>
-        }
-
-    def list_characters(self):
-        # <d5>
-        pass
-
-    def add_character(self, name):
-        # <d6>
-        pass
-
-    def move_character(self, character_id, room_id):
-        # <d7>
-        pass
-
-    def get_location(self, character_id):
-        # <d8>
-        pass
-
-    def get_room(self, room_id):
-        # <d9>
-        pass
-
-    def list_dungeons(self):
-        # <d9>
-        pass
+import dal
 
 
 # ===========================================================================
@@ -182,7 +137,7 @@ class HelloResource(object):  # <w3>
 api = falcon.API()
 api.add_route('/', HelloResource())  # <w4>
 
-controller = Controller()
+controller = dal.Controller()
 # <a14>
 # <a15>
 # <a16>
