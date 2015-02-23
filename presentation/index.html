@@ -582,7 +582,7 @@ curl ?
           </aside>
         </section>
 
-        <section>
+        <section id="impl-lab-1">
           <h1>Lab: Hello world!</h1>
         </section>
 
@@ -599,11 +599,14 @@ $ subl .
 
         <section>
           <pre><code data-trim class="lang-sh">
-$ wget https://raw.githubusercontent.com/everett-toews/a-restful-adventure/gh-pages/code/api.py
+$ wget http://rack.to/rest-api -O api.py
+$ wget http://rack.to/rest-dal -O dal.py
           </code></pre>
           <aside class="notes">
-            <p>Next, download the skeleton api.py file to your project directory. You can do this through the browser or with wget.</p>
-            <p>Now open that file in your editor. We will be filling this out in a series of labs. See those funny-looking comments with the angle brackets? Those are placeholders that we'll replace with code as we go along. Each placholder comment has a unique tag that I'll reference. OK?</p>
+            <p>Now we need to download a skeleton api.py file to your project directory. You can do this through the browser or with wget.</p>
+            <p>We also need to download the data access layer module, or DAL, contained in dal.py.</p>
+            <p>Now open api.py in your editor. We will be filling this out in a series of labs. See those funny-looking comments with the angle brackets? Those are placeholders that we'll replace with code as we go along. Each placeholder comment has a unique tag that I'll reference.</p>
+            <p>All set?</p>
           </aside>
         </section>
 
@@ -618,9 +621,9 @@ def application(env, start_response):
 
           </code></pre>
           <aside class="notes">
-            Let's get a simple "hello world" app working. Do a search in api.py for the tag *w1*. This function is a simple hello world WSGI application. WSGI is a standard for connecting python applications to any of a number of web servers, such as apache httpd or gunicorn. Headers and other information about each request are passed in through the environment dict. The application sets the status code and headers for the response using the start_response callback, and then returns an iterable containing the response body.
+            <p>Next let's get a simple "hello world" app working. Do a search in api.py for the tag *w1*. This function is a simple hello world WSGI application. WSGI is a standard for connecting python applications to any of a number of web servers, such as apache httpd or gunicorn. Headers and other information about each request are passed in through the environment dict. The application sets the status code and headers for the response using the start_response callback, and then returns an iterable containing the response body.</p>
 
-            The Python standard library includes a basic references WSGI server that we will use to self-host our application for our labs. Let's try it out.
+            <p>The Python standard library includes a basic references WSGI server that we will use to self-host our application for our labs. Let's try it out.</p>
           </aside>
         </section>
 
@@ -629,7 +632,7 @@ def application(env, start_response):
 $ python api.py
           </code></pre>
           <aside class="notes">
-            We need to run api.py. I'm using the command line, but if you are using an IDE, you can run the file directly from there if you like.
+            Let's run api.py. I'm using the command line, but if you are using an IDE, you can run the file directly from there if you like.
           </aside>
         </section>
 
@@ -671,7 +674,8 @@ Hello Adventurer
         </section>
 
         <section>
-          <h3>WSGI</h3>
+          <h2>Falcon</h2>
+          <div><img class="overlaid" src="img/flight-silhouettes.png" width="400" height="250" /></div>
           <aside class="notes">
             OK, so we've seen what a basic WSGI app looks like. But working directly with WSGI is pretty tedious, so we're going to actually use a lightweight REST framework I developed, called Falcon, to make things easier.
           </aside>
@@ -681,8 +685,10 @@ Hello Adventurer
           <pre><code data-trim class="lang-sh">
 $ pip install falcon
           </code></pre>
+          <p><a href="http://falconframework.org/">falconframework.org</a></p>
           <aside class="notes">
-            Let's install falcon now. Enter the following to install falcon with pip.
+            <p>Let's install falcon now. Just pip install falcon as shown here.</p>
+            <p>We'll only be scratching the surface of the Falcon framework today, but if you're interested, you can visit falconframework.org later to learn more.</p>
           </aside>
         </section>
 
@@ -745,7 +751,7 @@ $ http 127.0.0.1:8000 x-name:Adventurer
           </aside>
         </section>
 
-        <section>
+        <section id="impl-lab-3">
           <h1>Lab: Choosing a character</h1>
           <aside class="notes">
             The first thing a player needs to do is choose their character. They will have to find out what characters are available, so we'll start with implementing a collection resource to represent a list of characters.
@@ -925,119 +931,14 @@ def _id_to_href(self, character_id):
         </section>
 
         <section>
-          <h3>d5</h3>
-          <pre><code data-trim class="lang-py">
-def list_characters(self):
-    # Convert "database" result to an entity
-
-    # TODO: Handle the case that our DB can't be reached
-    return [
-        {
-            'id': character_id,
-            'name': details['name'],
-            'room_id': details['room_id']
-        }
-
-        for character_id, details in self._characters.items()
-    ]
-
-          </code></pre>
-          <aside class="notes">
-            <p>Next, let's start filling in our Data Access Layer or DAL. We need to implement the list_characters() method in the Controller class. Find the *d5* tag and replace it with the code shown here.</p>
-
-            <p>Note the TODO there regarding errors, We don't have time to cover this today, but it important to keep in mind everything that could go wrong in a real application.</p>
-
-            <p>Any time an error occurs, you should log a human-friendly description of the error and a system or database code. This is often more helpful than a stack trace.</p>
-
-            <p>Then, you should return an error to the user that includes helpful diagnostic information.</p>
-          </aside>
-        </section>
-
-        <section>
-          <h3>d1</h3>
-          <pre><code data-trim class="lang-py">
-self._characters = {
-    uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
-        'name': 'Knox Thunderbane',
-        'room_id': None
-    }
-}
-
-          </code></pre>
-          <aside class="notes">
-            <p>Now find the *d1* tag. In the interest of time, we are going to just store everything in memory using a python dictionary, otherwise known as "My Lousy Database". Replace the *d1* comment with a sample character record so your code looks like this.</p>
-
-            <p>Note that we are using UUIDs rather than simple integers as was shown in the spec. This was done to highlight the fact that the server owns the URL schema, not the client. The client should not know or care what individual sections of the URL look like.</p>
-          </aside>
-        </section>
-
-        <section>
-          <pre><code data-trim class="lang-py tall">
+          <pre><code id="api-lab-3" data-trim class="lang-py tall">
 from copy import deepcopy
 import json
 import uuid
 
 import falcon
 
-
-# ===========================================================================
-# DAL (backend, storage and entities)
-# ===========================================================================
-
-class Controller(object):
-    def __init__(self):
-        # Store data in MyLDB
-
-        self._characters = {
-            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
-                'name': 'Knox Thunderbane',
-                'room_id': None
-            }
-        }
-
-        self._dungeons = {
-            # &lt;d2&gt;
-        }
-
-        self._rooms = {
-            # &lt;d3&gt;
-
-            # &lt;d4&gt;
-        }
-
-    def list_characters(self):
-        # Convert &quot;database&quot; result to an entity
-
-        # TODO: Handle the case that our DB can't be reached
-        return [
-            {
-                'id': character_id,
-                'name': details['name'],
-                'room_id': details['room_id']
-            }
-
-            for character_id, details in self._characters.items()
-        ]
-
-    def add_character(self, name):
-        # &lt;d6&gt;
-        pass
-
-    def move_character(self, character_id, room_id):
-        # &lt;d7&gt;
-        pass
-
-    def get_location(self, character_id):
-        # &lt;d8&gt;
-        pass
-
-    def get_room(self, room_id):
-        # &lt;d9&gt;
-        pass
-
-    def list_dungeons(self):
-        # &lt;d9&gt;
-        pass
+import dal
 
 
 # ===========================================================================
@@ -1212,7 +1113,7 @@ class HelloResource(object):  # &lt;w3&gt;
 api = falcon.API()
 # api.add_route('/', HelloResource())  # &lt;w4&gt;
 
-controller = Controller()
+controller = dal.Controller()
 api.add_route('/characters', CharacterList(controller))
 # &lt;a15&gt;
 # &lt;a16&gt;
@@ -1298,7 +1199,7 @@ content-type: application/json; charset=utf-8
           </aside>
         </section>
 
-        <section>
+        <section id="impl-lab-4">
           <h1>Lab: Adding a new character</h1>
           <aside class="notes">
             <p>Let's give the player a way to create their own character. We'll begin by reviewing the API design.</p>
@@ -1395,106 +1296,15 @@ def on_post(self, req, resp):
         </section>
 
         <section>
-          <h3>d6</h3>
-          <pre><code data-trim class="lang-py">
-def add_character(self, name):
-        character_id = uuid.uuid4()
+          <pre><code id="api-lab-4" data-trim class="lang-py tall">
 
-        # TODO: Handle the case that the name is too long
-        character = {
-            'name': name,
-            'room_id': None
-        }
-
-        # TODO: Handle the case that our DB can't be reached
-        self._characters[character_id] = character
-
-        character['id'] = character_id
-        return character
-          </code></pre>
-          <aside class="notes">
-            Next we need to implement that add_character() method in the Controller class. Search for the *d6* tag and update add_character to look like this.
-          </aside>
-        </section>
-
-        <section>
-          <pre><code data-trim class="lang-py tall">
 from copy import deepcopy
 import json
 import uuid
 
 import falcon
 
-
-# ===========================================================================
-# DAL (backend, storage and entities)
-# ===========================================================================
-
-class Controller(object):
-    def __init__(self):
-        # Store data in MyLDB
-
-        self._characters = {
-            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
-                'name': 'Knox Thunderbane',
-                'room_id': None
-            }
-        }
-
-        self._dungeons = {
-            # &lt;d2&gt;
-        }
-
-        self._rooms = {
-            # &lt;d3&gt;
-
-            # &lt;d4&gt;
-        }
-
-    def list_characters(self):
-        # Convert &quot;database&quot; result to an entity
-
-        # TODO: Handle the case that our DB can't be reached
-        return [
-            {
-                'id': character_id,
-                'name': details['name'],
-                'room_id': details['room_id']
-            }
-
-            for character_id, details in self._characters.items()
-        ]
-
-    def add_character(self, name):
-        character_id = uuid.uuid4()
-
-        # TODO: Handle the case that the name is too long
-        character = {
-            'name': name,
-            'room_id': None
-        }
-
-        # TODO: Handle the case that our DB can't be reached
-        self._characters[character_id] = character
-
-        character['id'] = character_id
-        return character
-
-    def move_character(self, character_id, room_id):
-        # &lt;d7&gt;
-        pass
-
-    def get_location(self, character_id):
-        # &lt;d8&gt;
-        pass
-
-    def get_room(self, room_id):
-        # &lt;d9&gt;
-        pass
-
-    def list_dungeons(self):
-        # &lt;d9&gt;
-        pass
+import dal
 
 
 # ===========================================================================
@@ -1583,7 +1393,6 @@ class CharacterList(CharacterBase):
                 }
             ]
         }
-
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
 
@@ -1684,7 +1493,7 @@ class HelloResource(object):  # &lt;w3&gt;
 api = falcon.API()
 # api.add_route('/', HelloResource())  # &lt;w4&gt;
 
-controller = Controller()
+controller = dal.Controller()
 api.add_route('/characters', CharacterList(controller))
 # &lt;a15&gt;
 # &lt;a16&gt;
@@ -1709,7 +1518,7 @@ if __name__ == '__main__':
 
           </code></pre>
           <aside class="notes">
-            Now your api.py file should look like this:
+            Now your api.py file should look like this.
           </aside>
         </section>
 
@@ -1853,7 +1662,7 @@ content-type: application/json; charset=utf-8
           </aside>
         </section>
 
-        <section>
+        <section id="impl-lab-5">
           <h1>Lab: Choosing a dungeon</h1>
           <aside class="notes">
 Now that we can choose a character, or create a new one if we don't like any of the choices, we need to pick a dungeon to play. We want to provide the user agent a set of choices that it can display to the player.
@@ -1990,148 +1799,14 @@ api.add_route('/dungeons', DungeonList(controller))
         </section>
 
         <section>
-          <h3>d2</h3>
-          <pre><code data-trim class="lang-py">
-self._dungeons = {
-    uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
-        'name': 'Dungeon of Doom',
-        'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
-    },
-    uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
-        'name': 'Dungeon of Hope',
-        'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
-    }
-}
-
-          </code></pre>
-          <aside class="notes">
-<p>Let's go implement the controller's list_dungeons() method. First we will need to add some dungeon records to our data set. Find the comment tag *d2*.</p>
-
-<p>Let's add a couple of dungeon records to make the data set look likes this.</p>
-
-          </aside>
-        </section>
-
-        <section>
-          <h3>d9</h3>
-          <pre><code data-trim class="lang-py">
-# Convert "database" result to entities
-
-# TODO: Handle the case that our DB can't be reached
-return [
-    {
-        'id': dungeon_id,
-        'name': details['name'],
-        'entry_id': details['entry_id']
-    }
-    for dungeon_id, details in self._dungeons.items()
-]
-
-          </code></pre>
-          <aside class="notes">
-<p>Next, find the comment tag *d9*.</p>
-
-<p>Modify the list_dungeons method as shown here.</p>
-
-<p>Once that is done, the user agent will be able to list the dungeons in the game, and let the player choose one to enter.</p>
-
-          </aside>
-        </section>
-
-        <section>
-          <pre><code data-trim class="lang-py tall">
+          <pre><code id="api-lab-5" data-trim class="lang-py tall">
 from copy import deepcopy
 import json
 import uuid
 
 import falcon
 
-
-# ===========================================================================
-# DAL (backend, storage and entities)
-# ===========================================================================
-
-class Controller(object):
-    def __init__(self):
-        # Store data in MyLDB
-
-        self._characters = {
-            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
-                'name': 'Knox Thunderbane',
-                'room_id': None
-            }
-        }
-
-        self._dungeons = {
-            uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
-                'name': 'Dungeon of Doom',
-                'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
-            },
-            uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
-                'name': 'Dungeon of Hope',
-                'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
-            }
-        }
-
-        self._rooms = {
-            # &lt;d3&gt;
-
-            # &lt;d4&gt;
-        }
-
-    def list_characters(self):
-        # Convert &quot;database&quot; result to an entity
-
-        # TODO: Handle the case that our DB can't be reached
-        return [
-            {
-                'id': character_id,
-                'name': details['name'],
-                'room_id': details['room_id']
-            }
-
-            for character_id, details in self._characters.items()
-        ]
-
-    def add_character(self, name):
-        character_id = uuid.uuid4()
-
-        # TODO: Handle the case that the name is too long
-        character = {
-            'name': name,
-            'room_id': None
-        }
-
-        # TODO: Handle the case that our DB can't be reached
-        self._characters[character_id] = character
-
-        character['id'] = character_id
-        return character
-
-    def move_character(self, character_id, room_id):
-        # &lt;d7&gt;
-        pass
-
-    def get_location(self, character_id):
-        # &lt;d8&gt;
-        pass
-
-    def get_room(self, room_id):
-        # &lt;d9&gt;
-        pass
-
-    def list_dungeons(self):
-        # Convert the database result to a list of entities
-
-        # TODO: Handle the case that our DB can't be reached
-        return [
-            {
-                'id': dungeon_id,
-                'name': details['name'],
-                'entry_id': details['entry_id']
-            }
-            for dungeon_id, details in self._dungeons.items()
-        ]
+import dal
 
 
 # ===========================================================================
@@ -2220,7 +1895,6 @@ class CharacterList(CharacterBase):
                 }
             ]
         }
-
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
 
@@ -2355,7 +2029,7 @@ class HelloResource(object):  # &lt;w3&gt;
 api = falcon.API()
 # api.add_route('/', HelloResource())  # &lt;w4&gt;
 
-controller = Controller()
+controller = dal.Controller()
 api.add_route('/characters', CharacterList(controller))
 # &lt;a15&gt;
 # &lt;a16&gt;
@@ -2459,7 +2133,7 @@ content-type: application/json; charset=utf-8
           </aside>
         </section>
 
-        <section>
+        <section id="impl-lab-6">
           <h1>Lab: Entering the dungeon</h1>
           <aside class="notes">
 <p>We need to move our character to the dungeon entrance.</p>
@@ -2668,69 +2342,6 @@ Then, right below that, replace the tag *a4* like so.
         </section>
 
         <section>
-          <h3>d3</h3>
-          <pre><code data-trim class="lang-py">
-uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27'): {
-    'name': 'Super Creepy Entrance',
-    'is_exit': False,
-    'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
-    'doorways': [
-        {
-            'direction': 'north',
-            'room_id': uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2')
-        },
-        {
-            'direction': 'east',
-            'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
-        }
-    ]
-},
-
-          </code></pre>
-          <aside class="notes">
-All set? OK, next, we need to Add a room record to our data set that we can play around with. Find the tag *d3* and replace it with the following entrace room for the Dungeon of Doom.
-
-          </aside>
-        </section>
-
-        <section>
-          <h3>d7</h3>
-          <pre><code data-trim class="lang-py">
-def move_character(self, character_id, room_id):
-    # TODO: Handle the case that character_id is invalid
-    # TODO: Handle the case that our DB can't be reached
-    character = self._characters[character_id]
-
-    # TODO: Check that room_id can be reached from the character's
-    #       current position (no teleportation allowed!)
-    character['room_id'] = room_id
-
-          </code></pre>
-          <aside class="notes">
-Now we need to fill out the Controller's move_character and get_location methods, since those are needed by the CharacterLocation class. Find the tag *d7* and update the move_character() method to look like this.
-          </aside>
-        </section>
-
-        <section>
-          <h3>d8</h3>
-          <pre><code data-trim class="lang-py">
-def get_location(self, character_id):
-    # TODO: Handle the case that character_id is invalid
-    # TODO: Handle the case that our DB can't be reached
-    character = self._characters[character_id]
-
-    room_id = character['room_id']
-    room = self._rooms[room_id]
-
-    return room_id, room['dungeon_id']
-
-          </code></pre>
-          <aside class="notes">
-And then, right below that, replace the tag *d8* with the this code.
-          </aside>
-        </section>
-
-        <section>
           <h3>a15</h3>
           <pre><code data-trim class="lang-py">
 api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
@@ -2739,129 +2350,19 @@ api.add_route('/characters/{character_id}/location', CharacterLocation(controlle
           <aside class="notes">
 <p>Finally, we need to tell Falcon about our CharacterLocation resource. Find the tag *a15* and replace it with the following call to add_route:</p>
 
-<p>Got it?</p>
+<p>All set?</p>
           </aside>
         </section>
 
         <section>
-          <pre><code data-trim class="lang-py tall">
+          <pre><code id="api-lab-6" data-trim class="lang-py tall">
 from copy import deepcopy
 import json
 import uuid
 
 import falcon
 
-
-# ===========================================================================
-# DAL (backend, storage and entities)
-# ===========================================================================
-
-class Controller(object):
-    def __init__(self):
-        # Store data in MyLDB
-
-        self._characters = {
-            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
-                'name': 'Knox Thunderbane',
-                'room_id': None
-            }
-        }
-
-        self._dungeons = {
-            uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
-                'name': 'Dungeon of Doom',
-                'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
-            },
-            uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
-                'name': 'Dungeon of Hope',
-                'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
-            }
-        }
-
-        self._rooms = {
-            uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27'): {
-                'name': 'Super Creepy Entrance',
-                'is_exit': False,
-                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
-                'doorways': [
-                    {
-                        'direction': 'north',
-                        'room_id': uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2')
-                    },
-                    {
-                        'direction': 'east',
-                        'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
-                    }
-                ]
-            },
-
-            # &lt;d4&gt;
-        }
-
-    def list_characters(self):
-        # Convert &quot;database&quot; result to an entity
-
-        # TODO: Handle the case that our DB can't be reached
-        return [
-            {
-                'id': character_id,
-                'name': details['name'],
-                'room_id': details['room_id']
-            }
-
-            for character_id, details in self._characters.items()
-        ]
-
-    def add_character(self, name):
-        character_id = uuid.uuid4()
-
-        # TODO: Handle the case that the name is too long
-        character = {
-            'name': name,
-            'room_id': None
-        }
-
-        # TODO: Handle the case that our DB can't be reached
-        self._characters[character_id] = character
-
-        character['id'] = character_id
-        return character
-
-    def move_character(self, character_id, room_id):
-        # TODO: Handle the case that character_id is invalid
-        # TODO: Handle the case that our DB can't be reached
-        character = self._characters[character_id]
-
-        # TODO: Check that room_id can be reached from the character's
-        #       current position (no teleportation allowed!)
-        character['room_id'] = room_id
-
-    def get_location(self, character_id):
-        # TODO: Handle the case that character_id is invalid
-        # TODO: Handle the case that our DB can't be reached
-        character = self._characters[character_id]
-
-        room_id = character['room_id']
-        room = self._rooms[room_id]
-
-        return room_id, room['dungeon_id']
-
-    def get_room(self, room_id):
-        # &lt;d9&gt;
-        pass
-
-    def list_dungeons(self):
-        # Convert the database result to a list of entities
-
-        # TODO: Handle the case that our DB can't be reached
-        return [
-            {
-                'id': dungeon_id,
-                'name': details['name'],
-                'entry_id': details['entry_id']
-            }
-            for dungeon_id, details in self._dungeons.items()
-        ]
+import dal
 
 
 # ===========================================================================
@@ -2983,7 +2484,6 @@ class CharacterList(CharacterBase):
                 }
             ]
         }
-
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
 
@@ -3118,7 +2618,7 @@ class HelloResource(object):  # &lt;w3&gt;
 api = falcon.API()
 # api.add_route('/', HelloResource())  # &lt;w4&gt;
 
-controller = Controller()
+controller = dal.Controller()
 api.add_route('/characters', CharacterList(controller))
 api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
 # &lt;a16&gt;
@@ -3160,7 +2660,7 @@ Date: Sun, 22 Feb 2015 03:35:06 GMT
 Server: WSGIServer/0.1 Python/2.7.9
           </code></pre>
           <aside class="notes">
-OK, now let's try again to move the character to the dungeon entrance. Restart your app, then in another console run this command.
+OK, let's try again to move the character to the dungeon entrance. Restart your app, then in another console run this command.
 
           </aside>
         </section>
@@ -3194,7 +2694,7 @@ content-type: application/json; charset=utf-8
           </aside>
         </section>
 
-        <section>
+        <section id="impl-lab-7">
           <h1>Lab: Finding a way out!</h1>
           <aside class="notes">
 Now that we've entered the dungeon, we need to traverse the rooms in search of the exit.
@@ -3369,79 +2869,8 @@ Next, fill in tags *a9* and *a10* as show here, to make self._entity_to_resource
           </aside>
         </section>
 
-        <section>
-          <h3>d9</h3>
-          <pre><code data-trim class="lang-py">
-def get_room(self, room_id):
-    # TODO: Handle the case that room_id is invalid
-    # TODO: Handle the case that our DB can't be reached
-    room = self._rooms[room_id]
-
-    entity = deepcopy(room)
-    entity['id'] = room_id
-
-    return entity
-          </code></pre>
-          <aside class="notes">
-<p>We're almost done! We need to implement the Controller's get_room() method since the Room class depends on it.</p>
-
-<p>Search for the tag *d9*.</p>
-
-<p>Update the get_room method to look like this.</p>
-          </aside>
-        </section>
-
-        <section>
-          <h3>d4</h3>
-          <pre><code data-trim class="lang-py">
-uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2'): {
-    'name': 'Room',
-    'is_exit': False,
-    'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
-    'doorways': [
-        {
-            'direction': 'south',
-            'room_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
-        }
-    ]
-},
-uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e'): {
-    'name': 'Armory',
-    'is_exit': False,
-    'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
-    'doorways': [
-        {
-            'direction': 'west',
-            'room_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
-        },
-        {
-            'direction': 'north',
-            'room_id': uuid.UUID('a7092981-3ceb-401a-9db2-4ed64b08b2bb')
-        }
-    ]
-},
-uuid.UUID('a7092981-3ceb-401a-9db2-4ed64b08b2bb'): {
-    'name': 'Exit',
-    'is_exit': True,
-    'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
-    'doorways': [
-        {
-            'direction': 'south',
-            'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
-        }
-    ]
-}
-          </code></pre>
-          <aside class="notes">
-<p>Now, a dungeon with just one room isn't really very interesting, is it? Let's add a few more rooms, and create doorways between them.</p>
-
-<p>Find the tag *d4*. Replace it with these room records. Make sure that the first record that is already in the dictionary has a trailing comma after it's closing curly bracket.</p>
-
-          </aside>
-        </section>
-
-        <section>
-          <h3>tag</h3>
+       <section>
+          <h3>a16</h3>
           <pre><code data-trim class="lang-py">
 api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
 
@@ -3454,165 +2883,13 @@ api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
         </section>
 
         <section>
-          <pre><code data-trim class="lang-py tall">
-from copy import deepcopy
+          <pre><code id="api-lab-7" data-trim class="lang-py tall">
 import json
 import uuid
 
 import falcon
 
-
-# ===========================================================================
-# DAL (backend, storage and entities)
-# ===========================================================================
-
-class Controller(object):
-    def __init__(self):
-        # Store data in MyLDB
-
-        self._characters = {
-            uuid.UUID('c1a008bc-105f-4793-bfa6-a54fbc9ce6b1') : {
-                'name': 'Knox Thunderbane',
-                'room_id': None
-            }
-        }
-
-        self._dungeons = {
-            uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117') : {
-                'name': 'Dungeon of Doom',
-                'entry_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
-            },
-            uuid.UUID('f2e557e6-6b07-417b-b416-17d693f3eadd') : {
-                'name': 'Dungeon of Hope',
-                'entry_id': uuid.UUID('29cf865c-936e-4dec-8626-9bab41ea619f')
-            }
-        }
-
-        self._rooms = {
-            uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27'): {
-                'name': 'Super Creepy Entrance',
-                'is_exit': False,
-                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
-                'doorways': [
-                    {
-                        'direction': 'north',
-                        'room_id': uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2')
-                    },
-                    {
-                        'direction': 'east',
-                        'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
-                    }
-                ]
-            },
-            uuid.UUID('751d5812-144d-40f8-a82d-221dbb3075e2'): {
-                'name': 'Room',
-                'is_exit': False,
-                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
-                'doorways': [
-                    {
-                        'direction': 'south',
-                        'room_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
-                    }
-                ]
-            },
-            uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e'): {
-                'name': 'Armory',
-                'is_exit': False,
-                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
-                'doorways': [
-                    {
-                        'direction': 'west',
-                        'room_id': uuid.UUID('8f726efc-5e3e-4332-ab24-243a1d3e0b27')
-                    },
-                    {
-                        'direction': 'north',
-                        'room_id': uuid.UUID('a7092981-3ceb-401a-9db2-4ed64b08b2bb')
-                    }
-                ]
-            },
-            uuid.UUID('a7092981-3ceb-401a-9db2-4ed64b08b2bb'): {
-                'name': 'Exit',
-                'is_exit': True,
-                'dungeon_id': uuid.UUID('5a024cd8-2db3-446e-b777-bdc60185a117'),
-                'doorways': [
-                    {
-                        'direction': 'south',
-                        'room_id': uuid.UUID('65840050-12d3-4e29-9412-7c3b22fdd52e')
-                    }
-                ]
-            }
-        }
-
-    def list_characters(self):
-        # Convert &quot;database&quot; result to an entity
-
-        # TODO: Handle the case that our DB can't be reached
-        return [
-            {
-                'id': character_id,
-                'name': details['name'],
-                'room_id': details['room_id']
-            }
-
-            for character_id, details in self._characters.items()
-        ]
-
-    def add_character(self, name):
-        character_id = uuid.uuid4()
-
-        # TODO: Handle the case that the name is too long
-        character = {
-            'name': name,
-            'room_id': None
-        }
-
-        # TODO: Handle the case that our DB can't be reached
-        self._characters[character_id] = character
-
-        character['id'] = character_id
-        return character
-
-    def move_character(self, character_id, room_id):
-        # TODO: Handle the case that character_id is invalid
-        # TODO: Handle the case that our DB can't be reached
-        character = self._characters[character_id]
-
-        # TODO: Check that room_id can be reached from the character's
-        #       current position (no teleportation allowed!)
-        character['room_id'] = room_id
-
-    def get_location(self, character_id):
-        # TODO: Handle the case that character_id is invalid
-        # TODO: Handle the case that our DB can't be reached
-        character = self._characters[character_id]
-
-        room_id = character['room_id']
-        room = self._rooms[room_id]
-
-        return room_id, room['dungeon_id']
-
-    def get_room(self, room_id):
-        # TODO: Handle the case that room_id is invalid
-        # TODO: Handle the case that our DB can't be reached
-        room = self._rooms[room_id]
-
-        entity = deepcopy(room)
-        entity['id'] = room_id
-
-        return entity
-
-    def list_dungeons(self):
-        # Convert the database result to a list of entities
-
-        # TODO: Handle the case that our DB can't be reached
-        return [
-            {
-                'id': dungeon_id,
-                'name': details['name'],
-                'entry_id': details['entry_id']
-            }
-            for dungeon_id, details in self._dungeons.items()
-        ]
+import dal
 
 
 # ===========================================================================
@@ -3856,9 +3133,7 @@ class DungeonBase(object):
             },
             {
                 'rel': 'room first',
-                'allow': [
-                    'GET', 'PUT'
-                ],
+                'allow': ['GET'],
                 'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
             }
         ]
@@ -3917,7 +3192,7 @@ class HelloResource(object):  # &lt;w3&gt;
 api = falcon.API()
 # api.add_route('/', HelloResource())  # &lt;w4&gt;
 
-controller = Controller()
+controller = dal.Controller()
 api.add_route('/characters', CharacterList(controller))
 api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
 api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
@@ -3942,7 +3217,7 @@ if __name__ == '__main__':
 
           </code></pre>
           <aside class="notes">
-Phew! At this point, your code should look like this:
+OK, at this point, your code should look like this:
 
           </aside>
         </section>
@@ -4099,9 +3374,11 @@ content-type: application/json; charset=utf-8
         <section>
           <h1>Lab: Independent evolution</h1>
           <aside class="notes">
-<p>Can you imagine a world in which each time you made a change to your website, everyone had to update their web browsers to a new version? It simply would not scale.</p>
+<p>Can you imagine a world in which each time you made a change to your website, everyone had to update their web browsers to a new version? The REST architectural style makes it possible for clients and servers to be more loosely coupled, so that each node on the network can evolve more or less independently over time.</p>
 
-<p>During our RESTful adventure we saw how we can use hypermedia to change the state of the game.</p>
+<p>Granted, sometimes a big change can only be made in an incompatible way. However, our goal as API and client developers is to minimize the number of times this has to happen, while still allowing for agile iteration and evolution on both sides.</p>
+
+<p>Now, during our RESTful adventure we saw how we can use hypermedia to change the state of the game. This is one example of how REST can help decouple different parts of a system.</p>
 
 <p>Since the UA is just following links around, it is easier to evolve the server independently of the UA. Changing something in the server is less likely to break the UA, because the UA is making fewer assumptions.</p>
 
