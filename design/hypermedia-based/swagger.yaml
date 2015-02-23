@@ -260,14 +260,16 @@ paths:
                 "dungeons": [
                   {
                     "name": "Dungeon of Doom",
-                    "entrance_room_id": "1000",
                     "links": [
                       {
                         "rel": "self",
+                        "allow": [
+                            "GET"
+                        ],
                         "href": "/dungeons/1234"
                       },
                       {
-                        "rel": "room",
+                        "rel": "room first",
                         "allow": [
                             "GET"
                         ],
@@ -311,7 +313,7 @@ paths:
                     "href": "/dungeons/1234"
                   },
                   {
-                    "rel": "room",
+                    "rel": "room first",
                     "allow": [
                         "GET"
                     ],
@@ -354,12 +356,11 @@ paths:
                     "href": "/dungeons/1234/rooms/1000"
                   },
                   {
-                    "rel": "room",
+                    "rel": "room east",
                     "allow": [
                         "GET"
                     ],
                     "href": "/dungeons/1234/rooms/1001"
-                    "description": "east",
                   }
                 ]
               }
@@ -378,17 +379,9 @@ definitions:
         maxLength: 256
       links:
         type: array
-        readOnly: true
+        description: A link relation that point to "self" or the "location" of a Character. Shows the allowed methods on a Character.
         items:
-          type: object
-          properties:
-            rel:
-              type: string
-            allow:
-              type: string
-            href:
-              type: string
-              format: url
+          $ref: "#/definitions/Link"
   Characters:
     readOnly: true
     properties:
@@ -398,64 +391,45 @@ definitions:
           $ref: "#/definitions/Character"
       links:
         type: array
+        description: A link relation that point to "self". Shows the allowed methods on Characters.
         items:
-          type: object
-          properties:
-            rel:
-              type: string
-            allow:
-              type: string
-            href:
-              type: string
-              format: url
+          $ref: "#/definitions/Link"
   CharacterLocation:
-    properties:
-      rel:
-        type: string
-      allow:
-        type: string
-      href:
-        type: string
-        format: url
+    $ref: "#/definitions/Error"
   Room:
     readOnly: true
     properties:
-      id:
-        type: string
-        readOnly: true
       name:
-        type: string
-      dungeon_id:
         type: string
       is_exit:
         type: boolean
-      doors:
+      links:
         type: array
+        description: A link relation that point to "self" or adjacent rooms denoted by a direction "room [direction]". Shows the allowed methods on a Room.
         items:
-          type: object
-          properties:
-            room_id:
-              type: string
-            direction:
-              type: string
-              enum:
-                - north
-                - south
-                - east
-                - west
+          $ref: "#/definitions/Link"
   Dungeon:
     readOnly: true
     properties:
-      id:
-        type: string
-      entrance_room_id:
-        type: string
       name:
         type: string
+      links:
+        type: array
+        description: A link relation that point to "self" or the first room of the dungeon denoted by a direction "room first". Shows the allowed methods on a Dungeon.
+        items:
+          $ref: "#/definitions/Link"
   Dungeons:
-    type: array
-    items:
-      $ref: "#/definitions/Dungeon"
+    readOnly: true
+    properties:
+      dungeons:
+        type: array
+        items:
+          $ref: "#/definitions/Dungeon"
+      links:
+        type: array
+        description: A link relation that point to "self". Shows the allowed methods on Characters.
+        items:
+          $ref: "#/definitions/Link"
   Error:
     readOnly: true
     properties:
@@ -472,15 +446,20 @@ definitions:
         type: string
         description: A long, human readable description of the error.
       link:
-        properties:
-          rel:
-            type: string
-            enum: [ "help" ]
-          href:
-            type: string
-            format: url
-            description: A link to a document containing more information about the error and how to take action on it.
+        description: A link to a document containing more information about the error and how to take action on it.
+        $ref: "#/definitions/Link"
   Errors:
     type: array
     items:
       $ref: "#/definitions/Error"
+  Link:
+    readOnly: true
+    properties:
+      rel:
+        type: string
+      allow:
+        type: string
+        description: The HTTP methods allowed on the href.
+      href:
+        type: string
+        format: url
