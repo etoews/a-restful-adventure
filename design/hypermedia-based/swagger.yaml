@@ -102,7 +102,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
   /characters/{character_id}:
     get:
       summary: Get a specific Character
@@ -140,9 +140,9 @@ paths:
                 ]
               }
         default:
-          description: Unexpected Errors
+          description: Unexpected Error
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
     put:
       summary: Update a Character
       operationId: update_character
@@ -168,7 +168,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
     delete:
       summary: Delete a Character
       operationId: delete_character
@@ -183,7 +183,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
   /characters/{character_id}/location:
     get:
       summary: Get a specific Character's location
@@ -201,16 +201,14 @@ paths:
           examples:
             application/json: |-
               {
-                  "allow": [
-                      "GET"
-                  ],
-                  "href": "dungeons/1234/rooms/1001",
+                  "allow": [ "GET" ],
+                  "href": "/dungeons/1234/rooms/1001",
                   "rel": "room"
               }
         default:
-          description: Unexpected Errors
+          description: Unexpected Error
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
     put:
       summary: Update a Character's location
       operationId: update_character_location
@@ -241,7 +239,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
   /dungeons:
     get:
       summary: List all Dungeons
@@ -250,10 +248,7 @@ paths:
         200:
           description: An array of Dungeons
           schema:
-            properties:
-              dungeons:
-                type: array
-                $ref: "#/definitions/Dungeons"
+            $ref: "#/definitions/Dungeons"
           examples:
             application/json: |-
               {
@@ -324,7 +319,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
   /dungeons/{dungeon_id}/rooms/{room_id}:
     get:
       summary: Get a specific Room in a specific Dungeon
@@ -364,12 +359,29 @@ paths:
                   }
                 ]
               }
+        400:
+          description: You tried to teleport. That's just not allowed.
+          schema:
+            $ref: "#/definitions/Error"
+          examples:
+            application/json: |-
+              {
+                "transaction_id": "71607e7c-df7c-45f3-b571-d1829de4ad9a",
+                "code": "736.9",
+                "title": "Teleport Denied",
+                "description": "The room you tried to visit does not exist or is not accessible from your current room. Thought you could get away with it didn't you.",
+                "link": {
+                    "rel": "help",
+                    "href": "http://en.wikipedia.org/wiki/No-teleportation_theorem"
+                  }
+              }
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
 definitions:
   Character:
+    type: object
     required:
       - name
     properties:
@@ -383,6 +395,7 @@ definitions:
         items:
           $ref: "#/definitions/Link"
   Characters:
+    type: object
     readOnly: true
     properties:
       characters:
@@ -395,8 +408,9 @@ definitions:
         items:
           $ref: "#/definitions/Link"
   CharacterLocation:
-    $ref: "#/definitions/Error"
+    $ref: "#/definitions/Link"
   Room:
+    type: object
     readOnly: true
     properties:
       name:
@@ -409,6 +423,7 @@ definitions:
         items:
           $ref: "#/definitions/Link"
   Dungeon:
+    type: object
     readOnly: true
     properties:
       name:
@@ -419,6 +434,7 @@ definitions:
         items:
           $ref: "#/definitions/Link"
   Dungeons:
+    type: object
     readOnly: true
     properties:
       dungeons:
@@ -431,6 +447,7 @@ definitions:
         items:
           $ref: "#/definitions/Link"
   Error:
+    type: object
     readOnly: true
     properties:
       transaction_id:
@@ -448,11 +465,8 @@ definitions:
       link:
         description: A link to a document containing more information about the error and how to take action on it.
         $ref: "#/definitions/Link"
-  Errors:
-    type: array
-    items:
-      $ref: "#/definitions/Error"
   Link:
+    type: object
     readOnly: true
     properties:
       rel:

@@ -18,10 +18,7 @@ paths:
         200:
           description: An array of Characters
           schema:
-            properties:
-              characters:
-                type: array
-                $ref: "#/definitions/Characters"
+            $ref: "#/definitions/Characters"
           examples:
             application/json: |-
               {
@@ -59,7 +56,6 @@ paths:
               description: A link to the Character
           schema:
             $ref: "#/definitions/Character"
-          # TODO: Do we want a top-level "character" key like we have with "characters"? e.g. { "character": {"id": 1234, ...}}
           examples:
             application/json: |-
               {
@@ -69,7 +65,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
   /characters/{character_id}:
     get:
       summary: Get a specific Character
@@ -94,9 +90,9 @@ paths:
                 "room_id": "3456"
               }
         default:
-          description: Unexpected Errors
+          description: Unexpected Error
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
     put:
       summary: Update a Character
       operationId: update_character
@@ -125,7 +121,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
     delete:
       summary: Delete a Character
       operationId: delete_character
@@ -141,7 +137,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
   /dungeons:
     get:
       summary: List all Dungeons
@@ -150,10 +146,7 @@ paths:
         200:
           description: An array of Dungeons
           schema:
-            properties:
-              dungeons:
-                type: array
-                $ref: "#/definitions/Dungeons"
+            $ref: "#/definitions/Dungeons"
           examples:
             application/json: |-
               {
@@ -195,7 +188,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
   /dungeons/{dungeon_id}/rooms/{room_id}:
     get:
       summary: Get a specific Room in a specific Dungeon
@@ -233,7 +226,7 @@ paths:
         400:
           description: You tried to teleport. That's just not allowed.
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
           examples:
             application/json: |-
               {
@@ -249,7 +242,7 @@ paths:
         default:
           description: Unexpected errors
           schema:
-            $ref: "#/definitions/Errors"
+            $ref: "#/definitions/Error"
 definitions:
   Character:
     type: object
@@ -268,9 +261,13 @@ definitions:
       room_id:
         type: string
   Characters:
-    type: array
-    items:
-      $ref: "#/definitions/Character"
+    type: object
+    readOnly: true
+    properties:
+      characters:
+        type: array
+        items:
+          $ref: "#/definitions/Character"
   Room:
     type: object
     readOnly: true
@@ -309,9 +306,13 @@ definitions:
       name:
         type: string
   Dungeons:
-    type: array
-    items:
-      $ref: "#/definitions/Dungeon"
+    type: object
+    readOnly: true
+    properties:
+      dungeons:
+        type: array
+        items:
+          $ref: "#/definitions/Dungeon"
   Error:
     type: object
     readOnly: true
@@ -337,7 +338,3 @@ definitions:
             type: string
             format: url
             description: A link to a document containing more information about the error and how to take action on it.
-  Errors:
-    type: array
-    items:
-      $ref: "#/definitions/Error"
