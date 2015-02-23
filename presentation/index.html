@@ -481,12 +481,13 @@ definitions:
         </section>
 
         <section>
-          <h1>Lab: curl</h1>
+          <h1>Lab: curl and python -m json.tool</h1>
+          <p>Bonus Points: Use <a href="http://httpie.org">httpie</a> and <a href="http://stedolan.github.io/jq/">jq</a> instead</p>
           <pre><code data-trim>
-HOST=http://localhost:5000
+HOST=http://104.130.13.137
 
 echo "Get characters"
-curl ?
+curl ? | python -m json.tool
 
 echo "Create a character"
 curl ?
@@ -547,6 +548,22 @@ curl ?
           <h1>Lab: API Doc</h1>
           <h2>Copy: <a href="https://raw.githubusercontent.com/everett-toews/a-restful-adventure/gh-pages/design/hypermedia-based/swagger.yaml" target="_blank">Swagger YAML</a></h2>
           <h2>Paste: <a href="http://editor.swagger.io/" target="_blank">Swagger Editor</a></h2>
+        </section>
+
+        <section>
+          <h1>Final Thoughts</h1>
+
+          <aside class="notes">
+            <ul>
+              <li>If there's one thing I want you to leave with from the design portion, it's the notion of user-centric design.</li>
+              <li>There's lots of ways to go about it but it can be tough when you're on a small team.</li>
+              <li>One idea is to totally decouple API design and implementation from API clients and testing.</li>
+              <li>Have 1 person come up with the design and implementation.</li>
+              <li>Have 1 person come up with the unit tests and clients.</li>
+              <li>And the only way you can communicate is through doc and bug reports.</li>
+              <li>If at any point the tester/client is looking at server source code, you're doing it wrong.</li>
+            </ul>
+          </aside>
         </section>
 
           <section id="break">
@@ -2011,7 +2028,7 @@ $ http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
         <section id="qa">
           <h1>Thanks!</h1>
           <h2>Q &amp; A</h2>
-          <p><a href="http://rax.io/2015-workshops-feedback" target="_blank">rax.io/2015-workshops-feedback</a></p>
+          <p><a href="http://rack.to/2015-workshops-feedback" target="_blank">rack.to/2015-workshops-feedback</a></p>
         </section>
       </div>
 
