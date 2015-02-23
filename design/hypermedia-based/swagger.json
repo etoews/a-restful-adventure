@@ -26,7 +26,7 @@
                             "$ref": "#/definitions/Characters"
                         },
                         "examples": {
-                            "application/json": "{\n  \"characters\": [\n    {\n      \"id\": \"1234\",\n      \"name\": \"Knox Thunderbane\",\n      \"dungeon_id\": \"2345\",\n      \"room_id\": \"3456\"\n    }\n  ]\n}"
+                            "application/json": "{\n  \"characters\": [\n    {\n      \"name\": \"Knox Thunderbane\",\n      \"links\": [\n        {\n          \"rel\": \"self\",\n          \"allow\": [\n            \"GET\", \"PUT\"\n          ],\n          \"href\": \"/characters/1234\"\n        },\n        {\n          \"rel\": \"location\",\n          \"allow\": [\n            \"GET\", \"PUT\"\n          ],\n          \"href\": \"/characters/1234/location\"\n        }\n      ]\n    }\n  ],\n  \"links\": [\n    {\n      \"rel\": \"self\",\n      \"allow\": [\n        \"GET\", \"POST\"\n      ],\n      \"href\": \"/characters\"\n    }\n  ]\n}"
                         }
                     }
                 }
@@ -69,7 +69,7 @@
                             "$ref": "#/definitions/Character"
                         },
                         "examples": {
-                            "application/json": "{\n  \"id\": \"1234\",\n  \"name\": \"Knox Thunderbane\"\n}"
+                            "application/json": "{\n  \"name\": \"Knox Thunderbane\",\n  \"links\": [\n    {\n      \"rel\": \"self\",\n      \"allow\": [\n        \"GET\", \"PUT\"\n      ],\n      \"href\": \"/characters/1234\"\n    },\n    {\n      \"rel\": \"location\",\n      \"allow\": [\n        \"GET\", \"PUT\"\n      ],\n      \"href\": \"/characters/1234/location\"\n    }\n  ]\n}"
                         }
                     },
                     "default": {
@@ -101,7 +101,7 @@
                             "$ref": "#/definitions/Character"
                         },
                         "examples": {
-                            "application/json": "{\n  \"id\": \"1234\",\n  \"name\": \"Knox Thunderbane\",\n  \"dungeon_id\": \"2345\",\n  \"room_id\": \"3456\"\n}"
+                            "application/json": "{\n  \"name\": \"Knox Thunderbane\",\n  \"links\": [\n    {\n      \"rel\": \"self\",\n      \"allow\": [\n        \"GET\", \"PUT\"\n      ],\n      \"href\": \"/characters/1234\"\n    },\n    {\n      \"rel\": \"location\",\n      \"allow\": [\n        \"GET\", \"PUT\"\n      ],\n      \"href\": \"/characters/1234/location\"\n    }\n  ]\n}"
                         }
                     },
                     "default": {
@@ -126,14 +126,14 @@
                         "name": "body",
                         "in": "body",
                         "required": true,
-                        "description": "Rename a Character or move them to a new room.",
+                        "description": "Rename a Character.",
                         "schema": {
                             "$ref": "#/definitions/Character"
                         }
                     }
                 ],
                 "x-examples": {
-                    "application/json": "{\n  \"id\": \"1234\",\n  \"name\": \"Knox Thunderbane\",\n  \"dungeon_id\": \"2345\",\n  \"room_id\": \"4567\"\n}"
+                    "application/json": "{\n  \"name\": \"Knox Thunderbane II\"\n}"
                 },
                 "responses": {
                     "204": {
@@ -155,13 +155,85 @@
                         "name": "character_id",
                         "in": "path",
                         "required": true,
-                        "type": "string",
-                        "description": "The id of the Character to delete"
+                        "type": "string"
                     }
                 ],
                 "responses": {
                     "204": {
                         "description": "Character deleted"
+                    },
+                    "default": {
+                        "description": "Unexpected errors",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/characters/{character_id}/location": {
+            "get": {
+                "summary": "Get a specific Character's location",
+                "operationId": "get_character_location",
+                "parameters": [
+                    {
+                        "name": "character_id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A CharacterLocation",
+                        "schema": {
+                            "$ref": "#/definitions/CharacterLocation"
+                        },
+                        "examples": {
+                            "application/json": "{\n    \"allow\": [ \"GET\" ],\n    \"href\": \"/dungeons/1234/rooms/1001\",\n    \"rel\": \"room\"\n}"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a Character's location",
+                "operationId": "update_character_location",
+                "parameters": [
+                    {
+                        "name": "character_id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "properties": {
+                                "rel": {
+                                    "type": "string"
+                                },
+                                "href": {
+                                    "type": "string",
+                                    "format": "url"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "x-examples": {
+                    "application/json": "{\n  \"rel\": \"room\",\n  \"href\": \"/dungeons/1234/rooms/1002\"\n}"
+                },
+                "responses": {
+                    "204": {
+                        "description": "Character updated"
                     },
                     "default": {
                         "description": "Unexpected errors",
@@ -183,7 +255,7 @@
                             "$ref": "#/definitions/Dungeons"
                         },
                         "examples": {
-                            "application/json": "{\n  \"dungeons\": [\n    {\n      \"id\": \"1234\",\n      \"name\": \"Dungeon of Doom\",\n      \"entrance_room_id\": \"1000\"\n    },\n    {\n      \"id\": \"9876\",\n      \"name\": \"Dungeon of Hope\",\n      \"entrance_room_id\": \"2000\"\n    }\n  ]\n}"
+                            "application/json": "{\n  \"dungeons\": [\n    {\n      \"name\": \"Dungeon of Doom\",\n      \"links\": [\n        {\n          \"rel\": \"self\",\n          \"allow\": [\n              \"GET\"\n          ],\n          \"href\": \"/dungeons/1234\"\n        },\n        {\n          \"rel\": \"room first\",\n          \"allow\": [\n              \"GET\"\n          ],\n          \"href\": \"/dungeons/1234/rooms/1002\",\n          \"description\": \"entrance\"\n      ]\n    }\n  ],\n  \"links\": [\n    {\n      \"rel\": \"self\",\n      \"allow\": [\n          \"GET\"\n      ],\n      \"href\": \"/dungeons\"\n    }\n  ]\n}"
                         }
                     }
                 }
@@ -209,7 +281,7 @@
                             "$ref": "#/definitions/Dungeon"
                         },
                         "examples": {
-                            "application/json": "{\n  \"id\": \"1234\",\n  \"name\": \"Dungeon of Doom\",\n  \"entrance_room_id\": \"1000\"\n}"
+                            "application/json": "{\n  \"name\": \"Dungeon of Doom\",\n  \"links\": [\n    {\n      \"rel\": \"self\",\n      \"href\": \"/dungeons/1234\"\n    },\n    {\n      \"rel\": \"room first\",\n      \"allow\": [\n          \"GET\"\n      ],\n      \"href\": \"/dungeons/1234/rooms/1000\",\n      \"description\": \"entrance\"\n  ]\n}"
                         }
                     },
                     "default": {
@@ -248,7 +320,7 @@
                             "$ref": "#/definitions/Room"
                         },
                         "examples": {
-                            "application/json": "{\n  \"id\": \"1000\",\n  \"name\": \"Entrance\",\n  \"dungeon_id\": \"1234\",\n  \"is_exit\": false,\n  \"doors\": [\n    {\n      \"room_id\": \"1001\",\n      \"direction\": \"east\"\n    }\n  ]\n}"
+                            "application/json": "{\n  \"name\": \"Entrance\",\n  \"is_exit\": false,\n  \"links\": [\n    {\n      \"rel\": \"self\",\n      \"href\": \"/dungeons/1234/rooms/1000\"\n    },\n    {\n      \"rel\": \"room east\",\n      \"allow\": [\n          \"GET\"\n      ],\n      \"href\": \"/dungeons/1234/rooms/1001\"\n    }\n  ]\n}"
                         }
                     },
                     "400": {
@@ -277,20 +349,17 @@
                 "name"
             ],
             "properties": {
-                "id": {
-                    "type": "string",
-                    "readOnly": true
-                },
                 "name": {
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 256
                 },
-                "dungeon_id": {
-                    "type": "string"
-                },
-                "room_id": {
-                    "type": "string"
+                "links": {
+                    "type": "array",
+                    "description": "A link relation that point to \"self\" or the \"location\" of a Character. Shows the allowed methods on a Character.",
+                    "items": {
+                        "$ref": "#/definitions/Link"
+                    }
                 }
             }
         },
@@ -303,44 +372,34 @@
                     "items": {
                         "$ref": "#/definitions/Character"
                     }
+                },
+                "links": {
+                    "type": "array",
+                    "description": "A link relation that point to \"self\". Shows the allowed methods on Characters.",
+                    "items": {
+                        "$ref": "#/definitions/Link"
+                    }
                 }
             }
+        },
+        "CharacterLocation": {
+            "$ref": "#/definitions/Link"
         },
         "Room": {
             "type": "object",
             "readOnly": true,
             "properties": {
-                "id": {
-                    "type": "string",
-                    "readOnly": true
-                },
                 "name": {
-                    "type": "string"
-                },
-                "dungeon_id": {
                     "type": "string"
                 },
                 "is_exit": {
                     "type": "boolean"
                 },
-                "doors": {
+                "links": {
                     "type": "array",
+                    "description": "A link relation that point to \"self\" or adjacent rooms denoted by a direction \"room [direction]\". Shows the allowed methods on a Room.",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "room_id": {
-                                "type": "string"
-                            },
-                            "direction": {
-                                "type": "string",
-                                "enum": [
-                                    "north",
-                                    "south",
-                                    "east",
-                                    "west"
-                                ]
-                            }
-                        }
+                        "$ref": "#/definitions/Link"
                     }
                 }
             }
@@ -349,14 +408,15 @@
             "type": "object",
             "readOnly": true,
             "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "entrance_room_id": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "description": "A link relation that point to \"self\" or the first room of the dungeon denoted by a direction \"room first\". Shows the allowed methods on a Dungeon.",
+                    "items": {
+                        "$ref": "#/definitions/Link"
+                    }
                 }
             }
         },
@@ -368,6 +428,13 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Dungeon"
+                    }
+                },
+                "links": {
+                    "type": "array",
+                    "description": "A link relation that point to \"self\". Shows the allowed methods on Characters.",
+                    "items": {
+                        "$ref": "#/definitions/Link"
                     }
                 }
             }
@@ -393,19 +460,25 @@
                     "description": "A long, human readable description of the error."
                 },
                 "link": {
-                    "properties": {
-                        "rel": {
-                            "type": "string",
-                            "enum": [
-                                "help"
-                            ]
-                        },
-                        "href": {
-                            "type": "string",
-                            "format": "url",
-                            "description": "A link to a document containing more information about the error and how to take action on it."
-                        }
-                    }
+                    "description": "A link to a document containing more information about the error and how to take action on it.",
+                    "$ref": "#/definitions/Link"
+                }
+            }
+        },
+        "Link": {
+            "type": "object",
+            "readOnly": true,
+            "properties": {
+                "rel": {
+                    "type": "string"
+                },
+                "allow": {
+                    "type": "string",
+                    "description": "The HTTP methods allowed on the href."
+                },
+                "href": {
+                    "type": "string",
+                    "format": "url"
                 }
             }
         }
