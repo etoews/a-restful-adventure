@@ -19,12 +19,31 @@ class CharacterBase(object):
     """
 
     def _entity_to_resource(self, character):
-        # <a1>
-        pass
+        base_href = self._id_to_href(character['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href
+            },
+            {
+                'rel': 'location',
+                'allow': [
+                    'GET', 'PUT'
+                ],
+                'href': base_href + '/location'
+            }
+        ]
+
+        return {
+            'name': character['name'],
+            'links': links
+        }
 
     def _id_to_href(self, character_id):
-        # <a2>
-        pass
+        return '/characters/{0}'.format(character_id)
 
     def _room_href_to_id(self, href):
         # <a3>
@@ -58,8 +77,31 @@ class CharacterList(CharacterBase):
         self._controller = controller
 
     def on_get(self, req, resp):
-        # <a7>
-        pass
+        # Ask the DAL for a list of entities
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        characters = self._controller.list_characters()
+
+        # Map the entities to the resource
+        resource = {
+            'characters': [self._entity_to_resource(c) for c in characters],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET', 'POST'],
+                    'href': '/characters'
+                }
+            ]
+        }
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
+
+        # Falcon defaults to the JSON media type for the content
+        # resp.content_type = 'application/json'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp):
         # <a8>
@@ -137,10 +179,10 @@ class HelloResource(object):  # <w3>
 
 # An instance of falcon.API is a WSGI application
 api = falcon.API()
-api.add_route('/', HelloResource())  # <w4>
+# api.add_route('/', HelloResource())  # <w4>
 
 controller = dal.Controller()
-# <a14>
+api.add_route('/characters', CharacterList(controller))
 # <a15>
 # <a16>
 # <a17>

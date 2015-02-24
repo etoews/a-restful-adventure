@@ -157,25 +157,8 @@ class DungeonBase(object):
     """
 
     def _entity_to_resource(self, dungeon):
-        base_href = '/dungeons/{0}'.format(dungeon['id'])
-        links = [
-            {
-                'rel': 'self',
-                'allow': ['GET'],
-                'href': base_href
-            },
-            {
-                'rel': 'room first',
-                'allow': ['GET'],
-                'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
-            }
-        ]
-
-        return {
-            'name': dungeon['name'],
-            'links': links
-        }
-
+        # <a12>
+        pass
 
 class DungeonList(DungeonBase):
     """Resource class for the dungeon list concept."""
@@ -185,23 +168,8 @@ class DungeonList(DungeonBase):
         self._controller = controller
 
     def on_get(self, req, resp):
-        # Ask the DAL for a list of entities
-        dungeons = self._controller.list_dungeons()
-
-        # Map the entities to the resource
-        resource = {
-            'dungeons': [self._entity_to_resource(d) for d in dungeons],
-            'links': [
-                {
-                    'rel': 'self',
-                    'allow': ['GET'],
-                    'href': '/dungeons'
-                }
-            ]
-        }
-
-        # Create a JSON representation of the resource
-        resp.body = json.dumps(resource, ensure_ascii=False)
+        # <a13>
+        pass
 
 
 # ===========================================================================
@@ -210,7 +178,9 @@ class DungeonList(DungeonBase):
 
 class HelloResource(object):  # <w3>
     def on_get(self, req, resp):
-        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.body = 'Hello ' + req.get_header('x-name') + '!\n'
+
+        # Falcon defaults to 'application/json'
         resp.content_type = 'text/plain'
 
         # Falcon defaults to 200 OK
@@ -229,21 +199,19 @@ controller = dal.Controller()
 api.add_route('/characters', CharacterList(controller))
 # <a15>
 # <a16>
-api.add_route('/dungeons', DungeonList(controller))
+# <a17>
 
 
 # ===========================================================================
 # WSGI
 # ===========================================================================
 
-def application(env, start_response):  # <w1>
-    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
-
-    start_response("200 OK", [('Content-Type', 'text/plain')])
-    return [body.encode('utf-8')]
-
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
 
-    server = make_server('127.0.0.1', 8000, api)  # <w2>
+    host = '127.0.0.1'
+    port = 8000
+    server = make_server(host, port, api)  # <w2>
+
+    print('Listening on {0}:{1}'.format(host, port))
     server.serve_forever()

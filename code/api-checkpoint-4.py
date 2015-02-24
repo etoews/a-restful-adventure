@@ -46,12 +46,15 @@ class CharacterBase(object):
         return '/characters/{0}'.format(character_id)
 
     def _room_href_to_id(self, href):
-        # <a3>
-        pass
+        # ID will be the last part of the URL.
+        return uuid.UUID(href.split('/')[-1])
 
     def _room_id_to_location(self, room_id, dungeon_id):
-        # <a4>
-        pass
+        return {
+            'rel': 'room',
+            'allow': ['GET'],
+            'href': 'dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
+        }
 
 
 class CharacterLocation(CharacterBase):
@@ -61,12 +64,42 @@ class CharacterLocation(CharacterBase):
         self._controller = controller
 
     def on_get(self, req, resp, character_id):
-        # <a5>
-        pass
+        # TODO: Handle the case that character_id is not a valid UUID
+        character_id = uuid.UUID(character_id)
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        room_id, dungeon_id = self._controller.get_location(character_id)
+
+        # Define the resource. We have to translate the DAL's notion
+        # of a "location" to the API's concept of a "location".
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        resource = self._room_id_to_location(room_id, dungeon_id)
+
+        # Create a JSON representation of the resource
+        # TODO: Use functools.partial to create a version of json.dumps that
+        #       defaults to ensure_ascii=False
+        resp.body = json.dumps(resource, ensure_ascii=False)
 
     def on_put(self, req, resp, character_id):
-        # <a6>
-        pass
+        # TODO: Validate against a schema
+        representation = req.stream.read().decode('utf-8')
+        representation = json.loads(representation)
+
+        # TODO: Raise falcon.HTTPError if ID is not a UUID
+        character_id = uuid.UUID(character_id)
+
+        # TODO: Raise falcon.HTTPError if ID is not a UUID
+        room_href = representation['href']
+        room_id = self._room_href_to_id(room_href)
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        self._controller.move_character(character_id, room_id)
+
+        # Success!
+        resp.status = falcon.HTTP_204
 
 
 class CharacterList(CharacterBase):
@@ -93,7 +126,6 @@ class CharacterList(CharacterBase):
                 }
             ]
         }
-
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
 
@@ -104,8 +136,23 @@ class CharacterList(CharacterBase):
         # resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp):
-        # <a8>
-        pass
+        # Parse the incoming representation. This can be factored out into
+        # Falcon hooks or middleware, but we'll keep it inline for now.
+        # TODO: Validate against a schema
+        representation = req.stream.read().decode('utf-8')
+        representation = json.loads(representation)
+
+        # Create a new entity from the representation
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        character = self._controller.add_character(representation['name'])
+
+        # Map the entity to the resource. Again, this sort of thing
+        # could be factored out into a Falcon hook (DRY).
+        resource = self._entity_to_resource(character)
+
+        resp.location = self._id_to_href(character['id'])
+        resp.body = json.dumps(resource, ensure_ascii=False)
 
 
 class RoomBase(object):
@@ -143,8 +190,25 @@ class DungeonBase(object):
     """
 
     def _entity_to_resource(self, dungeon):
-        # <a12>
-        pass
+        base_href = '/dungeons/{0}'.format(dungeon['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': ['GET'],
+                'href': base_href
+            },
+            {
+                'rel': 'room first',
+                'allow': ['GET'],
+                'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
+            }
+        ]
+
+        return {
+            'name': dungeon['name'],
+            'links': links
+        }
+
 
 class DungeonList(DungeonBase):
     """Resource class for the dungeon list concept."""
@@ -154,8 +218,23 @@ class DungeonList(DungeonBase):
         self._controller = controller
 
     def on_get(self, req, resp):
-        # <a13>
-        pass
+        # Ask the DAL for a list of entities
+        dungeons = self._controller.list_dungeons()
+
+        # Map the entities to the resource
+        resource = {
+            'dungeons': [self._entity_to_resource(d) for d in dungeons],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET'],
+                    'href': '/dungeons'
+                }
+            ]
+        }
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
 
 
 # ===========================================================================
@@ -164,7 +243,9 @@ class DungeonList(DungeonBase):
 
 class HelloResource(object):  # <w3>
     def on_get(self, req, resp):
-        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.body = 'Hello ' + req.get_header('x-name') + '!\n'
+
+        # Falcon defaults to 'application/json'
         resp.content_type = 'text/plain'
 
         # Falcon defaults to 200 OK
@@ -181,23 +262,21 @@ api = falcon.API()
 
 controller = dal.Controller()
 api.add_route('/characters', CharacterList(controller))
-# <a15>
+api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
 # <a16>
-# <a17>
+api.add_route('/dungeons', DungeonList(controller))
 
 
 # ===========================================================================
 # WSGI
 # ===========================================================================
 
-def application(env, start_response):  # <w1>
-    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
-
-    start_response("200 OK", [('Content-Type', 'text/plain')])
-    return [body.encode('utf-8')]
-
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
 
-    server = make_server('127.0.0.1', 8000, api)  # <w2>
+    host = '127.0.0.1'
+    port = 8000
+    server = make_server(host, port, api)  # <w2>
+
+    print('Listening on {0}:{1}'.format(host, port))
     server.serve_forever()

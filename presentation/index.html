@@ -213,7 +213,7 @@
 <!--
           <p>[draw a big-picture diagram here, then point out the elements and talk about them briefly]</p>
  -->
-          <h3 class="fragment">Components</h3>
+          <h3>Components</h3>
           <h3 class="fragment">Connectors</h3>
           <h3 class="fragment">Resources</h3>
           <h3 class="fragment">Representations</h3>
@@ -629,15 +629,83 @@ curl ?
           </aside>
         </section>
 
-        <section id="impl-lab-1">
+        <section>
           <h1>Lab: Hello world!</h1>
         </section>
 
         <section>
+          <h3>WSGI ("whiskey")</h3>
+          <p>Python Web Server Gateway Interface</p>
+          <pre><code data-trim class="lang-py">
+def application(env, start_response):
+    body = 'Hello ' + env['HTTP_X_NAME'] + '!\n'
+
+    start_response("200 OK", [('Content-Type', 'text/plain')])
+    return [body.encode('utf-8')]
+
+          </code></pre>
+          <aside class="notes">
+            Let's walk through this example line by line.
+          </aside>
+        </section>
+
+        <section>
+          <h3>Self-hosting a WSGI App</h3>
+          <pre><code data-trim class="lang-py">
+if __name__ == '__main__':
+    from wsgiref.simple_server import make_server
+
+    host = '127.0.0.1'
+    port = 8000
+    server = make_server(host, port, application)
+
+    print('Listening on {0}:{1}'.format(host, port))
+    server.serve_forever()
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+$ python myapp.py
+
+Listening on 127.0.0.1:8000
+          </code></pre>
+        </section>
+
+       <section>
+          <h2>Falcon</h2>
+          <div><img class="overlaid" src="img/flight-silhouettes.png" width="400" height="250" /></div>
+          <aside class="notes">
+            <p>OK, so we've seen what a basic WSGI app looks like. But working directly with WSGI is pretty tedious, so we're going to actually use a lightweight REST framework I developed, called Falcon, to make things easier.</p>
+            <p>Everett mentioned Flask earlier, and that's another valid option. However, I like to use Falcon because it makes it a little easier to teach the REST concepts that we'll be covering.</p>
+          </aside>
+        </section>
+
+        <section>
+          <p><a href="http://falconframework.org/" target="_blank">falconframework.org</a></p>
           <pre><code data-trim class="lang-sh">
-$ mkdir restful-adventure
-$ cd restful-adventure
-$ subl .
+$ pip install falcon
+          </code></pre>
+          <aside class="notes">
+            <p>Let's install falcon now. Just pip install falcon as shown here.</p>
+            <p>We'll only be scratching the surface of the Falcon framework today, but if you're interested, you can visit falconframework.org another time to learn more.</p>
+          </aside>
+        </section>
+
+        <section>
+          <p><a href="http://httpie.org" target="_blank">httpie.org</a></p>
+          <pre><code data-trim class="lang-sh">
+$ pip install httpie
+          </code></pre>
+          <aside class="notes">
+            <p>We'll also be using htt-pie to exercise our API as we go along, so let's install that now.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>Ready?</h3>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ mkdir restful-adventure &amp;&amp; cd restful-adventure
           </code></pre>
           <aside class="notes">
             First, let's create a directory for our project and cd into it. If you are using an IDE, you can create a new project within that, but I'm using a combination of the command line and a text editor called Sublime Text, so I'll do it like this:
@@ -650,7 +718,7 @@ $ wget http://rack.to/rest-api -O api.py
 $ wget http://rack.to/rest-dal -O dal.py
           </code></pre>
           <aside class="notes">
-            <p>Now we need to download a skeleton api.py file to your project directory. You can do this through the browser or with wget.</p>
+            <p>Now we need to download a skeleton api.py file to the project directory. You can do this through the browser or with wget.</p>
             <p>We also need to download the data access layer module, or DAL, contained in dal.py.</p>
             <p>Now open api.py in your editor. We will be filling this out in a series of labs. See those funny-looking comments with the angle brackets? Those are placeholders that we'll replace with code as we go along. Each placeholder comment has a unique tag that I'll reference.</p>
             <p>All set?</p>
@@ -658,52 +726,59 @@ $ wget http://rack.to/rest-dal -O dal.py
         </section>
 
         <section>
-          <h3>w1</h3>
+          <h3>w3</h3>
+          <pre><code data-trim>
+class HelloResource(object):
+    def on_get(self, req, resp):
+        resp.body = 'Hello ' + req.get_header('x-name') + '!\n'
+
+        # Falcon defaults to 'application/json'
+        resp.content_type = 'text/plain'
+
+        # Falcon defaults to 200 OK
+        # resp.status = falcon.HTTP_200
+          </code></pre>
+          <aside class="notes">
+            <p>Next, open up the api.py file and search for the tag *w3*, towards the bottom of the file. Here we define a class to represent a REST resource. It has a single responder method to handle GET requests.</p>
+
+            <p>When a request comes in, Falcon wraps it with a Request class and passes that in. That's the req argument you see here.</p>
+            <p>Falcon also passes in an instance of a Response class that you can use to return a response to the client.</p>
+            <p>In this on_get responder, we echo the x-name header in a hello message, and set the content type to plain text to override the default.</p>
+
+            <p>Note that Falcon defaults to returning 200 OK, so we don't need to set that explicitly.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>w4</h3>
           <pre><code data-trim class="lang-py">
-def application(env, start_response):
-    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
-
-    start_response("200 OK", [('Content-Type', 'text/plain')])
-    return [body.encode('utf-8')]
-
+# An instance of falcon.API is a WSGI application
+api = falcon.API()
+api.add_route('/', HelloResource())
           </code></pre>
           <aside class="notes">
-            <p>Next let's get a simple "hello world" app working. Do a search in api.py for the tag *w1*. This function is a simple hello world WSGI application. WSGI is a standard for connecting python applications to any of a number of web servers, such as apache httpd or gunicorn. Headers and other information about each request are passed in through the environment dict. The application sets the status code and headers for the response using the start_response callback, and then returns an iterable containing the response body.</p>
-
-            <p>The Python standard library includes a basic references WSGI server that we will use to self-host our application for our labs. Let's try it out.</p>
+            <p>Next, find the tag *w4*. Here we create an instance of falcon.API and add a route. This route says that if the user agent requests the root path of our API, that corresponds to a resource identifier for HelloResource.</p>
+            <p>All set? OK, now let's test our work.</p>
           </aside>
         </section>
 
         <section>
+          <h3>Run it!</h3>
           <pre><code data-trim class="lang-sh">
-$ python api.py
+$ python myapp.py
+
+Listening on 127.0.0.1:8000
           </code></pre>
           <aside class="notes">
-            Let's run api.py. I'm using the command line, but if you are using an IDE, you can run the file directly from there if you like.
+            Run the hello-world service from the console as shown here.
           </aside>
         </section>
 
         <section>
+          <h3>Test it!</h3>
           <pre><code data-trim class="lang-sh">
-$ curl 127.0.0.1:8000 -H 'X-Name: Adventurer'
-          </code></pre>
-          <pre class="fragment"><code data-trim class="lang-sh">
-Hello Adventurer
+$ http 127.0.0.1:8000 x-name:Adventurer
 
-          </code></pre>
-        <aside class="notes">
-            <p>Now, open another console tab and type this on the command line.</p>
-            <p>[Next fragment]</p>
-            <p>
-            I'm sure all of you are familiar with curl. It works well enough, but I like to use another tool that's a little friendlier called httpie.
-            </p>p
-          </aside>
-        </section>
-
-        <section>
-          <pre><code data-trim class="lang-sh">
-$ pip install httpie
-$ http 127.0.0.1:8000 X-Name:Adventurer
           </code></pre>
           <pre class="fragment"><code data-trim class="lang-sh">
 HTTP/1.0 200 OK
@@ -716,89 +791,19 @@ Hello Adventurer
 
           </code></pre>
           <aside class="notes">
-            Let's install that real quick and give it a try. Enter this at the command line.
-          </aside>
-        </section>
+            <p>Now let's test it! Open up another console, and send a request to your service using htt-pie, as shown here.</p>
 
-        <section>
-          <h2>Falcon</h2>
-          <div><img class="overlaid" src="img/flight-silhouettes.png" width="400" height="250" /></div>
-          <aside class="notes">
-            OK, so we've seen what a basic WSGI app looks like. But working directly with WSGI is pretty tedious, so we're going to actually use a lightweight REST framework I developed, called Falcon, to make things easier.
-          </aside>
-        </section>
-
-        <section>
-          <p><a href="http://falconframework.org/">falconframework.org</a></p>
-          <pre><code data-trim class="lang-sh">
-$ pip install falcon
-          </code></pre>
-          <aside class="notes">
-            <p>Let's install falcon now. Just pip install falcon as shown here.</p>
-            <p>We'll only be scratching the surface of the Falcon framework today, but if you're interested, you can visit falconframework.org later to learn more.</p>
-          </aside>
-        </section>
-
-        <section>
-          <h3>w3</h3>
-          <pre><code data-trim>
-class HelloResource(object):
-    def on_get(self, req, resp):
-        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
-        resp.content_type = 'text/plain'
-
-        # Falcon defaults to 200 OK
-        # resp.status = falcon.HTTP_200
-          </code></pre>
-          <aside class="notes">
-            <p>Now let's go back to our app.py file and replace the raw WSGI app with a Falcon app. Find the tag *w4*. Here we define a class to represent a REST resource. It has a single responder method to handle GET requests.</p>
-
-            <p>Note that Falcon defaults to returning 200 OK if you don't specify a status.</p>
-          </aside>
-        </section>
-
-        <section>
-          <h3>w4</h3>
-          <pre><code data-trim class="lang-py">
-# An instance of falcon.API is a WSGI application
-api = falcon.API()
-api.add_route('/', HelloResource())
-          </code></pre>
-          <aside class="notes">
-            Next, find the tag *w4*. Here we create an instance of falcon.API and add a route. This route says that if the user agent requests the root path of our API, that will be handled by an instance of HelloResource.
-          </aside>
-        </section>
-
-        <section>
-          <h3>w2</h3>
-          <pre><code data-trim class="lang-py">
-server = make_server('127.0.0.1', 8000, api)
-
-          </code></pre>
-          <aside class="notes">
-            <p>Now, scroll down to find the *w2* tag. Replace "application" with "api" so that the server will use our falcon app instead. It will look like this.</p>
-
-            <p>All set? Now let's test our work.</p>
-          </aside>
-        </section>
-
-        <section>
-          <pre><code data-trim class="lang-sh">
-$ http 127.0.0.1:8000 x-name:Adventurer
-
-          </code></pre>
-          <aside class="notes">
-            <p>If your server is still running from the last test, kill it with ctrl-c and restart it to pick up the changes. Then, in another console, enter this.</p>
+            <p>Note the convention for passing headers.</p>
 
             <p>OK, did that work for everyone? Any questions so far?</p>
 
             <p>Now that you have a feel for how WSGI apps work, let's dive into creating our game! (yay!)</p>
 
-            <p>We'll take this step by step from the player's perspective. We want to keep the end user in mind.</p>
+            <p>We'll take this step by step from the player's perspective. As Everett mentioned earlier, we always want to keep the user in mind as we go through this process.</p>
           </aside>
         </section>
 
-        <section id="impl-lab-3">
+        <section>
           <h1>Lab: Choosing a character</h1>
           <aside class="notes">
             The first thing a player needs to do is choose their character. They will have to find out what characters are available, so we'll start with implementing a collection resource to represent a list of characters.
@@ -807,7 +812,7 @@ $ http 127.0.0.1:8000 x-name:Adventurer
         </section>
 
         <section>
-          <pre><code data-trim class="lang-yaml">
+          <pre><code data-trim class="lang-yaml tall">
 /characters:
   get:
     summary: List all Characters
@@ -877,7 +882,6 @@ $ http 127.0.0.1:8000 x-name:Adventurer
         <section>
           <h3>a14</h3>
           <pre><code data-trim class="lang-py">
-controller = Controller()
 api.add_route('/characters', CharacterList(controller))
 
           </code></pre>
@@ -894,7 +898,7 @@ api.add_route('/characters', CharacterList(controller))
 
         <section>
           <h3>a7</h3>
-          <pre><code data-trim class="lang-py">
+          <pre><code data-trim class="lang-py tall">
 def on_get(self, req, resp):
     # Ask the DAL for a list of entities
     # TODO: If an error is raised, convert it to an instance
@@ -932,7 +936,7 @@ def on_get(self, req, resp):
 
         <section>
           <h3>a1</h3>
-          <pre><code data-trim class="lang-py">
+          <pre><code data-trim class="lang-py tall">
 def _entity_to_resource(self, character):
     base_href = self._id_to_href(character['id'])
     links = [
@@ -977,10 +981,10 @@ def _id_to_href(self, character_id):
           </aside>
         </section>
 
-        <section id="impl-checkpoint-3">
+        <section id="impl-checkpoint-1">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-lab-3.py">api-lab-3.py</a>
+            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-1.py">api-checkpoint-1.py</a>
           </h4>
           <aside class="notes">
             Your api.py file should now look like this.
@@ -992,7 +996,7 @@ def _id_to_href(self, character_id):
 $ http 127.0.0.1:8000/characters
 
           </code></pre>
-          <pre class="fragment"><code data-trim class="lang-sh">
+          <pre class="fragment"><code data-trim class="lang-sh tall">
 HTTP/1.0 200 OK
 Date: Sat, 21 Feb 2015 22:52:54 GMT
 Server: WSGIServer/0.1 Python/2.7.9
@@ -1036,7 +1040,7 @@ content-type: application/json; charset=utf-8
 }
           </code></pre>
           <aside class="notes">
-            <p>Let's test this out. First, ctrl-c the running script, if needed, and restart it to pick up the changes. Then in your other console, run this.</p>
+            <p>Let's test this out. First, Control-C the running script, if needed, and restart it to pick up the changes. Then in your other console, run this.</p>
 
             <p>Great! Now we can list the characters and choose one.</p>
 
@@ -1044,7 +1048,7 @@ content-type: application/json; charset=utf-8
           </aside>
         </section>
 
-        <section id="impl-lab-4">
+        <section>
           <h1>Lab: Adding a new character</h1>
           <aside class="notes">
             <p>Let's give the player a way to create their own character. We'll begin by reviewing the API design.</p>
@@ -1141,10 +1145,10 @@ def on_post(self, req, resp):
           </aside>
         </section>
 
-        <section id="impl-checkpoint-4">
+        <section id="impl-checkpoint-2">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-lab-4.py">api-lab-4.py</a>
+            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-2.py">api-checkpoint-2.py</a>
           </h4>
 
           <aside class="notes">
@@ -1165,7 +1169,7 @@ Server: WSGIServer/0.1 Python/2.7.9
 allow: GET, POST
           </code></pre>
           <aside class="notes">
-            <p>Let's take this for a spin. First, ctrl-c the running script, if needed, and restart it.</p>
+            <p>Let's take this for a spin. First, Control-C the running script, if needed, and restart it.</p>
 
             <p>Then in your other console, enter this at the command line to make sure everything is wired up correctly.</p>
 
@@ -1179,7 +1183,7 @@ allow: GET, POST
 $ http POST 127.0.0.1:8000/characters name="Commander Keen"
 
           </code></pre>
-          <pre class="fragment"><code data-trim class="lang-sh">
+          <pre class="fragment"><code data-trim class="lang-sh tall">
 HTTP/1.0 200 OK
 Date: Sat, 21 Feb 2015 23:00:02 GMT
 Server: WSGIServer/0.1 Python/2.7.9
@@ -1219,7 +1223,7 @@ location: /characters/8713e99b-d4d2-4855-85a2-9d0a32fec0b7
 $ http 127.0.0.1:8000/characters
 
           </code></pre>
-          <pre class="fragment"><code data-trim class="lang-sh">
+          <pre class="fragment"><code data-trim class="lang-sh tall">
 HTTP/1.0 200 OK
 Date: Sat, 21 Feb 2015 23:00:58 GMT
 Server: WSGIServer/0.1 Python/2.7.9
@@ -1292,7 +1296,7 @@ content-type: application/json; charset=utf-8
           </aside>
         </section>
 
-        <section id="impl-lab-5">
+        <section>
           <h1>Lab: Choosing a dungeon</h1>
           <aside class="notes">
 Now that we can choose a character, or create a new one if we don't like any of the choices, we need to pick a dungeon to play. We want to provide the user agent a set of choices that it can display to the player.
@@ -1426,10 +1430,10 @@ api.add_route('/dungeons', DungeonList(controller))
           </aside>
         </section>
 
-        <section id="impl-checkpoint-5">
+        <section id="impl-checkpoint-3">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-lab-5.py">api-lab-5.py</a>
+            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-3.py">api-checkpoint-3.py</a>
           </h4>
 
           <aside class="notes">
@@ -1442,7 +1446,7 @@ api.add_route('/dungeons', DungeonList(controller))
 $ http 127.0.0.1:8000/dungeons
 
           </code></pre>
-          <pre class="fragment"><code data-trim class="lang-sh">
+          <pre class="fragment"><code data-trim class="lang-sh tall">
 HTTP/1.0 200 OK
 Date: Sun, 22 Feb 2015 02:13:32 GMT
 Server: WSGIServer/0.1 Python/2.7.9
@@ -1483,7 +1487,7 @@ content-type: application/json; charset=utf-8
 }
           </code></pre>
           <aside class="notes">
-<p>ctrl-c your app and restart it. Then in your other console window, enter the command shown here.</p>
+<p>Control-C your app and restart it. Then in your other console window, enter the command shown here.</p>
 
 <p>Cool. So far we've given players the ability to choose a character to play and a dungeon to enter. What's next?</p>
           </aside>
@@ -1503,7 +1507,7 @@ content-type: application/json; charset=utf-8
 $ http 127.0.0.1:8000/characters
 
           </code></pre>
-          <pre class="fragment"><code data-trim class="lang-sh">
+          <pre class="fragment"><code data-trim class="lang-sh tall">
 HTTP/1.0 200 OK
 Date: Sun, 22 Feb 2015 02:32:23 GMT
 Server: WSGIServer/0.1 Python/2.7.9
@@ -1709,10 +1713,10 @@ api.add_route('/characters/{character_id}/location', CharacterLocation(controlle
           </aside>
         </section>
 
-        <section id="impl-checkpoint-6">
+        <section id="impl-checkpoint-4">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-lab-6.py">api-lab-6.py</a>
+            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-4.py">api-checkpoint-4.py</a>
           </h4>          <aside class="notes">
 At this point your api.py file should look like this.
 
@@ -1765,7 +1769,7 @@ content-type: application/json; charset=utf-8
           </aside>
         </section>
 
-        <section id="impl-lab-7">
+        <section>
           <h1>Lab: Find a way out!</h1>
           <h3>(Preferably without dying...)</h3>
           <aside class="notes">
@@ -1775,19 +1779,19 @@ Now that we've entered the dungeon, we need to traverse the rooms in search of t
         </section>
 
         <section>
+          <h3>Use Case</h3>
           <ol>
-            <li>Dereference the room link for the character's current location to get a list of doorways.</li>
-            <li>Present the list of doorways to the player, and let them to choose one.</li>
-            <li>Move the character to the chosen room.</li>
-            <li>Are we at the exit? If not, go to (1).</li>
-          </ol>
-          <aside class="notes">
-            The User Agent will follow these steps.
+            <li>UA gets a list of doorways leading out from the player's location.</li>
+            <li>UA presents the list of doorways to Player.</li>
+            <li>Player chooses a doorway from the list.</li>
+            <li>UA moves Player's character to the chosen room.</li>
+          </ol>          <aside class="notes">
+            So here's the use case the User Agent will follow these steps.
           </aside>
         </section>
 
         <section>
-          <h3>Step 1: Get a list of doorways</h3>
+          <h3>Step 1: UA gets a list of doorways</h3>
           <aside class="notes">
 To get a list of doorways, we need to implement a Room resource that will provide a list of links to other rooms. Each of these links represent a doorway out of the room.
           </aside>
@@ -1900,7 +1904,7 @@ def on_get(self, req, resp, dungeon_id, room_id):
 
         <section>
           <h3>a9</h3>
-          <pre><code data-trim class="lang-py">
+          <pre><code data-trim class="lang-py tall">
 def _entity_to_resource(self, room):
     dungeon_id = room['dungeon_id']
     room_id = room['id']
@@ -1973,35 +1977,193 @@ api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
           </aside>
         </section>
 
-        <section id="impl-checkpoint-7">
+        <section id="impl-checkpoint-5">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-lab-7.py">api-lab-7.py</a>
+            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-5.py">api-checkpoint-5.py</a>
           </h4>
           <aside class="notes">
-<p>Before we move on, ctrl-c and restart your WSGI server to pick up the changes we just made.</p>
+<p>Before we move on, Control-C and restart your WSGI server to pick up the changes we just made.</p>
 
-<p>Let's list the doorways in the entrance room.</p>
+          </aside>
+        </section>
 
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000/dungeons
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh tall">
+HTTP/1.0 200 OK
+Date: Tue, 24 Feb 2015 00:44:24 GMT
+Server: WSGIServer/0.2 CPython/3.3.6
+content-length: 356
+content-type: application/json; charset=utf-8
+
+{
+    "dungeons": [
+        {
+            "links": [
+                {
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117",
+                    "rel": "self"
+                },
+                {
+                    "allow": [
+                        "GET"
+                    ],
+                    "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27",
+                    "rel": "room first"
+                }
+            ],
+            "name": "Dungeon of Doom"
+        }
+    ],
+    "links": [
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "/dungeons",
+            "rel": "self"
+        }
+    ]
+}
+          </code></pre>
+          <aside class="notes">
+            <p>OK, let's see how this works.<p>
+            <p>First we need to set the stage by moving the character to the Dungeon of Doom entrance.</p>
+            <p>Run this command to list all dungeons.</p>
           </aside>
         </section>
 
         <section>
           <pre><code data-trim class="nohighlight smaller-text">
-$ ROOM_URL=/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/751d5812-144d-40f8-a82d-221dbb3075e2
+$ ROOM_URL=/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27
 
           </code></pre>
           <aside class="notes">
-Let's choose the north doorway out of the entrance room. We'll copy and paste the href from that link relation. Go back to your console and paste this on the command line.
+            <p>Next, copy the href for the first room in the Dungeon of Doom</p>
+          </aside>
+        </section>
+
+        <section>
+          <pre><code data-trim class="lang-sh">
+$ http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh">
+HTTP/1.0 204 No Content
+Content-Length: 0
+Date: Sun, 22 Feb 2015 03:56:54 GMT
+Server: WSGIServer/0.1 Python/2.7.9
+
+          </code></pre>
+          <aside class="notes">
+            Now let's use the character location URL (that we cached earlier) to move Knox to the dungeon entrance.
 
           </aside>
         </section>
 
         <section>
-          <h3>Step 3: Move the character</h3>
+          <pre><code data-trim class="lang-sh">
+$ http 127.0.0.1:8000$ROOM_URL
+
+          </code></pre>
+          <pre class="fragment"><code data-trim class="lang-sh tall">
+HTTP/1.0 200 OK
+Date: Tue, 24 Feb 2015 01:03:13 GMT
+Server: WSGIServer/0.2 CPython/3.3.6
+content-length: 575
+content-type: application/json; charset=utf-8
+
+{
+    "is_exit": false,
+    "links": [
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/8f726efc-5e3e-4332-ab24-243a1d3e0b27",
+            "rel": "self"
+        },
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "dungeons/5a024cd8-2db3-446e-b777-bdc60185a117",
+            "rel": "dungeon"
+        },
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/751d5812-144d-40f8-a82d-221dbb3075e2",
+            "rel": "room north"
+        },
+        {
+            "allow": [
+                "GET"
+            ],
+            "href": "/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/65840050-12d3-4e29-9412-7c3b22fdd52e",
+            "rel": "room east"
+        }
+    ],
+    "name": "Super Creepy Entrance"
+}
+
+          </code></pre>
+          <aside class="notes">
+            Now that we have entered the dungeon, let's find our where we can go from here. Let's dereference the room link for the character's
+            current location. We already have that href cached, so we can just do this.
+          </aside>
         </section>
 
         <section>
+          <h3>Step 2: Present the list of doorways</h3>
+          <div>&nbsp;</div>
+          <pre>
+Thou findest thyself in yonder Super Creepy Entrance...
+
+Looking about, thou doth see doorways leading North and East. What
+is thy command?
+
+&gt; <span class="blink">_</span>
+
+          </pre>
+          <aside class="notes">
+            So, we'll just assume we have a fancy interface for displaying a list of choices to the user. It might look something like this.
+          </aside>
+        </section>
+
+        <section>
+          <h3>Step 3: Player chooses a doorway</h3>
+          <div>&nbsp;</div>
+          <pre>
+Thou findest thyself in yonder Super Creepy Entrance...
+
+Looking about, thou doth see doorways leading North and East. What
+is thy command?
+
+&gt; go north<span class="blink">_</span>
+
+          </pre>
+          <pre class="fragment"><code data-trim class="nohighlight smaller-text">
+$ ROOM_URL=/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/751d5812-144d-40f8-a82d-221dbb3075e2
+
+          </code></pre>
+          <aside class="notes">
+            <p>Let's assume the player chooses the North doorway out of the entrance room. </p>
+            <p>[next fragment</p>
+            <p>We'll copy and paste the href from that link relation. Go back to your console and paste this on the command line.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>Step 4: Move the character</h3>
           <pre><code data-trim class="lang-sh">
 $  http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
 
@@ -2014,22 +2176,20 @@ Server: WSGIServer/0.1 Python/2.7.9
 
           </code></pre>
           <aside class="notes">
-Now let's move the character by linking their location to the room we've chosen to enter. Here's the command.
+Now let's move the character by linking their location to the room the Player chose to enter. Here's the command for that.
 
           </aside>
         </section>
 
         <section>
-          <h3>Are we at the exit? If not, go to (2)</h3>
+          <h3>Step 5: Did we make it out alive?</h3>
         </section>
-
-
         <section>
           <pre><code data-trim class="lang-sh">
 $ http 127.0.0.1:8000$ROOM_URL
 
           </code></pre>
-          <pre class="fragment"><code data-trim class="lang-sh">
+          <pre class="fragment"><code data-trim class="lang-sh tall">
 HTTP/1.0 200 OK
 Date: Sun, 22 Feb 2015 03:58:01 GMT
 Server: WSGIServer/0.1 Python/2.7.9
@@ -2069,16 +2229,33 @@ content-type: application/json; charset=utf-8
 
 <p>[next fragment]</p>
 
-<p>Darn! It's a dead end! The only way out is back the way we just came, so we'll have to backtrack.</p>
-
-<p>So you get the idea. You would continue repeating this process, exploring the dungeon one room at a time until you reach the exit. If you temporarily lose your network connection, or simply get tired and want to take a break, the user agent will still remember the character you were playing with last, and can GET it's last location from the server when you are ready to pick up again where you left off.</p>
-
+<p>let's see what we have here. Shoot! Doesn't look like the exit. In fact, it's a dead end! </p>
           </aside>
         </section>
 
-        <section id="impl-lab-8">
+        <section>
+          <div>&nbsp;</div>
+          <pre>
+Thou findest thyself in yonder Armory...
+
+Fortunately, thou art not dead yet. Be that at is may, thou hast
+found a dead-end. Thou canst only retreat back through yonder
+Southward door. What is thy command?
+
+&gt; <span class="blink">_</span>
+
+          </pre>
+          <aside class="notes">
+<p>The only way out is back the way we just came, so we'll have to backtrack.</p>
+
+<p>So you get the idea. The player would repeat this process, exploring the dungeon one room at a time until they found the exit. If the player temporarily lost their network connection, or they simply got tired and wanted to take a break, the user agent could remember which character they were playing last. Later, the Player could come back and the UA would be able to pick up where they left off.</p>          </aside>
+        </section>
+
+        <section>
           <h1>Lab: Independent evolution</h1>
           <aside class="notes">
+<p>OK, our final lab is a quick look at independent evolution between the client and the server.</p>
+
 <p>Can you imagine a world in which each time you made a change to your website, everyone had to update their web browsers to a new version? The REST architectural style makes it possible for clients and servers to be more loosely coupled, so that each node on the network can evolve more or less independently over time.</p>
 
 <p>Granted, sometimes a big change can only be made in an incompatible way. However, our goal as API and client developers is to minimize the number of times this has to happen, while still allowing for agile iteration and evolution on both sides.</p>
@@ -2089,7 +2266,7 @@ content-type: application/json; charset=utf-8
 
 <p>Let's see an example of this real quick.</p>
 
-<p>Suppose we were to change our URL schema for some reason.</p>
+<p>Suppose we were to change our URL schema for some reason...</p>
           </aside>
         </section>
 
@@ -2106,7 +2283,7 @@ Go back to your api.py file and find-and-replace all instances of the string '/l
 $ http 127.0.0.1:8000/characters
 
           </code></pre>
-          <pre class="fragment"><code data-trim class="lang-sh">
+          <pre class="fragment"><code data-trim class="lang-sh tall">
 HTTP/1.0 200 OK
 Date: Sun, 22 Feb 2015 04:21:58 GMT
 Server: WSGIServer/0.1 Python/2.7.9
@@ -2130,7 +2307,7 @@ content-type: application/json; charset=utf-8
                         "GET",
                         "PUT"
                     ],
-                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/location",
+                    "href": "/characters/c1a008bc-105f-4793-bfa6-a54fbc9ce6b1/foo",
                     "rel": "location"
                 }
             ],

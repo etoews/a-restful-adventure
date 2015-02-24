@@ -1,4 +1,3 @@
-from copy import deepcopy
 import json
 import uuid
 
@@ -46,12 +45,15 @@ class CharacterBase(object):
         return '/characters/{0}'.format(character_id)
 
     def _room_href_to_id(self, href):
-        # <a3>
-        pass
+        # ID will be the last part of the URL.
+        return uuid.UUID(href.split('/')[-1])
 
     def _room_id_to_location(self, room_id, dungeon_id):
-        # <a4>
-        pass
+        return {
+            'rel': 'room',
+            'allow': ['GET'],
+            'href': 'dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
+        }
 
 
 class CharacterLocation(CharacterBase):
@@ -61,12 +63,42 @@ class CharacterLocation(CharacterBase):
         self._controller = controller
 
     def on_get(self, req, resp, character_id):
-        # <a5>
-        pass
+        # TODO: Handle the case that character_id is not a valid UUID
+        character_id = uuid.UUID(character_id)
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        room_id, dungeon_id = self._controller.get_location(character_id)
+
+        # Define the resource. We have to translate the DAL's notion
+        # of a "location" to the API's concept of a "location".
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        resource = self._room_id_to_location(room_id, dungeon_id)
+
+        # Create a JSON representation of the resource
+        # TODO: Use functools.partial to create a version of json.dumps that
+        #       defaults to ensure_ascii=False
+        resp.body = json.dumps(resource, ensure_ascii=False)
 
     def on_put(self, req, resp, character_id):
-        # <a6>
-        pass
+        # TODO: Validate against a schema
+        representation = req.stream.read().decode('utf-8')
+        representation = json.loads(representation)
+
+        # TODO: Raise falcon.HTTPError if ID is not a UUID
+        character_id = uuid.UUID(character_id)
+
+        # TODO: Raise falcon.HTTPError if ID is not a UUID
+        room_href = representation['href']
+        room_id = self._room_href_to_id(room_href)
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        self._controller.move_character(character_id, room_id)
+
+        # Success!
+        resp.status = falcon.HTTP_204
 
 
 class CharacterList(CharacterBase):
@@ -93,6 +125,7 @@ class CharacterList(CharacterBase):
                 }
             ]
         }
+
         # Create a JSON representation of the resource
         resp.body = json.dumps(resource, ensure_ascii=False)
 
@@ -130,12 +163,43 @@ class RoomBase(object):
     """
 
     def _entity_to_resource(self, room):
-        # <a9>
-        pass
+        dungeon_id = room['dungeon_id']
+        room_id = room['id']
+
+        base_href = 'dungeons/{0}'.format(dungeon_id)
+
+        links = [
+            {
+                'rel': 'self',
+                'allow': ['GET'],
+                'href': '{0}/rooms/{1}'.format(base_href, room_id)
+            },
+            {
+                'rel': 'dungeon',
+                'allow': ['GET'],
+                'href': base_href
+            }
+        ]
+
+        # Add additional links, one per doorway to another room
+        links.extend([
+            {
+                'rel': 'room ' + doorway['direction'],
+                'allow': ['GET'],
+                'href': self._id_to_href(doorway['room_id'], dungeon_id)
+            }
+
+            for doorway in room['doorways']
+        ])
+
+        return {
+            'name': room['name'],
+            'is_exit': room['is_exit'],
+            'links': links
+        }
 
     def _id_to_href(self, room_id, dungeon_id):
-        # <a10>
-        pass
+        return '/dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
 
 
 class Room(RoomBase):
@@ -145,8 +209,25 @@ class Room(RoomBase):
         self._controller = controller
 
     def on_get(self, req, resp, dungeon_id, room_id):
-        # <a11>
-        pass
+        # TODO: Handle the case that these are not valid UUIDs
+        dungeon_id = uuid.UUID(dungeon_id)
+        room_id = uuid.UUID(room_id)
+
+        # Note that we don't actually need the dungeon_id, since
+        # the DAL just wants the room_id. We'll just ignore it
+        # for now.
+
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        room = self._controller.get_room(room_id)
+
+        # Create a resource based on the room entity
+        # TODO: If an error is raised, convert it to an instance
+        #       of falcon.HTTPError
+        resource = self._entity_to_resource(room)
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
 
 
 class DungeonBase(object):
@@ -157,8 +238,25 @@ class DungeonBase(object):
     """
 
     def _entity_to_resource(self, dungeon):
-        # <a12>
-        pass
+        base_href = '/dungeons/{0}'.format(dungeon['id'])
+        links = [
+            {
+                'rel': 'self',
+                'allow': ['GET'],
+                'href': base_href
+            },
+            {
+                'rel': 'room first',
+                'allow': ['GET'],
+                'href': '{0}/rooms/{1}'.format(base_href, dungeon['entry_id'])
+            }
+        ]
+
+        return {
+            'name': dungeon['name'],
+            'links': links
+        }
+
 
 class DungeonList(DungeonBase):
     """Resource class for the dungeon list concept."""
@@ -168,8 +266,23 @@ class DungeonList(DungeonBase):
         self._controller = controller
 
     def on_get(self, req, resp):
-        # <a13>
-        pass
+        # Ask the DAL for a list of entities
+        dungeons = self._controller.list_dungeons()
+
+        # Map the entities to the resource
+        resource = {
+            'dungeons': [self._entity_to_resource(d) for d in dungeons],
+            'links': [
+                {
+                    'rel': 'self',
+                    'allow': ['GET'],
+                    'href': '/dungeons'
+                }
+            ]
+        }
+
+        # Create a JSON representation of the resource
+        resp.body = json.dumps(resource, ensure_ascii=False)
 
 
 # ===========================================================================
@@ -178,7 +291,9 @@ class DungeonList(DungeonBase):
 
 class HelloResource(object):  # <w3>
     def on_get(self, req, resp):
-        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.body = 'Hello ' + req.get_header('x-name') + '!\n'
+
+        # Falcon defaults to 'application/json'
         resp.content_type = 'text/plain'
 
         # Falcon defaults to 200 OK
@@ -195,23 +310,21 @@ api = falcon.API()
 
 controller = dal.Controller()
 api.add_route('/characters', CharacterList(controller))
-# <a15>
-# <a16>
-# <a17>
+api.add_route('/characters/{character_id}/location', CharacterLocation(controller))
+api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
+api.add_route('/dungeons', DungeonList(controller))
 
 
 # ===========================================================================
 # WSGI
 # ===========================================================================
 
-def application(env, start_response):  # <w1>
-    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
-
-    start_response("200 OK", [('Content-Type', 'text/plain')])
-    return [body.encode('utf-8')]
-
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
 
-    server = make_server('127.0.0.1', 8000, api)  # <w2>
+    host = '127.0.0.1'
+    port = 8000
+    server = make_server(host, port, api)  # <w2>
+
+    print('Listening on {0}:{1}'.format(host, port))
     server.serve_forever()
