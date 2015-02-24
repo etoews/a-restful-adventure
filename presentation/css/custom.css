@@ -24,7 +24,7 @@
 }
 
 .reveal pre code.tall {
-  max-height: 600px;
+  max-height: 580px;
   /*font-size: 12px;*/
   line-height: 1.25em;
 }
@@ -36,4 +36,21 @@
 
 .reveal .smaller-text {
   font-size: smaller;
+}
+
+.reveal .blink {
+  animation: blink 1s steps(4, start) infinite;
+  -webkit-animation: blink 1s steps(4, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@-webkit-keyframes blink {
+  to {
+    visibility: hidden;
+  }
 }

@@ -178,7 +178,9 @@ class DungeonList(DungeonBase):
 
 class HelloResource(object):  # <w3>
     def on_get(self, req, resp):
-        resp.body = 'Hello ' + req.get_header('x-name') + '\n'
+        resp.body = 'Hello ' + req.get_header('x-name') + '!\n'
+
+        # Falcon defaults to 'application/json'
         resp.content_type = 'text/plain'
 
         # Falcon defaults to 200 OK
@@ -204,18 +206,12 @@ api.add_route('/characters', CharacterList(controller))
 # WSGI
 # ===========================================================================
 
-def application(env, start_response):  # <w1>
-    body = 'Hello ' + env['HTTP_X_NAME'] + '\n'
-
-    start_response("200 OK", [('Content-Type', 'text/plain')])
-    return [body.encode('utf-8')]
-
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
 
     host = '127.0.0.1'
     port = 8000
-    server = make_server(host, port, application)  # <w2>
+    server = make_server(host, port, api)  # <w2>
 
     print('Listening on {0}:{1}'.format(host, port))
     server.serve_forever()
