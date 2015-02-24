@@ -178,29 +178,129 @@
           <p>- Walt Whitman</p>
           <aside class="notes">
             <ul>
-              <li>REST is defined by a set of 6 architectural constraints.</li>
-              <li>Taken together, these contraints provide a mold for RESTful applications.</li>
+              <li>Roy Fielding defined REST as a set of 6 architectural constraints.</li>
+              <li>Taken together, these constraints provide a mold for RESTful applications.</li>
             </ul>
           </aside>
         </section>
-        <section>
-          <ul class="no-bullets inline-h3">
-            <li>🍜 Client-Server</li>
-            <li class="fragment">🐘 Stateless</li>
-            <li class="fragment">📦 Cache</li>
-            <li class="fragment">🎹 Uniform Interface</li>
-            <li class="fragment">🔗 Layering</li>
-            <li class="fragment">🎮 Code-on-Demand</li>
-          </ul>
+
+        <section data-background="#efefef" data-transition="fade" class="has-light-background">
+          <h2>Client-Server</h2>
+          <div>
+            <img class="overlaid" src="img/constraint-client-server-1.png" alt="" width="592" height="314">
+          </div>
+          <aside class="notes">
+            <ul>
+              <li>This constraint says that your system must have a clear separation between client and server roles.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#efefef" data-transition="fade" class="has-light-background">
+          <h2>Client-Server</h2>
+          <div>
+            <img class="overlaid" src="img/constraint-client-server-2.png" alt="" width="592" height="314">
+          </div>
+          <aside class="notes">
+            <ul>
+              <li></li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#efefef" >
+          <h3>Stateless</h3>
+          <div>
+            <img class="overlaid" src="img/constraint-stateless.png" alt="">
+          </div>
+          <aside class="notes">
+            <ul>
+              <li>The stateless constraint doesn't mean that your application doesn't have any state.</li>
+              <li>What it actually means is that your network connection should not carry any implicit state.</li>
+              <li>In other words, every request and response pair stand on their own.</li>
+              <li>This is important because at any time, the network may say "meh" and drop your connection.</li>
+              <li>This is especially true across the internet and over mobile networks.</li>
+              <li>The way REST works around this is by requiring clients to keep track of their own state in between every transaction.</li>
+              <li>[talk about client storing state, retransmitting to the server with every request so can pick up where left off]</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#efefef" >
+          <h3>Cache</h3>
+          <div>
+            <img class="overlaid" src="img/constraint-cache.png" alt="">
+          </div>
+          <aside class="notes">
+            <ul>
+              <li>REST provides for caching by requiring the server to be explicit about which resources downstream systems may and may not cache.</li>
+              <li>This allows intermediaries to safely and deterministically cache resources as close to the client as possible.</li>
+              <li>[explain picture elements</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#efefef" >
+          <h3>Uniform Interface</h3>
 
           <aside class="notes">
             <ul>
-              <li>Client-Server: This is all about creating a clear separation of concerns, which affords independent evolution and management between client and server. For example, when I sit down at my local Ramen shop, a server brings me a menu of options. I choose from the list of options and place my order. The server then goes off to interface with the backend kitchen services on my behalf. I don't need to know or care how my food is prepared, just that I get what I ordered in a timely manner.</li>
-              <li>Stateless: This doesn't mean that your system has no state, just that there is no state shared between individual requests. Transports are unreliable, so you want to avoid embedding state in them. The client is like an elephant that never forgets; the client is responsible for remembering its own session state, and including that information in every request to the server. If a server goes down, a client should be able to provide its session state to a different server in the pool and get the same answer back as it would have from the failed box. If a client crashes or it's network connection fails, it should be able to pick up later where it left off.</li>
-              <li>Cache: The idea here is to stock your goods as close to the consumer as possible, to reduce latency and transportation costs. For example, when I click "buy" on Amazon, the fulfillment system routes my order to the warehouse closest to my home that has my item in stock. Amazon regularly caches popular goods in warehouses as close to the consumer as they can get them. REST provides for caching by constraining systems to explicitly define caching parameters through the uniform interface.</li>
-              <li>Uniform Interface: The idea here is to provide a set of ground-rules, an <em>a-priori</em> baseline of syntax and semantics. A pianist can sit down at any piano and know what to do. The mechanisms under the lid can and do vary wildly, but the meaning and layout of the keys remain the same. For REST this means a shared language of identifiers, methods, and media types.</li>
-              <li>Layering: This extends Client-Server to create a chain of clients and servers, each exposing the same interface. It's like a recursive function. DNS works like this. When I want to find rackspace.com, I'll usually ask a local DNS server for the address. If the local DNS server doesn't know the IP address for my domain, it will act like a client and query another DNS server for the information, and so on and so forth.</li>
-              <li>Code-on-Demand: This is an optional constraint that allows the server to delegate processing to clients when that is more efficient, and to also provide dynamic logic to augment the client's limited abilities to understand and process resources provided by the service. When it comes to the web, this constraint people usually equite code-on-demand to JavaScript, but there isn't any reason why it can't be used in other contexts. For example, game engines typically rely on scripts to orchestrate game play. These scripts can be delivered dynamically from the server to the client.</li>
+              <li>The Uniform Interface constrains every system in the request path to speak the same basic language.</li>
+              <li>This includes a set of syntax and semantics that everyone can assume are true, rather than having to reinvent them for every application.</li>
+              <li>In this way, the Uniform Interface underpins every contract between client and server.</li>
+              <li>You might even say the Uniform Interface <em>is</em> the contract between client and server. More on this later.</li>
+              <li>I like the analogy of a piano keyboard...</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#efefef" data-transition="fade" >
+          <div>
+            <img class="overlaid"  src="img/constraint-ui-1.jpg" alt="" height="426">
+          </div>
+          <p class="smaller-text">Image credit: <a href="https://www.flickr.com/photos/nayukim/4274606367/">Nayu Kim</a></p>
+        </section>
+
+        <section data-background="#efefef" data-transition="fade">
+          <div>
+            <img class="overlaid"  src="img/constraint-ui-2.jpg" alt="" height="426">
+          </div>
+          <p class="smaller-text">Image credit: <a href="http://pixabay.com/en/piano-playing-pianist-hands-piano-375363/">dankreider</a></p>
+        </section>
+
+        <section data-background="#efefef" data-transition="fade">
+          <div>
+            <img class="overlaid"  src="img/constraint-ui-3.jpg" alt="" height="426">
+          </div>
+          <p class="smaller-text">Image credit: <a href="https://www.flickr.com/photos/23416307@N04/9168721286/">Ωméga</a></p>
+        </section>
+
+        <section data-background="#efefef" >
+          <h3>Layering</h3>
+          <div>
+            <img class="overlaid"  src="img/constraint-layering.png" alt="">
+          </div>
+          <aside class="notes">
+            <ul>
+              <li>The layering constraint says that I should be able to stack up a series of client-servers that support the same interface.</li>
+              <li>Series of middleware for caching, load balancing, security, etc.</li>
+              <li>Can transparently insert or remove various layers in the request path.</li>
+              <li>Each layer only sees the next one down. Should not know or care about any others.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#efefef" >
+          <h3>Code-on-Demand</h3>
+          <div>
+            <img class="overlaid"  src="img/code-on-demand.png" alt="">
+          </div>
+          <aside class="notes">
+            <ul>
+              <li>This is an optional constraint that allows the server to delegate processing to clients when that would be more efficient or scalable.</li>
+              <li>also provide dynamic logic to augment the client's limited abilities to understand and process resources provided by the service.</li>
+              <li>When it comes to the web, people usually equate code-on-demand to JavaScript, but there isn't any reason why it can't be used in other contexts.</li>
+              <li>For example, game engines typically rely on scripts to orchestrate gameplay. These scripts can be delivered dynamically from the server to the client.</li>
             </ul>
           </aside>
         </section>

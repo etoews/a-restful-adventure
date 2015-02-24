@@ -32,6 +32,7 @@
 .reveal img.overlaid {
   border: none;
   background: none;
+  box-shadow: none;
 }
 
 .reveal .smaller-text {
@@ -41,6 +42,10 @@
 .reveal .blink {
   animation: blink 1s steps(4, start) infinite;
   -webkit-animation: blink 1s steps(4, start) infinite;
+}
+
+.reveal .has-light-background h3, .reveal .has-light-background h2, .reveal .has-light-background {
+  color: black !important;
 }
 
 @keyframes blink {
