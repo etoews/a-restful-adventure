@@ -44,17 +44,17 @@
         <section id="welcome">
           <h1>A RESTful Adventure</h1>
           <h2><a href="http://rack.to/rest">rack.to/rest</a></h2>
-          <p><a href="https://one.rackspace.com/display/Engineering/A+RESTful+Adventure#ARESTfulAdventure-Prerequisites">Prerequisites</a></p>
+          <p><a href="https://one.rackspace.com/display/Engineering/A+RESTful+Adventure#ARESTfulAdventure-Prerequisites" target="_blank">Prerequisites</a></p>
           <center>
             <table>
               <tbody>
                 <tr>
                   <td>Kurt Griffiths</td>
-                  <td><a href="https://twitter.com/kgriffs">@kgriffs</a></td>
+                  <td><a href="https://twitter.com/kgriffs" target="_blank">@kgriffs</a></td>
                 </tr>
                 <tr>
                   <td>Everett Toews</td>
-                  <td><a href="https://twitter.com/everett_toews">@everett_toews</a></td>
+                  <td><a href="https://twitter.com/everett_toews" target="_blank">@everett_toews</a></td>
                 </tr>
               </tbody>
             </table>
@@ -64,7 +64,7 @@
             <ul>
               <li>Welcome to the RESTful Adventure workshop.</li>
               <li>[introduce the instructors - I'm a server, I'm a client - People usually approach API design from one perspective or the other.]</li>
-              <li>Over the next couple of hours we will take you on a journey through the creative process of designing and implementating a simple adventure game.</li>
+              <li>Over the next couple of hours we will take you on a journey through the creative process of designing and implementing a simple adventure game.</li>
               <li>Before we move on, let's make sure everyone can bring up the slides and the code samples.</li>
             </ul>
           </aside>
@@ -74,6 +74,15 @@
           <h1>Goal</h1>
           <h3>Design and Implement</h3>
           <h3>a RESTful API</h3>
+
+          <aside class="notes">
+            <ul>
+              <li>Gauge the audience knowledge level with some questions:</li>
+              <li>Who has used a web service before and sent a request with something like curl?</li>
+              <li>Who has implemented a RESTful API?</li>
+              <li>Who has designed a RESTful API?</li>
+            </ul>
+          </aside>
         </section>
 
         <section>
@@ -191,7 +200,7 @@
               <li>Cache: The idea here is to stock your goods as close to the consumer as possible, to reduce latency and transportation costs. For example, when I click "buy" on Amazon, the fulfillment system routes my order to the warehouse closest to my home that has my item in stock. Amazon regularly caches popular goods in warehouses as close to the consumer as they can get them. REST provides for caching by constraining systems to explicitly define caching parameters through the uniform interface.</li>
               <li>Uniform Interface: The idea here is to provide a set of ground-rules, an <em>a-priori</em> baseline of syntax and semantics. A pianist can sit down at any piano and know what to do. The mechanisms under the lid can and do vary wildly, but the meaning and layout of the keys remain the same. For REST this means a shared language of identifiers, methods, and media types.</li>
               <li>Layering: This extends Client-Server to create a chain of clients and servers, each exposing the same interface. It's like a recursive function. DNS works like this. When I want to find rackspace.com, I'll usually ask a local DNS server for the address. If the local DNS server doesn't know the IP address for my domain, it will act like a client and query another DNS server for the information, and so on and so forth.</li>
-              <li>Code-on-Demand: This is an optional constaint that allows the server to delegate processing to clients when that is more efficient, and to also provide dynamic logic to augment the client's limited abilities to understand and process resources provided by the service. When it comes to the web, this constraint people usually equite code-on-demand to JavaScript, but there isn't any reason why it can't be used in other contexts. For example, game engines typically rely on scripts to orchestrate gameplay. These scripts can be delivered dynamically from the server to the client.</li>
+              <li>Code-on-Demand: This is an optional constraint that allows the server to delegate processing to clients when that is more efficient, and to also provide dynamic logic to augment the client's limited abilities to understand and process resources provided by the service. When it comes to the web, this constraint people usually equite code-on-demand to JavaScript, but there isn't any reason why it can't be used in other contexts. For example, game engines typically rely on scripts to orchestrate game play. These scripts can be delivered dynamically from the server to the client.</li>
             </ul>
           </aside>
         </section>
@@ -215,7 +224,7 @@
             <ul>
               <li>REST components categorize individual nodes into various roles, with each role conveying a specific set of expectations. Examples of components include origin servers, user agents, gateways, and proxies.</li>
               <li>REST connectors define the types of actions a node performs, such as caching or acting as a client or server. A given component may implement one or more connectors.</li>
-              <li>Resources are client-facing models that map in some way to backend data entities. The mapping can be n-to-n and involve any number of transformations and amalgamations. Each resource is identified by a unique, opaque identifier, typically a URL. REST does not dictate a particular URL schema, although it can be helpful to adopt a human-friendly format, as we'll see later on. It's important to note here that the server has complete ownership of this identifier, which means that the client never constructs it, but simply "copies and pastes" identifiers it recieves from previous requests to the server. This makes it easier to evolve your API without breaking clients.</li>
+              <li>Resources are client-facing models that map in some way to backend data entities. The mapping can be n-to-n and involve any number of transformations and amalgamations. Each resource is identified by a unique, opaque identifier, typically a URL. REST does not dictate a particular URL schema, although it can be helpful to adopt a human-friendly format, as we'll see later on. It's important to note here that the server has complete ownership of this identifier, which means that the client never constructs it, but simply "copies and pastes" identifiers it receives from previous requests to the server. This makes it easier to evolve your API without breaking clients.</li>
               <li>Representations are snapshots of a resource at a point in time. A single resource can have multiple representations, such as JSON, PNG, or HTML. These representations are formalized as Internet media types. The client and server perform content negotiation to determine the desired representation.</li>
               <li>Control data is passed along with requests and responses to specify general semantics and to modify the default behavior of connectors. In HTTP, examples of control data include the HTTP method (e.g., GET and POST) and conditional headers, such as If-None-Match.</li>
               <li>Hypermedia is one of the most often ignored aspects of REST. This is ironic, because hypermedia is probably the most important difference between REST and other architectural styles, such as RPC. Rather than relying on brittle endpoint specifications, REST uses hypermedia to identify resources and provide a living web of links that clients traverse in order to change application state. The server may provide different links to the client according to the current state of the system. In this way, REST-based systems can be very flexible, allowing different components of the system to evolve independently.</li>
@@ -281,6 +290,7 @@
               <li>Who is your audience?</li>
               <li>Not necessarily designing the API for everyone</li>
               <li>Stick to known use cases without designing yourself into a corner</li>
+              <li>Put yourself in your player's seven league boots</li>
             </ul>
           </aside>
         </section>
@@ -298,8 +308,7 @@
             <li>Pretty URLs</li>
             <li>Versioning</li>
             <li>Authentication</li>
-            <li>Resource Updates</li>
-            <li>(State Transitions)</li>
+            <li>Resource Updates (State Transitions)</li>
           </ul>
 
           <aside class="notes">
@@ -307,9 +316,9 @@
               <li>Media Types: JSON vs. XML vs. YAML vs. Protocol Buffers. Pick one that meets your requirements. Default to JSON.</li>
               <li>IDs vs hypermedia: I'll just pose a question on this one, how much does thinking of the data model implementation affect design of the API resource model?</li>
               <li>Pretty URLs: This decision has a bigger impact if you're not doing hypermedia. If you're relying on clients to construct the URLs, the prettiness of the URLs matters a lot early on.</li>
-              <li>Versioning: Not a solved problem and there's no de facto standard. Put the version in a header, probably the Accept header.</li>
+              <li>Versioning: There's no de facto standard. Put the version in a header, probably the Accept header after the media type.</li>
               <li>Auth: Punt</li>
-              <li>Resouce Updates: PUT or PATCH or JSON PATCH</li>
+              <li>Resource Updates: PUT or PATCH or JSON PATCH</li>
             </ul>
           </aside>
         </section>
@@ -351,6 +360,20 @@
         </section>
 
         <section>
+          <img class="stretch" src="img/a-vs-ui.png">
+
+          <aside class="notes">
+            <ul>
+              <li>But why do you need an API definition if you have the REST uniform interface.</li>
+              <li>The current state of the art necessitates a lot of API definition.</li>
+              <li>There is much that still hasn't been decided on.</li>
+              <li>And not everyone knows or understands the uniform interface yet.</li>
+              <li>API definitions can help get us there but should eventually take a back seat to the uniform interface.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
           <h1>Swagger</h1>
           <h2><a href="https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md" target="_blank">Spec</a></h2>
 
@@ -365,12 +388,15 @@
               <li>The editor has improved since we began creating this workshop</li>
               <li>Some of the 3rd party tools look like they're in good shape, particularly the Python stuff</li>
               <li>I'd also be very interested to hear from people who've worked with RAML and API Blueprint</li>
+              <li>*** Open the spec ***</li>
+              <li>Let's not get hung up on Swagger syntax. If you're frustrated, just use text files.</li>
             </ul>
           </aside>
         </section>
 
         <section>
           <h1>Lab: Paths</h1>
+          <p>Hint: <a href="https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#path-templating" target="_blank">Path Templating</a></p>
           <pre><code data-trim>
 swagger: "2.0"
 info:
@@ -391,6 +417,7 @@ paths:
 
         <section>
           <h1>Lab: Examples</h1>
+          <p>Hint: <a href="https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#example-object-" target="_blank">Example Object</a> and <a href="https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#data-types" target="_blank">Resource Data Types</a></p>
           <pre><code data-trim>
 swagger: "2.0"
 info:
@@ -409,14 +436,14 @@ paths:
       responses:
         200:
           examples:
-            application/json: |-
+            replace-this-with-a-mime-type: |-
               {
                 "?": "?"
                 ...
               }
     post:
       x-examples:
-        application/json: { "?": "?" }
+        replace-this-with-a-mime-type: { "?": "?" }
       responses:
         201:
           headers:
@@ -425,7 +452,7 @@ paths:
               format: ?
               description: ?
           examples:
-            application/json: |-
+            replace-this-with-a-mime-type: |-
               {
                 "?": "?"
                 ...
@@ -435,7 +462,7 @@ paths:
 
         <section>
           <h1>Lab: Models</h1>
-          <p>Hint: <a href="https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#data-types" target="_blank">Data Types</a></p>
+          <p>Hint: <a href="https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#data-types" target="_blank">Resource Data Types</a></p>
           <pre><code data-trim>
 swagger: "2.0"
 info:
@@ -541,7 +568,6 @@ curl ?
           <aside class="notes">
             <ul>
               <li>APIs should as self documenting as possible</li>
-              <li>Should be as machine readable as possible</li>
               <li>There will always be a semantic gap that requires human understanding</li>
               <li>This is where beautiful documentation comes in</li>
             </ul>
@@ -2155,11 +2181,21 @@ $ http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
         </section>
 
         <section>
-          <h1>Add slides about conclusion here</h1>
+          <img src="img/the-more-you-know.jpg">
+        </section>
+
+        <section>
+          <h1><a href="https://github.com/everett-toews/a-restful-adventure">The Entire Repo</a></h1>
         </section>
 
         <section>
           <h1>Rackspace API Working Group</h1>
+          <h2>Other Examples:</h2>
+          <ul>
+            <li><a href="https://github.com/interagent/http-api-design">Heroku</a></li>
+            <li><a href="https://github.com/gocardless/http-api-design">GoCardless</a></li>
+            <li><a href="https://github.com/WhiteHouse/api-standards">The White House</a></li>
+          </ul>
         </section>
 
         <section id="qa">
