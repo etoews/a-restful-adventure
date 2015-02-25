@@ -449,12 +449,12 @@
         <section>
           <h1>Early Technical Decisions</h1>
           <ul>
-            <li>Media Types</li>
-            <li>IDs vs hypermedia</li>
-            <li>Pretty URLs</li>
-            <li>Versioning</li>
-            <li>Authentication</li>
-            <li>Resource Updates (State Transitions)</li>
+            <li class="fragment">Media Types</li>
+            <li class="fragment">IDs vs hypermedia</li>
+            <li class="fragment">Pretty URLs</li>
+            <li class="fragment">Versioning</li>
+            <li class="fragment">Authentication</li>
+            <li class="fragment">Resource Updates (State Transitions)</li>
           </ul>
 
           <aside class="notes">
@@ -584,7 +584,7 @@ paths:
           examples:
             replace-this-with-a-mime-type: |-
               {
-                "?": "?"
+                "?": ?
                 ...
               }
     post:
@@ -658,7 +658,7 @@ definitions:
         </section>
 
         <section>
-          <h1>Lab: curl and python -m json.tool</h1>
+          <h1>Lab: curl and python &#8209;m json.tool</h1>
           <p>Bonus Points: Use <a href="http://httpie.org">httpie</a> and <a href="http://stedolan.github.io/jq/">jq</a> instead</p>
           <pre><code data-trim>
 HOST=http://104.130.13.137
@@ -2509,6 +2509,13 @@ $ http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
 
         <section>
           <h1><a href="https://github.com/everett-toews/a-restful-adventure">The Entire Repo</a></h1>
+        </section>
+
+        <section>
+          <h1>Further Reading</h1>
+          <ul>
+            <li><a href="http://martinfowler.com/articles/richardsonMaturityModel.html">Richardson REST Maturity Model</a></li>
+          </ul>
         </section>
 
         <section>
