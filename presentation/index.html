@@ -171,7 +171,7 @@
         </section>
 
         <section>
-          <h2>Constraints</h2>
+          <h2>Six Constraints</h2>
           <blockquote cite="http://www.brainyquote.com/quotes/quotes/w/waltwhitma136364.html">
             &ldquo;The shallow consider liberty a release from all law, from every constraint. The wise man sees in it, on the contrary, the potent Law of Laws.&rdquo;
           </blockquote>
@@ -184,8 +184,8 @@
           </aside>
         </section>
 
-        <section data-background="#efefef" data-transition="fade" class="has-light-background">
-          <h2>Client-Server</h2>
+        <section data-background="#fefefe" data-transition="fade" class="has-light-background">
+          <h3>1. Client-Server</h3>
           <div>
             <img class="overlaid" src="img/constraint-client-server-1.png" alt="" width="592" height="314">
           </div>
@@ -196,28 +196,16 @@
           </aside>
         </section>
 
-        <section data-background="#efefef" data-transition="fade" class="has-light-background">
-          <h2>Client-Server</h2>
-          <div>
-            <img class="overlaid" src="img/constraint-client-server-2.png" alt="" width="592" height="314">
-          </div>
-          <aside class="notes">
-            <ul>
-              <li></li>
-            </ul>
-          </aside>
-        </section>
-
-        <section data-background="#efefef" >
-          <h3>Stateless</h3>
+        <section data-background="#fefefe" >
+          <h3>2. Stateless</h3>
           <div>
             <img class="overlaid" src="img/constraint-stateless.png" alt="">
           </div>
           <aside class="notes">
             <ul>
               <li>The stateless constraint doesn't mean that your application doesn't have any state.</li>
-              <li>What it actually means is that your network connection should not carry any implicit state.</li>
-              <li>In other words, every request and response pair stand on their own.</li>
+              <li>What it actually means is that every request carries with it everything the server needs to know in order to service the request.</li>
+              <li>Each request is independent of any other requests that proceeded it.</li>
               <li>This is important because at any time, the network may say "meh" and drop your connection.</li>
               <li>This is especially true across the internet and over mobile networks.</li>
               <li>The way REST works around this is by requiring clients to keep track of their own state in between every transaction.</li>
@@ -226,8 +214,8 @@
           </aside>
         </section>
 
-        <section data-background="#efefef" >
-          <h3>Cache</h3>
+        <section data-background="#fefefe" >
+          <h3>3. Cache</h3>
           <div>
             <img class="overlaid" src="img/constraint-cache.png" alt="">
           </div>
@@ -240,8 +228,8 @@
           </aside>
         </section>
 
-        <section data-background="#efefef" >
-          <h3>Uniform Interface</h3>
+        <section data-background="#fefefe" >
+          <h3>4. Uniform Interface</h3>
 
           <aside class="notes">
             <ul>
@@ -254,29 +242,29 @@
           </aside>
         </section>
 
-        <section data-background="#efefef" data-transition="fade" >
+        <section data-background="#fefefe" data-transition="fade" >
           <div>
             <img class="overlaid"  src="img/constraint-ui-1.jpg" alt="" height="426">
           </div>
           <p class="smaller-text">Image credit: <a href="https://www.flickr.com/photos/nayukim/4274606367/">Nayu Kim</a></p>
         </section>
 
-        <section data-background="#efefef" data-transition="fade">
+        <section data-background="#fefefe" data-transition="fade">
           <div>
             <img class="overlaid"  src="img/constraint-ui-2.jpg" alt="" height="426">
           </div>
           <p class="smaller-text">Image credit: <a href="http://pixabay.com/en/piano-playing-pianist-hands-piano-375363/">dankreider</a></p>
         </section>
 
-        <section data-background="#efefef" data-transition="fade">
+        <section data-background="#fefefe" data-transition="fade">
           <div>
             <img class="overlaid"  src="img/constraint-ui-3.jpg" alt="" height="426">
           </div>
           <p class="smaller-text">Image credit: <a href="https://www.flickr.com/photos/23416307@N04/9168721286/">Ωméga</a></p>
         </section>
 
-        <section data-background="#efefef" >
-          <h3>Layering</h3>
+        <section data-background="#fefefe" >
+          <h3>5. Layered System</h3>
           <div>
             <img class="overlaid"  src="img/constraint-layering.png" alt="">
           </div>
@@ -290,8 +278,8 @@
           </aside>
         </section>
 
-        <section data-background="#efefef" >
-          <h3>Code-on-Demand</h3>
+        <section data-background="#fefefe" >
+          <h3>6. Code-on-Demand</h3>
           <div>
             <img class="overlaid"  src="img/code-on-demand.png" alt="">
           </div>
@@ -306,31 +294,89 @@
         </section>
 
         <section>
-          <h2>Elements of the Uniform Interface</h2>
+          <h2>Elements</h2>
+          <h3>of the</h3>
+          <h2>Uniform Interface</h2>
         </section>
 
-        <section>
-<!--
-          <p>[draw a big-picture diagram here, then point out the elements and talk about them briefly]</p>
- -->
+        <section data-background="#fefefe" data-transition="fade" >
           <h3>Components</h3>
-          <h3 class="fragment">Connectors</h3>
-          <h3 class="fragment">Resources</h3>
-          <h3 class="fragment">Representations</h3>
-          <h3 class="fragment">Control Data</h3>
-          <h3 class="fragment">Hypermedia</h3>
-
+          <div>
+            <img class="overlaid"  src="img/ui-components.png" alt="">
+          </div>
           <aside class="notes">
             <ul>
-              <li>REST components categorize individual nodes into various roles, with each role conveying a specific set of expectations. Examples of components include origin servers, user agents, gateways, and proxies.</li>
-              <li>REST connectors define the types of actions a node performs, such as caching or acting as a client or server. A given component may implement one or more connectors.</li>
-              <li>Resources are client-facing models that map in some way to backend data entities. The mapping can be n-to-n and involve any number of transformations and amalgamations. Each resource is identified by a unique, opaque identifier, typically a URL. REST does not dictate a particular URL schema, although it can be helpful to adopt a human-friendly format, as we'll see later on. It's important to note here that the server has complete ownership of this identifier, which means that the client never constructs it, but simply "copies and pastes" identifiers it receives from previous requests to the server. This makes it easier to evolve your API without breaking clients.</li>
-              <li>Representations are snapshots of a resource at a point in time. A single resource can have multiple representations, such as JSON, PNG, or HTML. These representations are formalized as Internet media types. The client and server perform content negotiation to determine the desired representation.</li>
-              <li>Control data is passed along with requests and responses to specify general semantics and to modify the default behavior of connectors. In HTTP, examples of control data include the HTTP method (e.g., GET and POST) and conditional headers, such as If-None-Match.</li>
-              <li>Hypermedia is one of the most often ignored aspects of REST. This is ironic, because hypermedia is probably the most important difference between REST and other architectural styles, such as RPC. Rather than relying on brittle endpoint specifications, REST uses hypermedia to identify resources and provide a living web of links that clients traverse in order to change application state. The server may provide different links to the client according to the current state of the system. In this way, REST-based systems can be very flexible, allowing different components of the system to evolve independently.</li>
+              <li>REST components (what I am) categorize individual nodes into various roles, with each role conveying a specific set of expectations. Examples of components include origin servers, user agents, gateways, and proxies.</li>
             </ul>
           </aside>
         </section>
+
+        <section data-background="#fefefe" data-transition="fade" >
+          <h3>Connectors</h3>
+          <div>
+            <img class="overlaid"  src="img/ui-connectors.png" alt="">
+          </div>
+          <aside class="notes">
+            <ul>
+              <li>REST connectors (what I do) define the types of actions a node performs, such as caching or acting as a client or server. A given component may implement one or more connectors.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#fefefe" data-transition="fade" >
+          <h3>Resources &amp; Representations</h3>
+          <div>
+            <img class="overlaid"  src="img/ui-resources-and-representations.png" alt="">
+          </div>
+          <aside class="notes">
+            <ul>
+              <li>A resource is a concept.</li>
+              <li>For example, here we have the concept of a calendar. This is our resource.</li>
+              <li>A resource maps to one or more backend data entities.</li>
+              <li>And on the frontend, a resource maps to one or more representations.</li>
+              <li>In order to fulfill a request, the server translates between representations, resources, and entities.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#fefefe" data-transition="fade" >
+          <h3>Control Data</h3>
+          <p>Metadata about each message</p>
+          <p class="fragment">Purpose and meaning (HTTP's GET/POST, Content-Type)</p>
+          <p class="fragment">Override default behavior (HTTP's If-Modified-Since)</p>
+          <aside class="notes">
+            <ul>
+              <li>Next we have Control Data.</li>
+              <li>Control Data provides metadata about each message.</li>
+              <li>This metadata provides purpose and meaning, as in HTTP's...</li>
+              <li>Control Data also let's you override the default behavior of a connector. For example...to short-circuit a GET request.</li>
+              <li>[304 Not Modified]</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#fefefe" data-transition="fade" >
+          <h3>Hypermedia</h3>
+          <div>
+            <img class="overlaid"  src="http://www.jayway.com/wp-content/uploads/2012/10/hypermedia-application.png" alt="">
+          </div>
+          <p class="smaller-text">Image credit: <a href="http://www.jayway.com/wp-content/uploads/2012/10/hypermedia-application.png">Jan Kronquist</a></p>
+          <aside class="notes">
+            <ul>
+              <li>The final element of the uniform interface...is hypermedia.</li>
+              <li>Hypermedia is arguably one of the most distinguishing characteristics of RESTful APIs.</li>
+              <li>The idea here is that the server guides the client through a living web of links</li>
+              <li>Links represent the relationship between resources, and define the possible state transitions in the system.</li>
+              <li>The client starts at a single entry point into the app and requests a representation of that resource from the server.</li>
+              <li>The server then returns some information about that resource, including a list of links to other resources that the client may follow.</li>
+              <li>The client uses this information to provide a set of choices to the user.</li>
+              <li>The user then makes a choice, whereupon the client invokes the corresponding link in some way.</li>
+              <li>This process repeats until the user's goal is satisfied.</li>
+              <li>In this way, the uniform interface provides a very flexible interaction model that makes it much easier to evolve the server over time without breaking your clients willy-nilly.</li>
+            </ul>
+          </aside>
+        </section>
+
 
         <section id="design">
           <h1>Design the API</h1>
