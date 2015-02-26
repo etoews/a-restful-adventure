@@ -777,6 +777,7 @@ curl ?
 
         <section>
           <h1>Lab: Hello world!</h1>
+          <img height="350" src="http://upload.wikimedia.org/wikipedia/commons/8/82/TI_BASIC_HELLO_WORLD.png">
         </section>
 
         <section>
@@ -911,7 +912,7 @@ api.add_route('/', HelloResource())
         <section>
           <h3>Run it!</h3>
           <pre><code data-trim class="lang-sh">
-$ python myapp.py
+$ python api.py
 
 Listening on 127.0.0.1:8000
           </code></pre>
@@ -933,7 +934,7 @@ Content-Type: text/plain
 Date: Wed, 18 Feb 2015 19:29:29 GMT
 Server: WSGIServer/0.1 Python/2.7.9
 
-Hello Adventurer
+Hello Adventurer!
 
           </code></pre>
           <aside class="notes">
@@ -951,6 +952,8 @@ Hello Adventurer
 
         <section>
           <h1>Lab: Choosing a character</h1>
+          <img src="img/pixelated-tng.png" />
+          <p class="smaller-text">Image Credit: <a href="http://pixelblock.tumblr.com/post/30393098900/the-crew-of-the-u-s-s-enterprise-d-from-classic">PixelBlock</a>
           <aside class="notes">
             The first thing a player needs to do is choose their character. They will have to find out what characters are available, so we'll start with implementing a collection resource to represent a list of characters.
 
@@ -1196,6 +1199,8 @@ content-type: application/json; charset=utf-8
 
         <section>
           <h1>Lab: Adding a new character</h1>
+          <img height="200" src="http://files.gamebanana.com/img/ico/sprays/50a963ce6115d.png" />
+          <p class="smaller-text">Image Credit: <a href="http://tf2.gamebanana.com/sprays/66307">Antirest</a>
           <aside class="notes">
             <p>Let's give the player a way to create their own character. We'll begin by reviewing the API design.</p>
 
@@ -1444,6 +1449,8 @@ content-type: application/json; charset=utf-8
 
         <section>
           <h1>Lab: Choosing a dungeon</h1>
+          <img height="240" src="http://3.bp.blogspot.com/-oR_OJqteNqk/UOtEkB4rzrI/AAAAAAAAM-U/n8wiFykZ1N8/s1600/dcmain.PNG" />
+          <p class="smaller-text">Image Credit: <a href="http://crpgaddict.blogspot.com/2013/01/game-83-dungeon-campaign-1979.html">Chester Bolingbroke</a>
           <aside class="notes">
 Now that we can choose a character, or create a new one if we don't like any of the choices, we need to pick a dungeon to play. We want to provide the user agent a set of choices that it can display to the player.
           </aside>
@@ -1641,6 +1648,7 @@ content-type: application/json; charset=utf-8
 
         <section>
           <h1>Lab: Entering the dungeon</h1>
+          <img height="240" class="overlaid" src="img/entrance.png" />
           <aside class="notes">
 <p>[1:35 - 25 min remaining]</p>
 <p>We need to move our character to the dungeon entrance.</p>
@@ -1918,6 +1926,7 @@ content-type: application/json; charset=utf-8
 
         <section>
           <h1>Lab: Find a way out!</h1>
+          <img height="240" src="http://3.bp.blogspot.com/_BDCqpuwRnf4/TOzpHsYdALI/AAAAAAAAGxM/N_C-sgSZgkk/s1600/dungeon+man+3.png" />
           <h3>(Preferably without dying...)</h3>
           <aside class="notes">
 Now that we've entered the dungeon, we need to traverse the rooms in search of the exit.
