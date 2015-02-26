@@ -1133,7 +1133,7 @@ def _id_to_href(self, character_id):
         <section id="impl-checkpoint-1">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-1.py">api-checkpoint-1.py</a>
+            <a target="_blank" href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-1.py">16-1.py</a>
           </h4>
           <aside class="notes">
             Your api.py file should now look like this.
@@ -1299,7 +1299,7 @@ def on_post(self, req, resp):
         <section id="impl-checkpoint-2">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-2.py">api-checkpoint-2.py</a>
+            <a target="_blank" href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-2.py">api-checkpoint-2.py</a>
           </h4>
 
           <aside class="notes">
@@ -1586,7 +1586,7 @@ api.add_route('/dungeons', DungeonList(controller))
         <section id="impl-checkpoint-3">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-3.py">api-checkpoint-3.py</a>
+            <a target="_blank" href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-3.py">api-checkpoint-3.py</a>
           </h4>
 
           <aside class="notes">
@@ -1871,7 +1871,7 @@ api.add_route('/characters/{character_id}/location', CharacterLocation(controlle
         <section id="impl-checkpoint-4">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-4.py">api-checkpoint-4.py</a>
+            <a target="_blank" href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-4.py">api-checkpoint-4.py</a>
           </h4>          <aside class="notes">
 At this point your api.py file should look like this.
 
@@ -2097,9 +2097,6 @@ def _entity_to_resource(self, room):
         'links': links
     }
 
-def _id_to_href(self, room_id, dungeon_id):
-    return '/dungeons/{0}/rooms/{1}'.format(dungeon_id, room_id)
-
           </code></pre>
           <aside class="notes">
 Next, fill in the *a9* tag as show here, to make self._entity_to_resource() work as it should.
@@ -2136,7 +2133,7 @@ api.add_route('/dungeons/{dungeon_id}/rooms/{room_id}', Room(controller))
         <section id="impl-checkpoint-5">
           <h3>Checkpoint</h3>
           <h4>
-            <a href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-5.py">api-checkpoint-5.py</a>
+            <a target="_blank" href="https://github.com/everett-toews/a-restful-adventure/blob/gh-pages/code/api-checkpoint-5.py">api-checkpoint-5.py</a>
           </h4>
           <aside class="notes">
 <p>Before we move on, Control-C and restart your WSGI server to pick up the changes we just made.</p>
@@ -2321,7 +2318,7 @@ $ ROOM_URL=/dungeons/5a024cd8-2db3-446e-b777-bdc60185a117/rooms/751d5812-144d-40
         <section>
           <h3>Step 4: Move the character</h3>
           <pre><code data-trim class="lang-sh">
-$  http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
+$ http PUT 127.0.0.1:8000$CHAR_LOCATION_URL rel=room href=$ROOM_URL
 
           </code></pre>
           <pre class="fragment"><code data-trim class="lang-sh">
