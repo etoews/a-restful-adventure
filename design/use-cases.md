@@ -63,7 +63,7 @@
     4a1. Game remembers the last location of the Player's character.
     4a2. Game resumes at step (1) when Player returns.
 
-4b. Player tries to cheet by teleporting to a room to which there is no 
+4b. Player tries to cheat by teleporting to a room to which there is no 
     doorway:
 
     4b1. Game denies the request.
